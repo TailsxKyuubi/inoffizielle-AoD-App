@@ -17,7 +17,7 @@ class EpisodeProgressCache {
 
   _bootUp(){
     List<String> ids = _sharedPreferences.getStringList('tracking.mediaIds');
-    if(ids == null){
+    if(ids != null){
       ids.forEach((String element) {
         int mediaId = int.parse(element);
         this._cache.addAll({

@@ -4,7 +4,9 @@ class LoadingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Container(
+        body: WillPopScope(
+          onWillPop: () async => false,
+          child: Container(
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               color: Color.fromRGBO(53, 54, 56, 1),
@@ -28,7 +30,8 @@ class LoadingPage extends StatelessWidget {
 
               ],
             )
-        )
+        ),
+        ),
     );
   }
 
