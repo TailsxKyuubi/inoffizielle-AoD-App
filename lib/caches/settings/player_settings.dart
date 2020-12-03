@@ -9,7 +9,7 @@ class PlayerSettings extends AbstractSettings {
     }
     this.defaultQuality = preferences.getInt('player.defaultQuality');
     if(this.defaultQuality == null){
-      this.defaultQuality = 480;
+      this.defaultQuality = 720;
     }
     this.saveEpisodeProgress = preferences.getBool('player.saveEpisodeProgress');
     if(this.saveEpisodeProgress == null){
