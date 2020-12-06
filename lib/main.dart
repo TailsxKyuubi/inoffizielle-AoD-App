@@ -21,7 +21,6 @@ import 'caches/animes.dart' as animesCache;
 import 'package:flutter_isolate/flutter_isolate.dart';
 
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(AodApp());
