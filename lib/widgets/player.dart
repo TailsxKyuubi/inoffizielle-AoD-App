@@ -208,7 +208,11 @@ class PlayerState extends State<PlayerWidget> {
       if(playerCache.controller.value.isBuffering && playerCache.timeTrackThread.isActive){
         playerCache.timeTrackThread.cancel();
       }else if( ! playerCache.controller.value.isBuffering && ! playerCache.timeTrackThread.isActive ){
-        playerCache.timeTrackThread = Timer.periodic(Duration(seconds: 30), this.sendAodTrackingRequest);
+        playerCache.timeTrackThread = Timer(Duration(seconds: ((playerCache.controller.value.position.inSeconds % 30)-30)*-1),() {
+          playerCache.timeTrackThread = Timer.periodic(
+              Duration(seconds: 30), this.sendAodTrackingRequest
+          );
+        });
       }
     }
     SystemChrome.setEnabledSystemUIOverlays([]);

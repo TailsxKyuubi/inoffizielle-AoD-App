@@ -146,7 +146,11 @@ class _VideoControlsState extends State<VideoControls> {
                         onTap: (){
                           playerCache.controller.value.isPlaying && playerCache.timeTrackThread.isActive
                               ? playerCache.timeTrackThread.cancel()
-                              : playerCache.timeTrackThread = Timer.periodic(Duration(seconds: 30), widget.playerState.sendAodTrackingRequest);
+                              : Timer(Duration(seconds: ((playerCache.controller.value.position.inSeconds % 30)-30)*-1),(){
+                                playerCache.timeTrackThread = Timer.periodic(
+                                    Duration(seconds: 30), widget.playerState.sendAodTrackingRequest
+                                );
+                              });
                           playerCache.controller.value.isPlaying?playerCache.controller.pause():playerCache.controller.play();
                           setState(() {
                             widget.playerState.initDelayedControlsHide();
