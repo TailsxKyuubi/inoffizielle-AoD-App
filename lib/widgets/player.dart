@@ -69,7 +69,7 @@ class PlayerState extends State<PlayerWidget> {
     );
   }
 
-  saveEpisodeProgress(){
+  saveEpisodeProgress([timer]){
     if(settings.playerSettings.saveEpisodeProgress){
       episodeProgressCache.addEpisode(
           playerCache.playlist[playerCache.playlistIndex]['mediaid'],
@@ -173,6 +173,7 @@ class PlayerState extends State<PlayerWidget> {
               }else{
                 episodeProgressCache.addEpisode(playerCache.playlist[0]['mediaid'], Duration());
               }
+              Timer.periodic(Duration(seconds: 10), this.saveEpisodeProgress);
             }
             playerCache.controller.play();
           });
