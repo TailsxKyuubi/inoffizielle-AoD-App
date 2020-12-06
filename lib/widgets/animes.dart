@@ -47,28 +47,32 @@ class _AnimesWidgetState extends State<AnimesWidget> {
         padding: EdgeInsets.only(left: 20, right: 20),
         child: ListView(
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(10)
-                ),
-                child: Container(
-                  height: 40,
-                  padding: EdgeInsets.symmetric(horizontal: 5),
-                  decoration: BoxDecoration(
-                    color: Colors.grey
+              Container(
+                margin: EdgeInsets.only(top: 10),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.all(
+                      Radius.circular(5)
                   ),
-                  child: TextField(
-                    controller: this._controller,
-                    cursorColor: Theme.of(context).accentColor,
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: -14),
-                      hintText: 'Suche',
-                      hintStyle: TextStyle(
+
+                  child: Container(
+                    height: 40,
+                    padding: EdgeInsets.symmetric(horizontal: 5),
+                    decoration: BoxDecoration(
+                        color: Colors.grey
+                    ),
+                    child: TextField(
+                      controller: this._controller,
+                      cursorColor: Theme.of(context).accentColor,
+                      decoration: const InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(vertical: -14),
+                        hintText: 'Suche',
+                        hintStyle: TextStyle(
+                            color: Colors.white
+                        ),
+                      ),
+                      style: TextStyle(
                           color: Colors.white
                       ),
-                    ),
-                    style: TextStyle(
-                        color: Colors.white
                     ),
                   ),
                 ),
