@@ -9,4 +9,5 @@ int playlistIndex = 0;
 VideoPlayerController controller;
 Timer updateThread;
 Timer timeTrackThread;
+Timer episodeTracker;
 String language;

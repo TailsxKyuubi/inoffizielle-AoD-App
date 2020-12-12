@@ -51,7 +51,7 @@ class PlayerState extends State<PlayerWidget> {
               +'/'+playerCache.controller.value.position.inSeconds.toString()
               +'/30/'+playerCache.language+'/'
               +(settings.playerSettings.defaultQuality == 0
-              ? '480' : settings.playerSettings.defaultQuality.toString()),
+              ? '720' : settings.playerSettings.defaultQuality.toString()),
           headers: headerHandler.getHeaders());
   }
 
@@ -71,14 +71,20 @@ class PlayerState extends State<PlayerWidget> {
 
   saveEpisodeProgress([timer]){
     if(settings.playerSettings.saveEpisodeProgress){
+      Duration duration = (playerCache.controller.value.position.inSeconds > (playerCache.controller.value.duration.inSeconds - 120))
+          ? Duration()
+          : playerCache.controller.value.position;
+
       episodeProgressCache.addEpisode(
           playerCache.playlist[playerCache.playlistIndex]['mediaid'],
-        playerCache.controller.value.position
+        duration,
+        this.args.episode.languages[this.args.languageIndex]
       );
     }
   }
 
   jumpToNextEpisode() async{
+    this.saveEpisodeProgress();
     if(playerCache.playlist.length <= (playerCache.playlistIndex+1)){
       await playerCache.controller.pause();
       print('video halted');
@@ -152,9 +158,9 @@ class PlayerState extends State<PlayerWidget> {
       playerCache.playlist = jsonDecode(value.body)['playlist'];
 
       if(playerCache.playlist.length > 1 && args.countEpisodes != args.positionEpisodes){
-        playerCache.playlist.removeRange(((args.countEpisodes - args.positionEpisodes)), args.countEpisodes);
+        playerCache.playlist.removeRange(((playerCache.playlist.length - args.positionEpisodes)), playerCache.playlist.length);
       }else if(playerCache.playlist.length > 1 && args.countEpisodes == args.positionEpisodes){
-        playerCache.playlist.removeRange(1, args.countEpisodes);
+        playerCache.playlist.removeRange(1, playerCache.playlist.length);
       }
 
       String m3u8 = playerCache.playlist[0]['sources'][0]['file'];
@@ -166,14 +172,14 @@ class PlayerState extends State<PlayerWidget> {
           setState(() {
             if(settings.playerSettings.saveEpisodeProgress){
               Duration episodeTimeCode = episodeProgressCache
-                  .getEpisodeDuration(playerCache.playlist[0]['mediaid']);
+                  .getEpisodeDuration(playerCache.playlist[0]['mediaid'],this.args.episode.languages[this.args.languageIndex]);
               int difference = playerCache.controller.value.duration.inSeconds - episodeTimeCode.inSeconds;
               if(difference > 120){
                 playerCache.controller.seekTo(episodeTimeCode);
               }else{
-                episodeProgressCache.addEpisode(playerCache.playlist[0]['mediaid'], Duration());
+                episodeProgressCache.addEpisode(playerCache.playlist[0]['mediaid'], Duration(), this.args.episode.languages[this.args.languageIndex]);
               }
-              Timer.periodic(Duration(seconds: 10), this.saveEpisodeProgress);
+              playerCache.episodeTracker = Timer.periodic(Duration(seconds: 10), this.saveEpisodeProgress);
             }
             playerCache.controller.play();
           });
@@ -197,16 +203,16 @@ class PlayerState extends State<PlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if(playerCache.updateThread == null && this.bootUp){
+    if( playerCache.updateThread == null && this.bootUp ){
       print('init update thread');
       initUpdateThread();
     }
-    if(playerCache.controller == null && this.bootUp){
+    if( playerCache.controller == null && this.bootUp ){
       this.args = ModalRoute.of(context).settings.arguments;
       initPlayer();
     }
-    if(playerCache.controller != null && playerCache.controller.value != null){
-      if(playerCache.controller.value.isBuffering && playerCache.timeTrackThread.isActive){
+    if( playerCache.controller != null && playerCache.controller.value != null ){
+      if( playerCache.controller.value.isBuffering && playerCache.timeTrackThread.isActive ){
         playerCache.timeTrackThread.cancel();
       }else if( ! playerCache.controller.value.isBuffering && ! playerCache.timeTrackThread.isActive ){
         playerCache.timeTrackThread = Timer(Duration(seconds: ((playerCache.controller.value.position.inSeconds % 30)-30)*-1),() {
@@ -220,6 +226,10 @@ class PlayerState extends State<PlayerWidget> {
     if(playerCache.controller != null && playerCache.controller.value != null && playerCache.controller.value.position != null && playerCache.controller.value.duration != null &&
         playerCache.controller.value.duration.inSeconds == playerCache.controller.value.position.inSeconds) {
       jumpToNextEpisode();
+      if(settings.playerSettings.saveEpisodeProgress){
+        this.saveEpisodeProgress();
+      }
+
     }
     return Scaffold(
         body: WillPopScope(
@@ -232,6 +242,9 @@ class PlayerState extends State<PlayerWidget> {
             print('paused video');
             playerCache.updateThread.cancel();
             playerCache.timeTrackThread.cancel();
+            if(settings.playerSettings.saveEpisodeProgress){
+              playerCache.episodeTracker.cancel();
+            }
             await SystemChrome.setPreferredOrientations([
               DeviceOrientation.portraitDown,
               DeviceOrientation.portraitUp
@@ -292,7 +305,7 @@ class PlayerState extends State<PlayerWidget> {
                     ? VideoControls(this)
                     : _playlistLoaded && settings.playerSettings.alwaysShowProgress ? VideoProgress(): Container(height: 0),
                 showControls && _playlistLoaded
-                    ? VideoIntel()
+                    ? VideoIntel(this)
                     : Container(),
                 playerCache.controller.value.isBuffering
                     ? Positioned.fill(

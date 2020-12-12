@@ -8,13 +8,7 @@ class AnimePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Anime anime = ModalRoute.of(context).settings.arguments;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(anime.name),
-        backgroundColor: Color.fromRGBO(53, 54, 56, 1),
-      ),
-      body: AnimeWidget(anime),
-    );
+    return AnimeWidget(anime);
   }
 }
 

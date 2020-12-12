@@ -3,8 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:unoffical_aod_app/caches/playercache.dart' as playerCache;
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
 import 'package:unoffical_aod_app/caches/episode_progress.dart';
+import 'package:unoffical_aod_app/widgets/player.dart';
 
 class VideoIntel extends StatelessWidget {
+
+  final PlayerState _playerState;
+  VideoIntel(this._playerState);
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +25,11 @@ class VideoIntel extends StatelessWidget {
                 onTap: () async{
                   await playerCache.controller.pause();
                   if(settings.playerSettings.saveEpisodeProgress){
+                    playerCache.episodeTracker.cancel();
                     episodeProgressCache.addEpisode(
                         playerCache.playlist[playerCache.playlistIndex]['mediaid'],
-                        playerCache.controller.value.position
+                        playerCache.controller.value.position,
+                        this._playerState.args.episode.languages[this._playerState.args.languageIndex]
                     );
                   }
                   print('video halted');

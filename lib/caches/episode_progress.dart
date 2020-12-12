@@ -5,7 +5,7 @@ class EpisodeProgressCache {
 
   SharedPreferences _sharedPreferences;
   bool isReady;
-  Map<int,Duration> _cache = {};
+  Map<int,Map<String,Duration>> _cache = {};
 
   EpisodeProgressCache(){
     SharedPreferences.getInstance().then((value){
@@ -19,9 +19,13 @@ class EpisodeProgressCache {
     List<String> ids = _sharedPreferences.getStringList('tracking.mediaIds');
     if(ids != null){
       ids.forEach((String element) {
-        int mediaId = int.parse(element);
+        List<String> idArray = element.split('-');
+        int mediaId = int.parse(idArray[0]);
+        String lang = idArray[1];
         this._cache.addAll({
-          mediaId: this._initEpisode(mediaId)
+          mediaId: {
+            lang: this._initEpisode( mediaId, lang )
+          }
         });
       });
     }else{
@@ -29,26 +33,26 @@ class EpisodeProgressCache {
     }
   }
 
-  addEpisode(int mediaId, Duration timeCode){
+  addEpisode(int mediaId, Duration timeCode,String lang){
     if( ! this._cache.containsKey(mediaId) ){
-      this._cache.addAll( { mediaId: timeCode } );
+      this._cache.addAll( { mediaId: { lang: timeCode } } );
       this._saveMediaList();
     }else{
-      this._cache[mediaId] = timeCode;
+      this._cache[mediaId][lang] = timeCode;
     }
-    this._saveEpisodeDuration(mediaId, timeCode);
+    this._saveEpisodeDuration(mediaId, timeCode, lang);
   }
 
-  Duration getEpisodeDuration(int mediaId){
-    if(this._cache.containsKey(mediaId)){
-      return this._cache[mediaId];
+  Duration getEpisodeDuration(int mediaId, String lang){
+    if(this._cache.containsKey(mediaId) && this._cache[mediaId].containsKey(lang)){
+      return this._cache[mediaId][lang];
     }
     return Duration(hours: 0,minutes: 0, seconds: 0);
   }
 
-  _saveEpisodeDuration(int mediaId, Duration timeCode){
+  _saveEpisodeDuration(int mediaId, Duration timeCode, String lang){
     this._sharedPreferences.remove('tracking.'+mediaId.toString());
-    this._sharedPreferences.setString('tracking.'+mediaId.toString(), _durationToString(timeCode) );
+    this._sharedPreferences.setString('tracking.'+mediaId.toString()+'-'+lang, _durationToString(timeCode) );
   }
 
   String _durationToString(Duration timeCode){
@@ -61,9 +65,9 @@ class EpisodeProgressCache {
     _sharedPreferences.setStringList('tracking.mediaIds', _cache.keys.map((e) => e.toString()).toList(growable: false));
   }
 
-  Duration _initEpisode(int mediaId){
+  Duration _initEpisode(int mediaId, String lang){
     List<String> durationList = _sharedPreferences
-        .getString('tracking.'+mediaId.toString())
+        .getString('tracking.'+mediaId.toString()+'-'+lang)
         .split(':');
     return Duration(
       hours: int.parse(durationList[0]),
