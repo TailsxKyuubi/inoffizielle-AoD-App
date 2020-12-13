@@ -23,7 +23,7 @@ class EpisodeProgressCache {
         int mediaId = int.parse(idArray[0]);
         String lang;
         if(idArray.length == 1){
-          lang = 'jap';
+          return;
         }else{
           lang = idArray[1];
         }
