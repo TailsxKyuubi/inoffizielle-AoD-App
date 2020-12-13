@@ -21,7 +21,12 @@ class EpisodeProgressCache {
       ids.forEach((String element) {
         List<String> idArray = element.split('-');
         int mediaId = int.parse(idArray[0]);
-        String lang = idArray[1];
+        String lang;
+        if(idArray.length == 1){
+          lang = 'jap';
+        }else{
+          lang = idArray[1];
+        }
         this._cache.addAll({
           mediaId: {
             lang: this._initEpisode( mediaId, lang )
