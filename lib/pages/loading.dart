@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../caches/login.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 class LoadingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,7 @@ class LoadingPage extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.only(top: MediaQuery.of(context).size.height*0.1),
                 ),
-                Image.asset('images/fast.gif',scale: 5,),
+                Image.asset('images/logo.png',scale: 3,),
                 Flexible(child: Container()),
                 Padding(
                   padding: EdgeInsets.all(20),
@@ -26,8 +27,11 @@ class LoadingPage extends StatelessWidget {
                       color: Colors.white,
                     ),
                   ),
+                ),
+                SpinKitThreeBounce(
+                  color: Theme.of(context).accentColor,
+                  size: 40
                 )
-
               ],
             )
         ),

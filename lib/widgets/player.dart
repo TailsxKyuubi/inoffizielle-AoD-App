@@ -233,7 +233,7 @@ class PlayerState extends State<PlayerWidget> {
     }
     return Scaffold(
         body: WillPopScope(
-          onWillPop: () async{
+          onWillPop: () async {
             print('exit player');
             widget.receivePort.close();
             print('closed port');
