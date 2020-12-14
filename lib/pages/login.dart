@@ -1,6 +1,6 @@
 /*
  * Copyright 2020 TailsxKyuubi
- * This code is part of inoffizielle-AoD-App and licensed under the 4-Clause BSD License
+ * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'package:flutter/material.dart';
 import 'package:unoffical_aod_app/caches/login.dart';

@@ -1,6 +1,6 @@
 /*
  * Copyright 2020 TailsxKyuubi
- * This code is part of inoffizielle-AoD-App and licensed under the 4-Clause BSD License
+ * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';

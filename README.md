@@ -8,7 +8,7 @@
 
 ## License
 
-This App is licensed under the terms and conditions of the 4-Clause BSD license. This Project is not associated with Anime-on-Demand in any way.
+This App is licensed under the terms and conditions of the AGPL license. This Project is not associated with Anime-on-Demand in any way.
 
 ## Special Thanks
 Tami
