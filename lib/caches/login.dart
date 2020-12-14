@@ -1,3 +1,7 @@
+/*
+ * Copyright 2020 TailsxKyuubi
+ * This code is part of inoffizielle-AoD-App and licensed under the 4-Clause BSD License
+ */
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:html/dom.dart';
 import 'package:http/http.dart' as http;

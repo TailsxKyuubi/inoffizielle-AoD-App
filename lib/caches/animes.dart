@@ -1,3 +1,7 @@
+/*
+ * Copyright 2020 TailsxKyuubi
+ * This code is part of inoffizielle-AoD-App and licensed under the 4-Clause BSD License
+ */
 import 'dart:convert';
 
 import 'package:html/dom.dart' as dom;
