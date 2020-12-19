@@ -3,7 +3,7 @@
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'package:flutter/material.dart';
-import 'package:unoffical_aod_app/widgets/drawer.dart';
+import 'package:unoffical_aod_app/widgets/navigation_bar.dart';
 import '../widgets/animes.dart';
 
 class AnimesPage extends StatelessWidget {
@@ -16,8 +16,7 @@ class AnimesPage extends StatelessWidget {
           backgroundColor: Theme.of(context).primaryColor,
           title: Text('Meine Animes'),
         ),
-
-        drawer: DrawerWidget(),
+        bottomNavigationBar: NavigationBar(),
         body: AnimesWidget()
     );
   }

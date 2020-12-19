@@ -3,6 +3,7 @@
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'package:flutter/material.dart';
+import 'package:unoffical_aod_app/caches/login.dart';
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
 
 class AppSettingsWidget extends StatefulWidget {
@@ -34,6 +35,29 @@ class AppSettingsState extends State<AppSettingsWidget>{
               },
               value: settings.appSettings.keepSession,
             ),
+          ),
+          ListTile(
+            title: Text(
+              'Logout',
+              style: TextStyle(
+                  color: Colors.white
+              ),
+            ),
+            onTap: (){
+              logout();
+              Navigator.pushReplacementNamed(context, '/base');
+            },
+          ),
+          ListTile(
+            title: Text(
+              'Über die App',
+              style: TextStyle(
+                  color: Colors.white
+              ),
+            ),
+            onTap: (){
+              Navigator.pushNamed(context, '/about');
+            },
           ),
         ],
       ),
