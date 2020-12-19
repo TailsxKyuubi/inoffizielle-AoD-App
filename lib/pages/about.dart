@@ -4,6 +4,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:unoffical_aod_app/widgets/drawer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AboutPage extends StatelessWidget {
   @override
@@ -21,24 +22,9 @@ class AboutPage extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Padding(
-              padding: EdgeInsets.only( top: MediaQuery.of(context).size.height*0.2 ),
-              child: Text(
-                'Inoffizielle',
-                style: TextStyle(
-                    fontFamily: 'Planet Kosmos',
-                    fontSize: 40,
-                    color: Color.fromRGBO(171, 191, 57, 1)
-                ),
-              ),
-            ),
-            Text(
-              'AoD App',
-              style: TextStyle(
-                  fontFamily: 'Planet Kosmos',
-                  fontSize: 40,
-                  color: Color.fromRGBO(171, 191, 57, 1)
-              ),
+            Image.asset(
+              'images/logo.png',
+              scale: 6,
             ),
             Padding(
                 padding: EdgeInsets.all(5),
@@ -85,14 +71,27 @@ class AboutPage extends StatelessWidget {
               ),
             ),
             Padding(
-                padding: EdgeInsets.all(5),
+              padding: EdgeInsets.all(5),
               child: Text(
-                'Licensed with the BSD License',
+                'Licensed with the AGPL License',
                 style: const TextStyle(
                     color: Colors.white,
                     fontSize: 17
                 ),
               ),
+            ),
+            Container(
+                margin: EdgeInsets.only(top: 20),
+                child: GestureDetector(
+                  onTap:() => launch('https://anime-on-demand.de/datenschutz'),
+                  child: Text(
+                    'Datenschutz',
+                    style: TextStyle(
+                      color: Theme.of(context).accentColor,
+                      fontSize: 20
+                    ),
+                  ),
+                )
             )
           ],
         ),
