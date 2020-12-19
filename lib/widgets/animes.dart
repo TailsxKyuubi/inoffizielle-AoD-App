@@ -14,7 +14,7 @@ class AnimesWidget extends StatefulWidget {
 
 class _AnimesWidgetState extends State<AnimesWidget> {
   TextEditingController _controller = TextEditingController();
-  List<Anime> searchResult = animes.animes;
+  Map<String,Anime> searchResult = animes.animes;
 
   _AnimesWidgetState(){
     this._controller.addListener(onTextInput);
@@ -26,7 +26,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
     }else if(this._controller.text.isEmpty){
       this.searchResult = animes.animes;
     }else{
-      this.searchResult = [];
+      this.searchResult = {};
     }
     setState(() {
 
@@ -43,6 +43,16 @@ class _AnimesWidgetState extends State<AnimesWidget> {
     double elementWidth = (MediaQuery.of(context).size.width-40)*0.5-7;
     double elementHeight = elementWidth / 16 * 9;
     Radius radius = Radius.circular(2);
+    List<Widget> animeList = List<Widget>();
+    this.searchResult.forEach(
+            (String title,Anime anime) => animeList.add( AnimeSmallWidget(
+            anime,
+            elementWidth,
+            elementHeight,
+            radius,
+            ++i
+        ))
+    );
     return Container(
         decoration: BoxDecoration(
             color: Theme.of(context).primaryColor
@@ -83,16 +93,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
               ),
               Wrap(
                 direction: Axis.horizontal,
-                children: this.searchResult.map<Widget>(
-                        (Anime anime) =>
-                        AnimeSmallWidget(
-                            anime,
-                            elementWidth,
-                            elementHeight,
-                            radius,
-                            ++i
-                        )
-                ).toList(),
+                children: animeList,
               )
             ]
         )

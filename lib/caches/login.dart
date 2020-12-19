@@ -2,6 +2,7 @@
  * Copyright 2020 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:html/dom.dart';
 import 'package:http/http.dart' as http;
@@ -13,6 +14,8 @@ HeaderHandler headerHandler = HeaderHandler();
 FlutterSecureStorage _storage = FlutterSecureStorage();
 bool loginDataChecked = false;
 bool loginSuccess = false;
+bool aboActive = false;
+int aboDaysLeft = 0;
 
 Future<bool> checkLogin() async{
   print('start check login');
@@ -73,6 +76,17 @@ Future<bool> validateCredentialsAndSave( String username, String password ) asyn
     return true;
   }else{
     return false;
+  }
+}
+
+void validateAbo(Document myAnimesPage){
+  Element aboText = myAnimesPage.querySelector('.poolnote');
+  if(aboText != null){
+    int daysLeft = int.parse(aboText.querySelectorAll('.green')[1].text);
+    if(daysLeft > 0){
+      aboActive = true;
+      aboDaysLeft = daysLeft;
+    }
   }
 }
 

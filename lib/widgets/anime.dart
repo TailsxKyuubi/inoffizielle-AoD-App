@@ -51,13 +51,13 @@ class AnimeWidgetState extends State<AnimeWidget>{
     episodesRaw.forEach((element) {
       List<dom.Element> playButtons = element.querySelectorAll('input.highlight.streamstarter_html5');
       print('start anime episodes play button count');
-      if(playButtons.length == 0){
-        return;
-      }
+
       print('end anime episodes play button count');
       Episode tmpEpisode = Episode();
       print('start anime episodes play button parsing');
-      tmpEpisode.mediaId = int.tryParse(playButtons[0].attributes['data-playlist'].split('/')[2]);
+      if(playButtons.length > 0){
+        tmpEpisode.mediaId = int.tryParse(playButtons[0].attributes['data-playlist'].split('/')[2]);
+      }
       playButtons.forEach((dom.Element playButton) {
         tmpEpisode.languages.add(playButton.attributes['value']);
         tmpEpisode.playlistUrl.add('https://anime-on-demand.de' +
@@ -68,7 +68,11 @@ class AnimeWidgetState extends State<AnimeWidget>{
       if(movie){
         tmpEpisode.name = doc.querySelector('h1[itemprop=name]').text;
         tmpEpisode.imageUrl = Uri.parse(doc.querySelector('img.anime-top-image').attributes['src']);
-      }else {
+      } else {
+        dom.Element content = element.querySelector('.three-box-content');
+        if(content.children.last.className.isEmpty){
+          tmpEpisode.noteText = content.children.last.text;
+        }
         tmpEpisode.imageUrl = Uri.parse(element.querySelector('.episodebox-image').children[0].attributes['src']);
         tmpNameString = element
             .querySelector('h3.episodebox-title')
@@ -149,21 +153,21 @@ class AnimeWidgetState extends State<AnimeWidget>{
           title: Text(this._anime.name),
           backgroundColor: Theme.of(context).primaryColor,
         ),
-        floatingActionButton:settings.playerSettings.saveEpisodeProgress
+        floatingActionButton:settings.playerSettings.saveEpisodeProgress && aboActive
             ? FloatingActionButton(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).accentColor
-                  ),
-                  child: Icon(
-                    Icons.play_arrow,
-                    color: Theme.of(context).primaryColor
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/player',arguments: this._nextEpisode);
-                },
-              )
+          child: Container(
+            decoration: BoxDecoration(
+                color: Theme.of(context).accentColor
+            ),
+            child: Icon(
+                Icons.play_arrow,
+                color: Theme.of(context).primaryColor
+            ),
+          ),
+          onPressed: () {
+            Navigator.pushNamed(context, '/player',arguments: this._nextEpisode);
+          },
+        )
             : Container(),
         body: Container(
             decoration: BoxDecoration(
@@ -179,7 +183,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                         right: 15,left: 15,top: 10
                     ),
                     child: Text(
-                      showFullDescription
+                      showFullDescription || this._anime.description.length <= 150
                           ?this._anime.description
                           :this._anime.description.substring(0,this._anime.description.indexOf(' ',150)) + ' ...',
                       style: TextStyle(
@@ -187,26 +191,41 @@ class AnimeWidgetState extends State<AnimeWidget>{
                       ),
                     ),
                   ),
-                  Container(
-                      margin: EdgeInsets.only(
-                          right: 15,left: 15
-                      ),
-                      child:
-                      GestureDetector(
-                        onTap: (){
-                          this.showFullDescription = !this.showFullDescription;
-                          setState(() {});
-                        },
-                        child: Text(
-                          showFullDescription
-                              ? 'Weniger anzeigen'
-                              : 'Mehr anzeigen',
-                          style: TextStyle(
-                              color: Theme.of(context).accentColor
-                          ),
+                  this._anime.description.length > 150
+                      ? Container(
+                        margin: EdgeInsets.only(
+                            right: 15,left: 15
                         ),
-                      )
-                  ),
+                        child:
+                        GestureDetector(
+                          onTap: (){
+                            this.showFullDescription = !this.showFullDescription;
+                            setState(() {});
+                          },
+                          child: Text(
+                            showFullDescription
+                                ? 'Weniger anzeigen'
+                                : 'Mehr anzeigen',
+                            style: TextStyle(
+                                color: Theme.of(context).accentColor
+                            ),
+                          ),
+                        )
+                    )
+                      : Container(),
+                  !aboActive
+                      ? Container(
+                          margin: EdgeInsets.only(
+                              right: 15,left: 15,top: 10
+                          ),
+                          child: Text(
+                            'Ohne Premium Abo hast du gegebenenfalls nur eingeschränkt Zugriff auf die Inhalte',
+                            style: TextStyle(
+                                color: Colors.redAccent
+                            ),
+                          )
+                        )
+                      : Container(),
                   Container(
                     margin: EdgeInsets.only(
                       top: 10,
@@ -313,7 +332,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                               bottom: 5,
                                             ),
                                             decoration: BoxDecoration(
-                                                color: episode.languages[0] == 'Deutsch' ? Theme.of(context).accentColor : Colors.grey
+                                                color: episode.languages.length > 0 && episode.languages[0] == 'Deutsch' ? Theme.of(context).accentColor : Colors.grey
                                             ),
                                             child: Row(
                                                 children: [
@@ -375,7 +394,18 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                       )
                                     ],
                                   )
+                              ),
+                              episode.noteText.isNotEmpty
+                                  ? Padding(
+                                  padding: EdgeInsets.only(top: 10),
+                                  child: Text(
+                                    episode.noteText,
+                                    style: TextStyle(
+                                        color: Colors.white
+                                    ),
+                                  )
                               )
+                                  : Container()
                             ],
                           )
                       );

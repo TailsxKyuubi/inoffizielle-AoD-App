@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2020 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
@@ -90,11 +91,13 @@ class LoadingState extends State<BaseWidget>{
               headerHandler.writeCookiesInHeader();
             } else if (data.containsKey('animes')) {
               data['animes'].forEach(
-                      (anime) =>
-                      animesCache.animes.add(
-                          Anime.fromMap(
-                              anime.map<String, String>((key, value) =>
-                                  MapEntry(key.toString(), value.toString())))
+                      (String title,anime) =>
+                      animesCache.animes.addAll(
+                          {
+                            title: Anime.fromMap(
+                                anime.map<String, String>((key, value) =>
+                                    MapEntry(key.toString(), value.toString())))
+                          }
                       )
               );
               episodeProgressCache = EpisodeProgressCache();
@@ -112,7 +115,7 @@ class LoadingState extends State<BaseWidget>{
               print('data contains unknown key');
             }
           }
-        } else if (message is List<Anime>) {
+        } else if (message is Map<String,Anime>) {
           animesCache.animes = message;
         }
         setState(() {});
@@ -152,7 +155,16 @@ appBootUp(SendPort sendPort) async {
     sendPort.send(jsonEncode({'newSimulcastTitles':newSimulcastTitles}));
     sendPort.send(jsonEncode({'topTen':topTen}));
     await animesCache.getAllAnimesV2();
-    sendPort.send(jsonEncode({'animes':animesCache.animes.map((anime) => anime.toMap()).toList()}));
+    Map<String,dynamic> animes = Map<String,dynamic>();
+    animes.addEntries(
+        [
+          MapEntry(
+              'animes',
+              animesCache.animes.map((title, Anime anime) => MapEntry(title, anime.toMap()) )
+          )
+        ]
+    );
+    sendPort.send(jsonEncode(animes));
   }
 }
 

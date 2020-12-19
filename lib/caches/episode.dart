@@ -9,4 +9,5 @@ class Episode {
   int mediaId;
   List<String> playlistUrl = [];
   List<String> languages = [];
+  String noteText = '';
 }

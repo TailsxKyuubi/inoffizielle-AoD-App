@@ -2,6 +2,7 @@
  * Copyright 2020 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:html/dom.dart' as dom;
@@ -12,45 +13,71 @@ import 'package:unoffical_aod_app/caches/login.dart';
 
 import 'anime.dart';
 
-List<Anime> animes = new List<Anime>();
+Map<String,Anime> animes = Map<String,Anime>();
 
 Future getAllAnimesV2() async{
-  HtmlUnescape unescape = HtmlUnescape();
   print('starting animes request');
   http.Response res = await http.get(
-    'https://anime-on-demand.de/myanimes',
-    headers: headerHandler.getHeadersForGetRequest()
+      'https://anime-on-demand.de/myanimes',
+      headers: headerHandler.getHeadersForGetRequest()
   );
   print('finished animes request');
   print('begin processing the data');
   dom.Document animePageDoc = parse(res.body);
-  dom.Element rootElement = animePageDoc.querySelector('.three-box-container');
-  print('filtered elements');
-  List<dom.Element> animeElements = rootElement.querySelectorAll('.animebox');
-  animeElements.forEach((dom.Element element) {
-    print('begin processing anime element');
-    String title = element.querySelector('h3.animebox-title').innerHtml;
-    int id = int.parse(element.querySelector('.animebox-link a').attributes['href'].split('/').last);
-    String imageUrl = element.querySelector('.animebox-image img').attributes['src'];
-    Anime tmpAnime = Anime(
-      id: id,
-      name: unescape.convert(title).replaceAll('(Sub)', ''),
-      imageUrl: imageUrl
+  parseAnimePage(animePageDoc);
+  validateAbo(animePageDoc);
+  if( ! aboActive ){
+    print('inactive abo detected');
+    http.Response resAllAnimePage = await http.get(
+        'https://anime-on-demand.de/animes',
+        headers: headerHandler.getHeadersForGetRequest()
     );
-    animes.add(tmpAnime);
-    print('finished processing anime element');
-  });
+    dom.Document docAllAnimePage = parse(resAllAnimePage.body);
+    parseAnimePage(docAllAnimePage);
+  }
+  print('starting sorting anime');
+  SplayTreeMap<String,Anime> st = SplayTreeMap.from(animes);
+  animes.clear();
+  animes.addAll(st);
   print('finished anime parsing');
   return true;
 }
 
-List<Anime> filterAnimes(String searchQuery){
-  List<Anime> filteredResults = List<Anime>();
+void parseAnimePage(dom.Document animePageDoc){
+  HtmlUnescape unescape = HtmlUnescape();
+  dom.Element rootElement = animePageDoc.querySelector('.three-box-container');
+  print('filtered elements');
+  if(rootElement != null){
+    List<dom.Element> animeElements = rootElement.querySelectorAll('.animebox');
+    animeElements.forEach((dom.Element element) {
+      print('begin processing anime element');
+      String title = element
+          .querySelector('h3.animebox-title')
+          .innerHtml;
+      if( ! animes.containsKey( title ) ) {
+        int id = int.parse(element.querySelector('.animebox-link a').attributes['href'].split('/').last);
+        String imageUrl = element
+            .querySelector('.animebox-image img')
+            .attributes['src'];
+        Anime tmpAnime = Anime(
+            id: id,
+            name: unescape.convert(title).replaceAll('(Sub)', ''),
+            imageUrl: imageUrl
+        );
+        animes.addAll({title: tmpAnime});
+      }
+      print('finished processing anime element');
+    });
+  }
+}
+
+Map<String,Anime> filterAnimes(String searchQuery){
+  Map<String,Anime> filteredResults = Map<String,Anime>();
   HtmlEscape escape = HtmlEscape();
   List<String> words = searchQuery.toLowerCase().split(' ').map((String e) => escape.convert(e)).toList();
   String query = '(?=.*'+ words.join(')(?=.*') + ')';
-  animes.forEach((Anime element) => element.name.toLowerCase().indexOf( RegExp( query ) ) == -1
+  animes.forEach((String title,Anime element) => element.name.toLowerCase().indexOf( RegExp( query ) ) == -1
       ? null
-      : filteredResults.add(element));
+      : filteredResults.addAll({title:element}));
   return filteredResults;
 }
