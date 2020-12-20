@@ -43,6 +43,7 @@ Future<bool> validateCredentialsAndSave( String username, String password ) asyn
     print('finished home page request');
   }catch(exception){
     connectionError = true;
+    print('connection failed');
     return false;
   }
   Document mainDoc = parse(mainRes.body);

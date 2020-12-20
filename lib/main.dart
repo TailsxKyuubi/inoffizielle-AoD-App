@@ -8,6 +8,8 @@ import 'dart:isolate';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_isolate/flutter_isolate.dart';
+import 'package:unoffical_aod_app/caches/app.dart';
 import 'package:unoffical_aod_app/caches/episode_progress.dart';
 import 'package:unoffical_aod_app/caches/home.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
@@ -19,10 +21,10 @@ import 'package:unoffical_aod_app/pages/home.dart';
 import 'package:unoffical_aod_app/pages/loading.dart';
 import 'package:unoffical_aod_app/pages/login.dart';
 import 'package:unoffical_aod_app/pages/settings.dart';
+import 'package:unoffical_aod_app/widgets/loading_connection_error.dart';
 import 'package:unoffical_aod_app/widgets/player.dart';
 import 'caches/anime.dart';
 import 'caches/animes.dart' as animesCache;
-import 'package:flutter_isolate/flutter_isolate.dart';
 
 
 void main() async {
@@ -50,7 +52,6 @@ class AodApp extends StatelessWidget {
           primaryColor: const Color.fromRGBO(53, 54, 56, 1),
           accentColor: const Color.fromRGBO(171, 191, 57, 1)
       ),
-      //home: AnimesPage(),
       home: BaseWidget(),
     );
   }
@@ -63,13 +64,28 @@ class BaseWidget extends StatefulWidget {
 
 class LoadingState extends State<BaseWidget>{
 
-  final ReceivePort receivePort = ReceivePort();
-  LoadingState(){
-    if( ! loginDataChecked && ! loginSuccess ) {
-      receivePort.listen((message) {
+  triggerStateUpdate(){
+    setState(() {});
+  }
+
+  Widget startScreensScaffold(Widget content){
+    return Scaffold(
+          body: WillPopScope(
+            onWillPop: () async => false,
+            child: content,
+        )
+    );
+  }
+
+  parseMessage(message, BuildContext context){
+
         if (message is String) {
           if(message == 'connection error'){
             connectionError = true;
+            showDialog(
+                context: context,
+                child: LoadingConnectionErrorDialog(),
+            );
           } else if (message == 'login check done') {
             loginDataChecked = true;
             connectionError = false;
@@ -126,27 +142,25 @@ class LoadingState extends State<BaseWidget>{
           animesCache.animes = message;
         }
         setState(() {});
-      });
-      FlutterIsolate.spawn(appBootUp, receivePort.sendPort);
-    }
-  }
-  triggerStateUpdate(){
-    setState(() {
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     //SystemChrome.setEnabledSystemUIOverlays([]);
+    if(bootUpReceivePort == null){
+      bootUpReceivePort = ReceivePort();
+      bootUpReceivePort.listen((message) => parseMessage(message, context));
+      FlutterIsolate.spawn(appBootUp, bootUpReceivePort.sendPort);
+    }
     print('loading widget build');
     if(loginDataChecked && ! loginSuccess ) {
-      return LoginPage();
+      return startScreensScaffold(LoginPage());
     }else if(loginSuccess && animesCache.animes == null){
-      return LoadingPage();
+      return startScreensScaffold(LoadingPage());
     }else if(loginSuccess && animesCache.animes != null && animesCache.animes.isNotEmpty){
       return HomePage();
     }else{
-      return LoadingPage();
+      return startScreensScaffold(LoadingPage());
     }
   }
 }
@@ -185,3 +199,4 @@ appBootUp(SendPort sendPort) async {
     sendPort.send(jsonEncode(animes));
   }
 }
+
