@@ -43,8 +43,8 @@ class AppSettingsState extends State<AppSettingsWidget>{
                   color: Colors.white
               ),
             ),
-            onTap: (){
-              logout();
+            onTap: () async{
+              await logout();
               Navigator.pushReplacementNamed(context, '/base');
             },
           ),

@@ -4,7 +4,6 @@
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'dart:convert';
-import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter/cupertino.dart';
@@ -48,12 +47,11 @@ class AodApp extends StatelessWidget {
         '/about': (BuildContext context) => AboutPage()
       },
       theme: ThemeData(
-          primaryColor: Color.fromRGBO(53, 54, 56, 1),
-          accentColor: Color.fromRGBO(171, 191, 57, 1)
+          primaryColor: const Color.fromRGBO(53, 54, 56, 1),
+          accentColor: const Color.fromRGBO(171, 191, 57, 1)
       ),
       //home: AnimesPage(),
       home: BaseWidget(),
-      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -70,11 +68,20 @@ class LoadingState extends State<BaseWidget>{
     if( ! loginDataChecked && ! loginSuccess ) {
       receivePort.listen((message) {
         if (message is String) {
-          if (message == 'login check done') {
+          if(message == 'connection error'){
+            connectionError = true;
+          } else if (message == 'login check done') {
             loginDataChecked = true;
+            connectionError = false;
             settings = Settings();
           } else if (message == 'login success') {
             loginSuccess = true;
+          }else if(message == 'active abo') {
+            aboActive = true;
+          }else if(message == 'inactive abo'){
+            aboActive = false;
+          }else if(message.startsWith('remaining abo days:')){
+            aboDaysLeft = int.parse(message.split(':')[1]);
           } else {
             Map<String, dynamic> data;
             try {
@@ -124,7 +131,8 @@ class LoadingState extends State<BaseWidget>{
     }
   }
   triggerStateUpdate(){
-    setState(() {});
+    setState(() {
+    });
   }
 
   @override
@@ -146,7 +154,11 @@ class LoadingState extends State<BaseWidget>{
 appBootUp(SendPort sendPort) async {
   print('initialised bootup thread');
   await checkLogin();
-  sendPort.send('login check done');
+  if(connectionError){
+    sendPort.send('connection error');
+  }else{
+    sendPort.send('login check done');
+  }
   if(loginSuccess){
     sendPort.send('login success');
     sendPort.send(jsonEncode({'cookies': headerHandler.cookies}));
@@ -155,6 +167,12 @@ appBootUp(SendPort sendPort) async {
     sendPort.send(jsonEncode({'newSimulcastTitles':newSimulcastTitles}));
     sendPort.send(jsonEncode({'topTen':topTen}));
     await animesCache.getAllAnimesV2();
+    if(aboActive){
+      sendPort.send('active abo');
+      sendPort.send('remaining abo days:'+aboDaysLeft.toString());
+    }else{
+      sendPort.send('inactive abo');
+    }
     Map<String,dynamic> animes = Map<String,dynamic>();
     animes.addEntries(
         [
@@ -166,14 +184,4 @@ appBootUp(SendPort sendPort) async {
     );
     sendPort.send(jsonEncode(animes));
   }
-}
-
-checkForStateChangeLogin(SendPort sendPort){
-  print('checkForStateChange start');
-
-  while(!loginSuccess){
-    sleep(Duration(milliseconds: 100));
-  }
-  sendPort.send('');
-  print('checkForStateChange end');
 }

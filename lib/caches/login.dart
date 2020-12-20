@@ -16,6 +16,7 @@ bool loginDataChecked = false;
 bool loginSuccess = false;
 bool aboActive = false;
 int aboDaysLeft = 0;
+bool connectionError = false;
 
 Future<bool> checkLogin() async{
   print('start check login');
@@ -32,11 +33,18 @@ Future<bool> checkLogin() async{
 }
 
 Future<bool> validateCredentialsAndSave( String username, String password ) async{
+  connectionError = false;
   print('generate headers');
   Map<String,String> headers = headerHandler.getHeaders();
   print('starting home page request');
-  http.Response mainRes = await http.get('https://anime-on-demand.de/', headers: headers);
-  print('finished home page request');
+  http.Response mainRes;
+  try {
+    mainRes = await http.get('https://anime-on-demand.de/', headers: headers);
+    print('finished home page request');
+  }catch(exception){
+    connectionError = true;
+    return false;
+  }
   Document mainDoc = parse(mainRes.body);
   parseHomePage(mainDoc);
   print('parsed home page');
@@ -59,11 +67,17 @@ Future<bool> validateCredentialsAndSave( String username, String password ) asyn
   headers = headerHandler.getHeaders();
   print('data for login prepared');
   print('start login request');
-  http.Response res = await http.post(
-      'https://anime-on-demand.de/users/sign_in',
-      body: parameterString,
-      headers: headers
-  );
+  http.Response res;
+  try {
+    res = await http.post(
+        'https://anime-on-demand.de/users/sign_in',
+        body: parameterString,
+        headers: headers
+    );
+  }catch(exception){
+    connectionError = true;
+    return false;
+  }
   print('login request completed');
   print('set internal flags');
   loginDataChecked = true;
@@ -75,6 +89,7 @@ Future<bool> validateCredentialsAndSave( String username, String password ) asyn
     loginSuccess = true;
     return true;
   }else{
+    loginSuccess = false;
     return false;
   }
 }

@@ -4,7 +4,7 @@
  */
 class HeaderHandler {
   Map<String,String> _headers = {
-    'User-Agent': 'inoffizielle AoD App/0.5',
+    'User-Agent': 'inoffizielle AoD App/0.6',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
     'Accept-Language': 'de,en-US;q=0.7,en;q=0.3',
     'Accept-Encoding': 'gzip, deflate, br',
@@ -12,7 +12,6 @@ class HeaderHandler {
     'Upgrade-Insecure-Requests': '1',
     'Pragma': 'no-cache',
     'Cache-Control': 'no-cache',
-    'TE': 'Trailers',
     'Referer':'https://anime-on-demand.de/',
     'Origin':'https://anime-on-demand.de'
   };
