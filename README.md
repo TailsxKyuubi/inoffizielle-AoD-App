@@ -1,10 +1,11 @@
 # Inoffizielle AoD App
 
 ## Features
-* access all your media from aod
-* search in your aod library
-* see whats new on aod
-* decide if you want to see the subtitled version or dub
+* Zugriff auf deine komplette AoD Bibliothek
+* Durchsuche die AoD Bibliothek nach deinen Favoriten
+* Sieh was neu ist auf AoD
+* entscheide dich ob du die Serie mit Dub oder OmU sehen möchtest (sofern vorhanden)
+* Setze die Serie dort Fort wo du sie aufgehört hast
 
 ## License
 
