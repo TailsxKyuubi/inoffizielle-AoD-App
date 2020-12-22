@@ -5,7 +5,7 @@
 * Durchsuche die AoD Bibliothek nach deinen Favoriten
 * Sieh was neu ist auf AoD
 * entscheide dich ob du die Serie mit Dub oder OmU sehen möchtest (sofern vorhanden)
-* Setze die Serie dort Fort wo du sie aufgehört hast
+* Setze die Serie dort fort wo du sie aufgehört hast
 
 ## License
 
