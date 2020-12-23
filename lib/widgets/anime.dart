@@ -2,6 +2,8 @@
  * Copyright 2020 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -32,10 +34,17 @@ class AnimeWidgetState extends State<AnimeWidget>{
   bool movie = false;
   bool showFullDescription = false;
   PlayerTransfer _nextEpisode;
+  bool bootUp = true;
 
   Future getAnime() async{
     print('get anime init');
-    http.Response res = await http.get('https://anime-on-demand.de/anime/' + this._anime.id.toString(),headers: headerHandler.getHeaders());
+    http.Response res;
+    try {
+      res = await http.get('https://anime-on-demand.de/anime/' + this._anime.id.toString(),headers: headerHandler.getHeaders());
+    }catch(exception){
+      connectionError = true;
+      return false;
+    }
     dom.Document doc = parse(res.body);
     headerHandler.decodeCookiesString(res.headers['set-cookie']);
     this._csrf = doc.querySelector('meta[name=csrf-token]').attributes['content'];
@@ -142,6 +151,20 @@ class AnimeWidgetState extends State<AnimeWidget>{
       SystemUiOverlay.top,
       SystemUiOverlay.bottom
     ]);*/
+
+    if(connectionError){
+      /*showDialog(
+          context: context,
+          child: AnimeLoadingConnectionErrorDialog(this._anime),
+      );*/
+
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      connectionError = false;
+      this.getAnime().then((element){
+        setState(() {});
+      });
+    });
     if(this.episodes.isNotEmpty){
       HtmlUnescape unescape = HtmlUnescape();
       double firstWidth = (MediaQuery.of(context).size.width - 30) * 0.5;

@@ -17,10 +17,16 @@ Map<String,Anime> animes = Map<String,Anime>();
 
 Future getAllAnimesV2() async{
   print('starting animes request');
-  http.Response res = await http.get(
-      'https://anime-on-demand.de/myanimes',
-      headers: headerHandler.getHeadersForGetRequest()
-  );
+  http.Response res;
+  try {
+    res = await http.get(
+        'https://anime-on-demand.de/myanimes',
+        headers: headerHandler.getHeadersForGetRequest()
+    );
+  }catch(exception){
+    connectionError = true;
+    return false;
+  }
   print('finished animes request');
   print('begin processing the data');
   dom.Document animePageDoc = parse(res.body);
@@ -28,10 +34,16 @@ Future getAllAnimesV2() async{
   validateAbo(animePageDoc);
   if( ! aboActive ){
     print('inactive abo detected');
-    http.Response resAllAnimePage = await http.get(
-        'https://anime-on-demand.de/animes',
-        headers: headerHandler.getHeadersForGetRequest()
-    );
+    http.Response resAllAnimePage;
+    try {
+      resAllAnimePage = await http.get(
+          'https://anime-on-demand.de/animes',
+          headers: headerHandler.getHeadersForGetRequest()
+      );
+    }catch(exception){
+      connectionError = true;
+      return false;
+    }
     dom.Document docAllAnimePage = parse(resAllAnimePage.body);
     parseAnimePage(docAllAnimePage);
   }

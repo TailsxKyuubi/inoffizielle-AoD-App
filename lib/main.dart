@@ -139,6 +139,7 @@ class LoadingState extends State<BaseWidget>{
             }
           }
         } else if (message is Map<String,Anime>) {
+          connectionError = false;
           animesCache.animes = message;
         }
         setState(() {});
@@ -187,16 +188,20 @@ appBootUp(SendPort sendPort) async {
     }else{
       sendPort.send('inactive abo');
     }
-    Map<String,dynamic> animes = Map<String,dynamic>();
-    animes.addEntries(
-        [
-          MapEntry(
-              'animes',
-              animesCache.animes.map((title, Anime anime) => MapEntry(title, anime.toMap()) )
-          )
-        ]
-    );
-    sendPort.send(jsonEncode(animes));
+    if(connectionError){
+      sendPort.send('connection error');
+    }else{
+      Map<String,dynamic> animes = Map<String,dynamic>();
+        animes.addEntries(
+            [
+              MapEntry(
+                  'animes',
+                  animesCache.animes.map((title, Anime anime) => MapEntry(title, anime.toMap()) )
+              )
+            ]
+        );
+      sendPort.send(jsonEncode(animes));
+    }
   }
 }
 
