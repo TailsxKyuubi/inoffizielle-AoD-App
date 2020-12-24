@@ -159,12 +159,6 @@ class AnimeWidgetState extends State<AnimeWidget>{
       );*/
 
     }
-    WidgetsBinding.instance.addPostFrameCallback((_){
-      connectionError = false;
-      this.getAnime().then((element){
-        setState(() {});
-      });
-    });
     if(this.episodes.isNotEmpty){
       HtmlUnescape unescape = HtmlUnescape();
       double firstWidth = (MediaQuery.of(context).size.width - 30) * 0.5;
