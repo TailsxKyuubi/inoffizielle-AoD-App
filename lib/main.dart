@@ -182,12 +182,6 @@ appBootUp(SendPort sendPort) async {
     sendPort.send(jsonEncode({'newSimulcastTitles':newSimulcastTitles}));
     sendPort.send(jsonEncode({'topTen':topTen}));
     await animesCache.getAllAnimesV2();
-    if(aboActive){
-      sendPort.send('active abo');
-      sendPort.send('remaining abo days:'+aboDaysLeft.toString());
-    }else{
-      sendPort.send('inactive abo');
-    }
     if(connectionError){
       sendPort.send('connection error');
     }else{
@@ -201,6 +195,12 @@ appBootUp(SendPort sendPort) async {
             ]
         );
       sendPort.send(jsonEncode(animes));
+    }
+    if(aboActive){
+      sendPort.send('active abo');
+      sendPort.send('remaining abo days:'+aboDaysLeft.toString());
+    }else{
+      sendPort.send('inactive abo');
     }
   }
 }
