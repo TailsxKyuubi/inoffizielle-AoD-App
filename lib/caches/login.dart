@@ -6,6 +6,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:html/dom.dart';
 import 'package:http/http.dart' as http;
+import 'package:unoffical_aod_app/caches/app.dart';
 import 'HeaderHandler.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:unoffical_aod_app/caches/home.dart';
@@ -118,4 +119,6 @@ Future<void> logout() async{
   loginSuccess = false;
   loginDataChecked = false;
   headerHandler = HeaderHandler();
+  bootUpReceivePort = null;
+  bootUpIsolate = null;
 }

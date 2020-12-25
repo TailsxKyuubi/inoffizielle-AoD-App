@@ -8,11 +8,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 class LoadingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    /*showDialog(
-      context: context,
-      child: Text('Keine Verbindung'),
-      useRootNavigator: false,
-    );*/
     return Container(
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
