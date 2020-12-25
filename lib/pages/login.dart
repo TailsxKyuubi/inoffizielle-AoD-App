@@ -70,6 +70,10 @@ class _LoginPageState extends State<LoginPage> {
             TextFormField(
               focusNode: this.username,
               controller: this._usernameController,
+              autofillHints: [
+                AutofillHints.email,
+                AutofillHints.username
+              ],
               decoration: const InputDecoration(
                   hintText: 'Gib deinen Benutzernamen ein',
                   fillColor: Colors.white,
@@ -108,6 +112,9 @@ class _LoginPageState extends State<LoginPage> {
             TextFormField(
               focusNode: this.password,
               controller: this._passwordController,
+              autofillHints: [
+                AutofillHints.password
+              ],
               decoration: const InputDecoration(
                   hintText: 'Gib dein Passwort ein',
                   fillColor: Colors.white,
