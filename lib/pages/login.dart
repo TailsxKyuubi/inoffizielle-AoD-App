@@ -26,7 +26,11 @@ class _LoginPageState extends State<LoginPage> {
 
   void login(){
     saveCredentials(this._usernameController.text, this._passwordController.text);
+    loginStorageChecked = false;
     loginDataChecked = false;
+    loginSuccess = false;
+    bootUpReceivePort = null;
+    bootUpIsolate = null;
     Navigator.pushReplacementNamed(context, '/base');
   }
 
@@ -133,8 +137,6 @@ class _LoginPageState extends State<LoginPage> {
               onFieldSubmitted:(value){
                 this.password.unfocus();
                 if(this._passwordController.text.isNotEmpty && this._usernameController.text.isNotEmpty){
-                  bootUpReceivePort = null;
-                  bootUpIsolate = null;
                   login();
                 }else{
                   Scaffold.of(context).showSnackBar(SnackBar(content: Text('Bitte überprüfe deine Eingaben')));
@@ -152,8 +154,6 @@ class _LoginPageState extends State<LoginPage> {
                 // otherwise.
                 // If the form is valid, display a Snackbar.
                 if(this._passwordController.text.isNotEmpty && this._usernameController.text.isNotEmpty){
-                  bootUpReceivePort = null;
-                  bootUpIsolate = null;
                   login();
                 }else{
                   Scaffold.of(context).showSnackBar(SnackBar(content: Text('Bitte überprüfe deine Eingaben')));

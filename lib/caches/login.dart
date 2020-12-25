@@ -13,6 +13,7 @@ import 'package:unoffical_aod_app/caches/home.dart';
 
 HeaderHandler headerHandler = HeaderHandler();
 FlutterSecureStorage _storage = FlutterSecureStorage();
+bool loginStorageChecked = false;
 bool loginDataChecked = false;
 bool loginSuccess = false;
 bool aboActive = false;
@@ -24,7 +25,7 @@ Future<bool> checkLogin() async{
   String username = await _storage.read(key: 'username');
   String password = await _storage.read(key: 'password');
   print('read login data');
-  loginDataChecked = true;
+  loginStorageChecked = true;
   if(username == null || password == null){
     return false;
   }else if(loginSuccess){

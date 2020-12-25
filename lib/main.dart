@@ -90,6 +90,8 @@ class LoadingState extends State<BaseWidget>{
             loginDataChecked = true;
             connectionError = false;
             settings = Settings();
+          }else if(message == 'login storage check done'){
+            loginStorageChecked = true;
           } else if (message == 'login success') {
             loginSuccess = true;
           }else if(message == 'active abo') {
@@ -154,7 +156,7 @@ class LoadingState extends State<BaseWidget>{
       FlutterIsolate.spawn(appBootUp, bootUpReceivePort.sendPort);
     }
     print('loading widget build');
-    if(loginDataChecked && ! loginSuccess ) {
+    if(loginStorageChecked && ! loginSuccess ) {
       return startScreensScaffold(LoginPage());
     }else if(loginSuccess && animesCache.animes == null){
       return startScreensScaffold(LoadingPage());
@@ -171,8 +173,11 @@ appBootUp(SendPort sendPort) async {
   await checkLogin();
   if(connectionError){
     sendPort.send('connection error');
-  }else{
-    sendPort.send('login check done');
+  }else if(loginStorageChecked){
+    sendPort.send('login storage check done');
+    if(loginDataChecked){
+      sendPort.send('login check done');
+    }
   }
   if(loginSuccess){
     sendPort.send('login success');
