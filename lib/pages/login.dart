@@ -152,6 +152,8 @@ class _LoginPageState extends State<LoginPage> {
                 // otherwise.
                 // If the form is valid, display a Snackbar.
                 if(this._passwordController.text.isNotEmpty && this._usernameController.text.isNotEmpty){
+                  bootUpReceivePort = null;
+                  bootUpIsolate = null;
                   login();
                 }else{
                   Scaffold.of(context).showSnackBar(SnackBar(content: Text('Bitte überprüfe deine Eingaben')));
