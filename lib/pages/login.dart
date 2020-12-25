@@ -3,6 +3,7 @@
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'package:flutter/material.dart';
+import 'package:unoffical_aod_app/caches/app.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
 
 class LoginPage extends StatefulWidget {
@@ -132,6 +133,8 @@ class _LoginPageState extends State<LoginPage> {
               onFieldSubmitted:(value){
                 this.password.unfocus();
                 if(this._passwordController.text.isNotEmpty && this._usernameController.text.isNotEmpty){
+                  bootUpReceivePort = null;
+                  bootUpIsolate = null;
                   login();
                 }else{
                   Scaffold.of(context).showSnackBar(SnackBar(content: Text('Bitte überprüfe deine Eingaben')));
