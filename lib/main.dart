@@ -80,66 +80,75 @@ class LoadingState extends State<BaseWidget>{
   parseMessage(message, BuildContext context){
 
         if (message is String) {
-          if(message == 'connection error'){
-            connectionError = true;
-            showDialog(
+          switch(message){
+            case 'connection error':
+              connectionError = true;
+              showDialog(
                 context: context,
                 child: LoadingConnectionErrorDialog(),
-            );
-          } else if (message == 'login check done') {
-            loginDataChecked = true;
-            connectionError = false;
-            settings = Settings();
-          }else if(message == 'login storage check done'){
-            loginStorageChecked = true;
-          } else if (message == 'login success') {
-            loginSuccess = true;
-          }else if(message == 'active abo') {
-            aboActive = true;
-          }else if(message == 'inactive abo'){
-            aboActive = false;
-          }else if(message.startsWith('remaining abo days:')){
-            aboDaysLeft = int.parse(message.split(':')[1]);
-          } else {
-            Map<String, dynamic> data;
-            try {
-              data = jsonDecode(message);
-            } catch (e) {
-              print('isnt a json string');
-              print(e.toString());
-              print(message);
-            }
-            if (data.containsKey('cookies')) {
-              headerHandler.cookies =
-                  data['cookies'].map<String, String>((String key, value) =>
-                      MapEntry(key, value.toString()));
-              headerHandler.writeCookiesInHeader();
-            } else if (data.containsKey('animes')) {
-              data['animes'].forEach(
-                      (String title,anime) =>
-                      animesCache.animes.addAll(
-                          {
-                            title: Anime.fromMap(
-                                anime.map<String, String>((key, value) =>
-                                    MapEntry(key.toString(), value.toString())))
-                          }
-                      )
               );
-              episodeProgressCache = EpisodeProgressCache();
-            } else if (data.containsKey('newEpisodes')) {
-              newEpisodes.addAll(
-                  List.from(data['newEpisodes'])
-              );
-            } else if (data.containsKey('newCatalogTitles')) {
-              newCatalogTitles.addAll(data['newCatalogTitles']);
-            } else if (data.containsKey('newSimulcastTitles')) {
-              newSimulcastTitles.addAll(data['newSimulcastTitles']);
-            } else if (data.containsKey('topTen')) {
-              topTen.addAll(data['topTen']);
-            } else {
-              print('data contains unknown key');
+              break;
+            case 'login check done':
+              loginDataChecked = true;
+              connectionError = false;
+              settings = Settings();
+              break;
+            case 'login storage check done':
+              loginStorageChecked = true;
+              break;
+            case 'login success':
+              loginSuccess = true;
+              break;
+            case 'active abo':
+              aboActive = true;
+              break;
+            case 'inactive abo':
+              aboActive = false;
+              break;
+            default:
+              if(message.startsWith('remaining abo days:')){
+                aboDaysLeft = int.parse(message.split(':')[1]);
+              } else {
+                Map<String, dynamic> data;
+                try {
+                  data = jsonDecode(message);
+                } catch (e) {
+                  print('isnt a json string');
+                  print(e.toString());
+                  print(message);
+                }
+                if (data.containsKey('cookies')) {
+                  headerHandler.cookies =
+                      data['cookies'].map<String, String>((String key, value) =>
+                          MapEntry(key, value.toString()));
+                  headerHandler.writeCookiesInHeader();
+                } else if (data.containsKey('animes')) {
+                  data['animes'].forEach(
+                          (String title,anime) =>
+                          animesCache.animes.addAll(
+                              {
+                                title: Anime.fromMap(
+                                    anime.map<String, String>((key, value) =>
+                                        MapEntry(key.toString(), value.toString())))
+                              }
+                          )
+                  );
+                  episodeProgressCache = EpisodeProgressCache();
+                } else if (data.containsKey('newEpisodes')) {
+                  newEpisodes.addAll(
+                      List.from(data['newEpisodes'])
+                  );
+                } else if (data.containsKey('newCatalogTitles')) {
+                  newCatalogTitles.addAll(data['newCatalogTitles']);
+                } else if (data.containsKey('newSimulcastTitles')) {
+                  newSimulcastTitles.addAll(data['newSimulcastTitles']);
+                } else if (data.containsKey('topTen')) {
+                  topTen.addAll(data['topTen']);
+                } else {
+                  print('data contains unknown key');
+                }
+              }
             }
-          }
         } else if (message is Map<String,Anime>) {
           connectionError = false;
           animesCache.animes = message;
