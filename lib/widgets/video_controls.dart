@@ -20,6 +20,13 @@ class VideoControls extends StatefulWidget {
 
 class _VideoControlsState extends State<VideoControls> {
 
+  bool playTap = false;
+  bool nextTap = false;
+  bool tenSecondsForwardTap = false;
+  bool thirtySecondsForwardTap = false;
+  bool tenSecondsBackwardTap = false;
+  bool thirtySecondsBackwardTap = false;
+
   void jumpTo(TapDownDetails details){
     print('seek triggered');
     widget.playerState.initDelayedControlsHide();
@@ -38,6 +45,7 @@ class _VideoControlsState extends State<VideoControls> {
     if(!widget.playerState.showControls){
       return Positioned(child: Container());
     }
+    Color accentColor = Theme.of(context).accentColor;
     return Positioned(
         bottom: 0,
         width: MediaQuery.of(context).size.width,
@@ -109,9 +117,16 @@ class _VideoControlsState extends State<VideoControls> {
                   Row(
                     children: [
                       GestureDetector(
+                        onTapDown: (TapDownDetails event){
+                          widget.playerState.showControls = true;
+                          setState(() {
+                            this.thirtySecondsBackwardTap = true;
+                          });
+                        },
                         onTap: (){
                           playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds-30));
                           setState(() {
+                            this.thirtySecondsBackwardTap = false;
                             widget.playerState.initDelayedControlsHide();
                           });
                         },
@@ -119,7 +134,9 @@ class _VideoControlsState extends State<VideoControls> {
                           height: 40,
                           width: MediaQuery.of(context).size.width*0.15,
                           decoration: BoxDecoration(
-                            color: Color.fromRGBO(53, 54, 56, 0),
+                            color: this.thirtySecondsBackwardTap
+                                ? Color.fromRGBO(accentColor.red, accentColor.green, accentColor.blue,0.5)
+                                : Color.fromRGBO(53, 54, 56, 0),
                           ),
                           child: Icon(
                               Icons.replay_30,
@@ -128,17 +145,26 @@ class _VideoControlsState extends State<VideoControls> {
                         ),
                       ),
                       GestureDetector(
+                        onTapDown: (TapDownDetails event){
+                          setState(() {
+                            widget.playerState.showControls = true;
+                            this.tenSecondsBackwardTap = true;
+                          });
+                        },
                         onTap: (){
                           playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds-10));
                           setState(() {
                             widget.playerState.initDelayedControlsHide();
+                            this.tenSecondsBackwardTap = false;
                           });
                         },
                         child: Container(
                           height: 40,
                           width: MediaQuery.of(context).size.width*0.15,
                           decoration: BoxDecoration(
-                            color: Color.fromRGBO(53, 54, 56, 0),
+                            color: this.tenSecondsBackwardTap
+                                ? Color.fromRGBO(accentColor.red, accentColor.green, accentColor.blue,0.5)
+                                : Color.fromRGBO(53, 54, 56, 0),
                           ),
                           child: Icon(
                               Icons.replay_10,
@@ -147,6 +173,12 @@ class _VideoControlsState extends State<VideoControls> {
                         ),
                       ),
                       GestureDetector(
+                        onTapDown: (TapDownDetails event){
+                          setState(() {
+                            this.playTap = true;
+                            this.widget.playerState.showControls = true;
+                          });
+                        },
                         onTap: (){
                           playerCache.controller.value.isPlaying && playerCache.timeTrackThread.isActive
                               ? playerCache.timeTrackThread.cancel()
@@ -157,6 +189,7 @@ class _VideoControlsState extends State<VideoControls> {
                               });
                           playerCache.controller.value.isPlaying?playerCache.controller.pause():playerCache.controller.play();
                           setState(() {
+                            this.playTap = false;
                             widget.playerState.initDelayedControlsHide();
                             widget.playerState.saveEpisodeProgress();
                           });
@@ -165,7 +198,9 @@ class _VideoControlsState extends State<VideoControls> {
                           height: 40,
                           width: MediaQuery.of(context).size.width*0.3,
                           decoration: BoxDecoration(
-                            color: Color.fromRGBO(53, 54, 56, 0),
+                            color: this.playTap
+                                ? Color.fromRGBO(accentColor.red, accentColor.green, accentColor.blue,0.5)
+                                : Color.fromRGBO(53, 54, 56, 0),
                           ),
                           child: Icon(
                               playerCache.controller.value.isPlaying?Icons.pause:Icons.play_arrow,
@@ -174,6 +209,12 @@ class _VideoControlsState extends State<VideoControls> {
                         ),
                       ),
                       GestureDetector(
+                        onTapDown: (TapDownDetails event){
+                          setState(() {
+                            this.tenSecondsForwardTap = true;
+                            this.widget.playerState.showControls = true;
+                          });
+                        },
                         onTap: (){
                           if(playerCache.controller.value.duration.inSeconds <= playerCache.controller.value.position.inSeconds+10){
                             this.widget.playerState.jumpToNextEpisode();
@@ -181,6 +222,7 @@ class _VideoControlsState extends State<VideoControls> {
                             playerCache.controller.seekTo(Duration(seconds: playerCache.controller
                                 .value.position.inSeconds + 10));
                             setState(() {
+                              this.tenSecondsForwardTap = false;
                               widget.playerState.initDelayedControlsHide();
                             });
                           }
@@ -189,7 +231,9 @@ class _VideoControlsState extends State<VideoControls> {
                           height: 40,
                           width: MediaQuery.of(context).size.width*0.15,
                           decoration: BoxDecoration(
-                            color: Color.fromRGBO(53, 54, 56, 0),
+                            color: this.tenSecondsForwardTap
+                                ? Color.fromRGBO(accentColor.red, accentColor.green, accentColor.blue,0.5)
+                                : Color.fromRGBO(53, 54, 56, 0),
                           ),
                           child: Icon(
                               Icons.forward_10,
@@ -198,6 +242,12 @@ class _VideoControlsState extends State<VideoControls> {
                         ),
                       ),
                       GestureDetector(
+                        onTapDown: (TapDownDetails event){
+                          setState(() {
+                            this.thirtySecondsForwardTap = true;
+                            this.widget.playerState.showControls = true;
+                          });
+                        },
                         onTap: (){
                           if(playerCache.controller.value.duration.inSeconds <= playerCache.controller.value.position.inSeconds+30){
                             this.widget.playerState.jumpToNextEpisode();
@@ -205,6 +255,7 @@ class _VideoControlsState extends State<VideoControls> {
                             playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds+30));
                             setState(() {
                               widget.playerState.initDelayedControlsHide();
+                              this.thirtySecondsForwardTap = false;
                             });
                           }
                         },
@@ -212,7 +263,9 @@ class _VideoControlsState extends State<VideoControls> {
                           height: 40,
                           width: MediaQuery.of(context).size.width*0.15,
                           decoration: BoxDecoration(
-                            color: Color.fromRGBO(53, 54, 56, 0),
+                            color: this.thirtySecondsForwardTap
+                                ? Color.fromRGBO(accentColor.red, accentColor.green, accentColor.blue,0.5)
+                                : Color.fromRGBO(53, 54, 56, 0),
                           ),
                           child: Icon(
                               Icons.forward_30,
@@ -223,13 +276,17 @@ class _VideoControlsState extends State<VideoControls> {
                       GestureDetector(
                         onTap: (){
                           widget.playerState.jumpToNextEpisode();
-                          //setState(() {});
+                        },
+                        onTapDown: (TapDownDetails event){
+                          widget.playerState.showControls = true;
                         },
                         child: Container(
                           height: 40,
                           width: MediaQuery.of(context).size.width*0.1,
                           decoration: BoxDecoration(
-                            color: Color.fromRGBO(53, 54, 56, 0),
+                            color: this.nextTap
+                                ? Color.fromRGBO(accentColor.red, accentColor.green, accentColor.blue,0.5)
+                                : Color.fromRGBO(53, 54, 56, 0),
                           ),
                           child: Icon(
                               Icons.skip_next,
