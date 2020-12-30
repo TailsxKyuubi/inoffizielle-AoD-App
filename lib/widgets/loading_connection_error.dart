@@ -53,6 +53,7 @@ class LoadingConnectionErrorDialog extends StatelessWidget {
                         onPressed: () {
                           bootUpReceivePort.close();
                           bootUpReceivePort = null;
+                          Navigator.pop(context);
                           Navigator.pushReplacementNamed(context,'/base'); // To close the dialog
                         },
                         child: Text('Erneut versuchen'),
