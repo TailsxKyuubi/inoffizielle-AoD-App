@@ -1,3 +1,7 @@
+/*
+ * Copyright 2020 TailsxKyuubi
+ * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
+ */
 import 'package:flutter/material.dart';
 import 'package:unoffical_aod_app/transfermodels/player.dart';
 import 'package:unoffical_aod_app/caches/playercache.dart' as playerCache;
