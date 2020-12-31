@@ -10,7 +10,7 @@ class PlayerConnectionErrorDialog extends StatelessWidget {
       playerCache.episodeTracker.cancel();
       playerCache.episodeTracker = null;
     }
-    if(playerCache.updateThread.isActive){
+    if( playerCache.updateThread != null && playerCache.updateThread.isActive ){
       playerCache.updateThread.cancel();
       playerCache.updateThread = null;
     }
