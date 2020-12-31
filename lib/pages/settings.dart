@@ -4,6 +4,7 @@
  */
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:unoffical_aod_app/widgets/drawer.dart';
 import 'package:unoffical_aod_app/widgets/navigation_bar.dart';
 import 'package:unoffical_aod_app/widgets/settings/app.dart';
 import 'package:unoffical_aod_app/widgets/settings/player.dart';
@@ -15,7 +16,7 @@ class SettingsPage extends StatelessWidget {
       DefaultTabController(
           length: 2,
           child: Scaffold(
-            bottomNavigationBar: NavigationBar(),
+            drawer: DrawerWidget(),
             appBar: AppBar(
               title: Text('Einstellungen'),
               bottom: TabBar(
