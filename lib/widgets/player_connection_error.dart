@@ -16,7 +16,11 @@ class PlayerConnectionErrorDialog extends StatelessWidget {
     }
     playerCache.timeTrackThread.cancel();
     playerCache.timeTrackThread = null;
-    this.args.startTime = playerCache.controller.value.position;
+    if(playerCache.controller.value != null){
+      this.args.startTime = playerCache.controller.value.position;
+    }else{
+      this.args.startTime = Duration.zero;
+    }
     playerCache.controller = null;
   }
 
