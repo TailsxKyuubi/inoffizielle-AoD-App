@@ -27,7 +27,7 @@ class _VideoControlsState extends State<VideoControls> {
   bool tenSecondsBackwardTap = false;
   bool thirtySecondsBackwardTap = false;
 
-  void jumpTo(TapDownDetails details){
+  void jumpTo(details){
     print('seek triggered');
     widget.playerState.initDelayedControlsHide();
     int seconds = (details.localPosition.dx*1.1) ~/ ((MediaQuery.of(context).size.width-100)/100)*(playerCache.controller.value.duration.inSeconds/100).floor();
@@ -76,6 +76,7 @@ class _VideoControlsState extends State<VideoControls> {
                       //width: MediaQuery.of(context).size.width - 102,
                       GestureDetector(
                         onTapDown: jumpTo,
+                        onHorizontalDragUpdate: jumpTo,
                         child: Row(
                             children: [
                               Container(
