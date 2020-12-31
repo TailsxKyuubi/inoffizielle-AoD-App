@@ -29,7 +29,9 @@ class VideoIntel extends StatelessWidget {
                 onTap: () async{
                   await playerCache.controller.pause();
                   if(settings.playerSettings.saveEpisodeProgress){
-                    playerCache.episodeTracker.cancel();
+                    if(playerCache.episodeTracker != null){
+                      playerCache.episodeTracker.cancel();
+                    }
                     episodeProgressCache.addEpisode(
                         playerCache.playlist[playerCache.playlistIndex]['mediaid'],
                         playerCache.controller.value.position,

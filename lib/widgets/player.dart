@@ -11,6 +11,8 @@ import 'package:unoffical_aod_app/caches/episode_progress.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
 import 'package:unoffical_aod_app/transfermodels/player.dart';
+import 'package:unoffical_aod_app/widgets/player_connection_error.dart';
+import 'package:unoffical_aod_app/widgets/player_loading_connection_error.dart';
 import 'package:unoffical_aod_app/widgets/video_controls.dart';
 import 'package:unoffical_aod_app/widgets/video_intel.dart';
 import 'package:unoffical_aod_app/widgets/video_progress.dart';
@@ -49,14 +51,23 @@ class PlayerState extends State<PlayerWidget> {
   }
 
   sendAodTrackingRequest([timer]) async{
+    try {
       await http.get(
           'https://anime-on-demand.de/interfaces/startedstream/'
-              +playerCache.playlist[playerCache.playlistIndex]['mediaid'].toString()
-              +'/'+playerCache.controller.value.position.inSeconds.toString()
-              +'/30/'+playerCache.language+'/'
-              +(settings.playerSettings.defaultQuality == 0
+              + playerCache.playlist[playerCache.playlistIndex]['mediaid']
+              .toString()
+              + '/' + playerCache.controller.value.position.inSeconds.toString()
+              + '/30/' + playerCache.language + '/'
+              + (settings.playerSettings.defaultQuality == 0
               ? '720' : settings.playerSettings.defaultQuality.toString()),
           headers: headerHandler.getHeaders());
+    }catch(exception){
+      showDialog(
+        context: context,
+        child: PlayerConnectionErrorDialog(args),
+        barrierDismissible: false,
+      );
+    }
   }
 
   initDelayedControlsHide(){
@@ -81,8 +92,8 @@ class PlayerState extends State<PlayerWidget> {
 
       episodeProgressCache.addEpisode(
           playerCache.playlist[playerCache.playlistIndex]['mediaid'],
-        duration,
-        this.args.episode.languages[this.args.languageIndex]
+          duration,
+          this.args.episode.languages[this.args.languageIndex]
       );
     }
   }
@@ -156,7 +167,18 @@ class PlayerState extends State<PlayerWidget> {
     print('headers build');
     print('starting request');
     playerCache.language = Uri.parse(args.episode.playlistUrl[args.languageIndex]).path.split('/')[3] == 'OmU' ? 'jap' : 'ger';
-    http.Response value = await http.get(args.episode.playlistUrl[args.languageIndex], headers: headers);
+    http.Response value;
+    try{
+      value = await http.get(args.episode.playlistUrl[args.languageIndex], headers: headers);
+    }catch(exception){
+      showDialog(
+        context: context,
+        child: PlayerLoadingConnectionErrorDialog(args),
+        barrierDismissible: false,
+      );
+      return;
+    }
+
     print('request finished');
     try{
       playerCache.playlist = jsonDecode(value.body)['playlist'];
@@ -179,24 +201,25 @@ class PlayerState extends State<PlayerWidget> {
                   .getEpisodeDuration(playerCache.playlist[0]['mediaid'],this.args.episode.languages[this.args.languageIndex]);
               int difference = playerCache.controller.value.duration.inSeconds - episodeTimeCode.inSeconds;
               if(difference > 120){
-                playerCache.controller.seekTo(episodeTimeCode);
+                this.args.startTime = episodeTimeCode;
               }else{
-                episodeProgressCache.addEpisode(playerCache.playlist[0]['mediaid'], Duration(), this.args.episode.languages[this.args.languageIndex]);
+                episodeProgressCache.addEpisode(playerCache.playlist[0]['mediaid'], Duration.zero, this.args.episode.languages[this.args.languageIndex]);
               }
               playerCache.episodeTracker = Timer.periodic(Duration(seconds: 10), this.saveEpisodeProgress);
             }
+            playerCache.controller.seekTo(this.args.startTime);
             playerCache.controller.play();
           });
-        });
-      widget.receivePort.listen((message) {
-        if(playerCache.controller != null){
-          setState(() {});
+        })
+        ..addListener(() {
           if(playerCache.controller.value.hasError){
-            print("error");
-            print(playerCache.controller.value.errorDescription);
+            showDialog(
+              context: context,
+              child: PlayerConnectionErrorDialog(this.args),
+              barrierDismissible: false,
+            );
           }
-        }
-      });
+        });
     }catch(exception){
       print('error occurred');
       print(args.episode.playlistUrl[args.languageIndex]);
@@ -233,7 +256,6 @@ class PlayerState extends State<PlayerWidget> {
       if(settings.playerSettings.saveEpisodeProgress){
         this.saveEpisodeProgress();
       }
-
     }
     return Scaffold(
         body: WillPopScope(
@@ -242,12 +264,12 @@ class PlayerState extends State<PlayerWidget> {
             widget.receivePort.close();
             print('closed port');
             await playerCache.controller.pause();
-            this.saveEpisodeProgress();
             print('paused video');
             playerCache.updateThread.cancel();
             playerCache.timeTrackThread.cancel();
             if(settings.playerSettings.saveEpisodeProgress){
               playerCache.episodeTracker.cancel();
+              this.saveEpisodeProgress();
             }
             await SystemChrome.setPreferredOrientations([
               DeviceOrientation.portraitDown,
@@ -262,7 +284,7 @@ class PlayerState extends State<PlayerWidget> {
             print('unlinked object');
             return false;
           },
-          child: _playlistLoaded && playerCache.controller != null?Stack (
+          child: _playlistLoaded && playerCache.controller != null ? Stack (
               children: [
                 GestureDetector(
                   onTap: (){

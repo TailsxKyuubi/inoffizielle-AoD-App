@@ -12,5 +12,6 @@ class PlayerTransfer {
   String csrf;
   int positionEpisodes;
   int countEpisodes;
+  Duration startTime = Duration.zero;
   PlayerTransfer(this.episode,this.languageIndex,this.csrf,this.anime,this.positionEpisodes,this.countEpisodes);
 }

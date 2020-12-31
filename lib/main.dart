@@ -86,6 +86,7 @@ class LoadingState extends State<BaseWidget>{
               showDialog(
                 context: context,
                 child: LoadingConnectionErrorDialog(),
+                barrierDismissible: false
               );
               break;
             case 'login check done':
