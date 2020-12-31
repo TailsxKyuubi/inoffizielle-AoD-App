@@ -6,7 +6,7 @@ import 'package:unoffical_aod_app/caches/settings/settings.dart';
 class PlayerConnectionErrorDialog extends StatelessWidget {
   final PlayerTransfer args;
   PlayerConnectionErrorDialog(this.args){
-    if(settings.playerSettings.saveEpisodeProgress && playerCache.episodeTracker.isActive){
+    if(settings.playerSettings.saveEpisodeProgress && playerCache.episodeTracker != null && playerCache.episodeTracker.isActive){
       playerCache.episodeTracker.cancel();
       playerCache.episodeTracker = null;
     }
