@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:unoffical_aod_app/caches/episode_progress.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
@@ -37,9 +38,12 @@ class PlayerWidget extends StatefulWidget {
 class PlayerState extends State<PlayerWidget> {
   bool _playlistLoaded = false;
   bool showControls = false;
+  bool showVolume = false;
   DateTime showControlStart;
+  DateTime showVolumeStart;
   PlayerTransfer args;
   bool bootUp = true;
+  double basicVolume;
 
   initUpdateThread() async {
     playerCache.updateThread = Timer.periodic(Duration(milliseconds: 500), (timer) {
@@ -230,6 +234,7 @@ class PlayerState extends State<PlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    Color primaryColor = Color(Theme.of(context).primaryColor.value);
     if( playerCache.updateThread == null && this.bootUp ){
       print('init update thread');
       initUpdateThread();
@@ -301,6 +306,25 @@ class PlayerState extends State<PlayerWidget> {
                     }
                     setState(() {});
                   },
+                  onVerticalDragStart: (DragStartDetails value){
+                    this.showVolume = true;
+                    this.showVolumeStart = DateTime.now();
+                  },
+                  onVerticalDragUpdate: (DragUpdateDetails update){
+                    if(update.globalPosition.dx > MediaQuery.of(context).size.width * 0.5){
+                      playerCache.controller.setVolume(
+                          playerCache.controller.value.volume+((update.delta.dy/(MediaQuery.of(context).size.height/100*0.8))/100)*-1
+                      );
+                      setState(() {});
+                    }
+                  },
+                  onVerticalDragEnd: (DragEndDetails value){
+                    Timer(Duration(seconds: 5),(){
+                      if(DateTime.now().difference(showVolumeStart).inSeconds >= 5){
+                        showVolume = false;
+                      }
+                    });
+                  },
                   child: Container(
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
@@ -313,9 +337,8 @@ class PlayerState extends State<PlayerWidget> {
                       )
                           : Container()
                   ),
-
                 ),
-                settings.playerSettings.alwaysShowProgress&&!showControls?Positioned(
+                settings.playerSettings.alwaysShowProgress && !showControls ? Positioned(
                     width: MediaQuery.of(context).size.width,
                     bottom: 0,
                     right: 0,
@@ -327,6 +350,38 @@ class PlayerState extends State<PlayerWidget> {
                       ),
                     )
                 ):Container(),
+                showVolume && playerCache.controller.value != null
+                    ? Positioned(
+                  right: MediaQuery.of(context).size.width * 0.05,
+                  top: MediaQuery.of(context).size.height *0.15,
+                  child: Container(
+                    height: MediaQuery.of(context).size.height *0.7,
+                    width: 30,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                          color: primaryColor,
+                          width: 3
+                      ),
+                    ),
+                    child: Column(
+                        children: [
+                          Container(
+                            height: ((MediaQuery.of(context).size.height * 0.7)-6) * (playerCache.controller.value.volume*-1+1),
+                            decoration: BoxDecoration(
+
+                            ),
+                          ),
+                          Container(
+                            height: ((MediaQuery.of(context).size.height * 0.7)-6) * playerCache.controller.value.volume,
+                            decoration: BoxDecoration(
+                                color: Theme.of(context).accentColor
+                            ),
+                          ),
+                        ]
+                    ),
+                  ),
+                )
+                    :Container(),
                 showControls && _playlistLoaded
                     ? VideoControls(this)
                     : _playlistLoaded && settings.playerSettings.alwaysShowProgress ? VideoProgress(): Container(height: 0),
