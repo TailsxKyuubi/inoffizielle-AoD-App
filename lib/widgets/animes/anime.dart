@@ -71,6 +71,7 @@ class AnimeSmallWidget extends StatelessWidget{
                     height: elementHeight,
                     child: CachedNetworkImage(
                       imageUrl: this._anime.imageUrl,
+                      fit: BoxFit.fill,
                     ),
                   ),
                 ),
