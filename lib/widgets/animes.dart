@@ -40,7 +40,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
       DeviceOrientation.portraitDown
     ]);*/
     int i = 0;
-    double elementWidth = (MediaQuery.of(context).size.width-40)*0.5-7;
+    double elementWidth = (MediaQuery.of(context).size.width-40)*0.25-7.5;
     double elementHeight = elementWidth / 16 * 9;
     Radius radius = Radius.circular(2);
     List<Widget> animeList = List<Widget>();

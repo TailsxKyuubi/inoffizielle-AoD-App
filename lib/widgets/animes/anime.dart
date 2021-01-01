@@ -46,7 +46,7 @@ class AnimeSmallWidget extends StatelessWidget{
             width: elementWidth,
             margin: EdgeInsets.only(
               top: 10,
-              right: i % 2 == 1 ? 10 : 0,
+              right: i % 4 != 0 ? 10 : 0,
               bottom: animes.length == i?10:0,
             ),
             decoration: BoxDecoration(
@@ -71,6 +71,7 @@ class AnimeSmallWidget extends StatelessWidget{
                     height: elementHeight,
                     child: CachedNetworkImage(
                       imageUrl: this._anime.imageUrl,
+                      fit: BoxFit.fill,
                     ),
                   ),
                 ),

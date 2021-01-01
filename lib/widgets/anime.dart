@@ -193,7 +193,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
             child: ListView(
                 children: [
                   CachedNetworkImage(
-                      imageUrl: this._anime.imageUrl
+                    imageUrl: this._anime.imageUrl,
+                    fit: BoxFit.fill,
                   ),
                   Container(
                     margin: EdgeInsets.only(
@@ -210,38 +211,38 @@ class AnimeWidgetState extends State<AnimeWidget>{
                   ),
                   this._anime.description.length > 150
                       ? Container(
-                        margin: EdgeInsets.only(
-                            right: 15,left: 15
-                        ),
-                        child:
-                        GestureDetector(
-                          onTap: (){
-                            this.showFullDescription = !this.showFullDescription;
-                            setState(() {});
-                          },
-                          child: Text(
-                            showFullDescription
-                                ? 'Weniger anzeigen'
-                                : 'Mehr anzeigen',
-                            style: TextStyle(
-                                color: Theme.of(context).accentColor
-                            ),
+                      margin: EdgeInsets.only(
+                          right: 15,left: 15
+                      ),
+                      child:
+                      GestureDetector(
+                        onTap: (){
+                          this.showFullDescription = !this.showFullDescription;
+                          setState(() {});
+                        },
+                        child: Text(
+                          showFullDescription
+                              ? 'Weniger anzeigen'
+                              : 'Mehr anzeigen',
+                          style: TextStyle(
+                              color: Theme.of(context).accentColor
                           ),
-                        )
-                    )
+                        ),
+                      )
+                  )
                       : Container(),
                   !aboActive
                       ? Container(
-                          margin: EdgeInsets.only(
-                              right: 15,left: 15,top: 10
-                          ),
-                          child: Text(
-                            'Ohne Premium Abo hast du gegebenenfalls nur eingeschränkt Zugriff auf die Inhalte',
-                            style: TextStyle(
-                                color: Colors.redAccent
-                            ),
-                          )
-                        )
+                      margin: EdgeInsets.only(
+                          right: 15,left: 15,top: 10
+                      ),
+                      child: Text(
+                        'Ohne Premium Abo hast du gegebenenfalls nur eingeschränkt Zugriff auf die Inhalte',
+                        style: TextStyle(
+                            color: Colors.redAccent
+                        ),
+                      )
+                  )
                       : Container(),
                   Container(
                     margin: EdgeInsets.only(
@@ -281,7 +282,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                   Container(
                                     width: (MediaQuery.of(context).size.width-30) * 0.5,
                                     child: CachedNetworkImage(
-                                        imageUrl: 'https://'+episode.imageUrl.host+episode.imageUrl.path
+                                      imageUrl: 'https://'+episode.imageUrl.host+episode.imageUrl.path,
+                                      fit: BoxFit.fill,
                                     ),
                                   ),
                                   Column(
