@@ -276,10 +276,6 @@ class PlayerState extends State<PlayerWidget> {
               playerCache.episodeTracker.cancel();
               this.saveEpisodeProgress();
             }
-            await SystemChrome.setPreferredOrientations([
-              DeviceOrientation.portraitDown,
-              DeviceOrientation.portraitUp
-            ]);
             print('set orientation');
 
             Navigator.pop(context);

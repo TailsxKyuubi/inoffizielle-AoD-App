@@ -18,8 +18,8 @@ class LoadingPage extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(top: MediaQuery.of(context).size.height*0.1),
             ),
-            Image.asset('images/logo.png',scale: 3,),
-            Flexible(child: Container()),
+            Image.asset('images/logo.png',scale: 4,),
+            //Flexible(child: Container()),
             Padding(
               padding: EdgeInsets.all(20),
               child: Text(
