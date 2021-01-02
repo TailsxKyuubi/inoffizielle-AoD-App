@@ -7,7 +7,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:unoffical_aod_app/caches/anime.dart';
 import 'package:unoffical_aod_app/caches/home.dart';
-import 'package:unoffical_aod_app/widgets/drawer.dart';
 import 'package:unoffical_aod_app/widgets/navigation_bar.dart';
 
 class HomePage extends StatelessWidget {
@@ -19,7 +18,7 @@ class HomePage extends StatelessWidget {
         appBar: AppBar(
           title: Text('Startseite'),
         ),
-        drawer: DrawerWidget(),
+        bottomNavigationBar: NavigationBar(),
         body: Container(
           padding: EdgeInsets.only(top: 10),
           decoration: BoxDecoration(
