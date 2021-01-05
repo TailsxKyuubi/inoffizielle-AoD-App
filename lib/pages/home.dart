@@ -3,13 +3,13 @@
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:unoffical_aod_app/caches/anime.dart';
 import 'package:unoffical_aod_app/caches/home.dart';
 import 'package:unoffical_aod_app/widgets/navigation_bar.dart';
 
 class HomePage extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     double elementWidth = MediaQuery.of(context).size.width / 7 * 3;
