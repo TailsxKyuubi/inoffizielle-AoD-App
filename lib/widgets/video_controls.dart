@@ -45,6 +45,10 @@ class _VideoControlsState extends State<VideoControls> {
     if(!widget.playerState.showControls){
       return Positioned(child: Container());
     }
+    double baseWidth = (MediaQuery.of(context).size.width-142)/100;
+    double positionWidth = (positionSeconds / (durationSeconds/100))*baseWidth;
+    double bufferedWidth = ((playerCache.controller.value.buffered.last.end.inSeconds-positionSeconds) / (durationSeconds/100))*baseWidth;
+    double placeholderWidth = baseWidth*100-positionWidth-bufferedWidth;
     Color accentColor = Theme.of(context).accentColor;
     return Positioned(
         bottom: 0,
@@ -81,14 +85,22 @@ class _VideoControlsState extends State<VideoControls> {
                             children: [
                               Container(
                                 transform: Matrix4.skewX(-0.5),
-                                width: (positionSeconds / (durationSeconds/100))*((MediaQuery.of(context).size.width-142)/100),
+                                width: positionWidth,
                                 height: 20,
                                 decoration: BoxDecoration(
                                   color: Color.fromRGBO(171, 191, 57, 1),
                                 ),
                               ),
                               Container(
-                                width: (100 - (positionSeconds / (durationSeconds/100)))*((MediaQuery.of(context).size.width-142)/100),
+                                width: bufferedWidth,
+                                height: 20,
+                                transform: Matrix4.skewX(-0.5),
+                                decoration: BoxDecoration(
+                                    color: Color.fromRGBO(171, 191, 57, 0.5)
+                                ),
+                              ),
+                              Container(
+                                width: placeholderWidth,
                                 height: 20,
                                 decoration: BoxDecoration(
                                     color: Color.fromRGBO(53, 54, 56,0)
