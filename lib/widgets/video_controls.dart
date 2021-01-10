@@ -66,12 +66,12 @@ class _VideoControlsState extends State<VideoControls> {
                           width: 70,
                           child: positionSeconds >= 3600?
                           Text(
-                            (positionSeconds/3600).floor().toString()+':'+(positionSeconds%60>9?(((positionSeconds%3600)/60).floor().toString()):'0'+((positionSeconds%3600)/60).floor().toString())+':'+(positionSeconds%60>9?(positionSeconds%60).toString():'0'+(positionSeconds%60).toString()),
+                            (positionSeconds/3600).floor().toString()+':'+((positionSeconds%3600)/60).floor().toString().padLeft(2,'0')+':'+(positionSeconds%60).toString().padLeft(2,'0'),
                             style: timeStyle,
                             textAlign: TextAlign.center,
                           ):
                           Text(
-                            (positionSeconds/60).floor().toString()+':'+(positionSeconds%60>9?(positionSeconds%60).toString():'0'+(positionSeconds%60).toString()),
+                            (positionSeconds/60).floor().toString().padLeft(2,'0')+':'+((positionSeconds%60).toString().padLeft(2,'0')),
                             style: timeStyle,
                             textAlign: TextAlign.center,
                           )
@@ -109,18 +109,16 @@ class _VideoControlsState extends State<VideoControls> {
                             ]
                         ),
                       ),
-
-
                       Container(
                           width: 70,
                           child: durationSeconds >= 3600?
                           Text(
-                              (durationSeconds/3600).floor().toString()+':'+(((durationSeconds%3600)/60).floor()>10?(((durationSeconds%3600)/60).floor().toString()):'0'+((durationSeconds%3600)/60).floor().toString())+':'+(durationSeconds%60>9?(durationSeconds%60).toString():'0'+(durationSeconds%60).toString()),
+                              (durationSeconds/3600).floor().toString()+':'+((durationSeconds%3600)/60).floor().toString().padLeft(2,'0')+':'+(durationSeconds%60).toString().padLeft(2,'0'),
                               style: timeStyle,
                               textAlign: TextAlign.center
                           ):
                           Text(
-                              (durationSeconds/60).floor().toString()+':'+(durationSeconds%60>=9?(durationSeconds%60).toString():'0'+(durationSeconds%60).toString()),
+                              (durationSeconds/60).floor().toString().padLeft(2,'0')+':'+(durationSeconds%60).toString().padLeft(2,'0'),
                               style: timeStyle,
                               textAlign: TextAlign.center
                           )
