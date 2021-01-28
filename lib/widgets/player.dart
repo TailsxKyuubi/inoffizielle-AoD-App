@@ -4,11 +4,13 @@
  */
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:unoffical_aod_app/caches/episode_progress.dart';
+import 'package:unoffical_aod_app/caches/keycodes.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
 import 'package:unoffical_aod_app/transfermodels/player.dart';
@@ -24,6 +26,7 @@ import 'package:wakelock/wakelock.dart';
 import 'package:unoffical_aod_app/caches/playercache.dart' as playerCache;
 
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:toast/toast.dart';
 
 class PlayerWidget extends StatefulWidget {
   final ReceivePort receivePort = ReceivePort();
@@ -263,174 +266,209 @@ class PlayerState extends State<PlayerWidget> {
       }
     }
     return Scaffold(
-        body: WillPopScope(
-          onWillPop: () async {
-            print('exit player');
-            widget.receivePort.close();
-            print('closed port');
-            await playerCache.controller.pause();
-            print('paused video');
-            playerCache.updateThread.cancel();
-            playerCache.timeTrackThread.cancel();
-            if(settings.playerSettings.saveEpisodeProgress){
-              playerCache.episodeTracker.cancel();
-              this.saveEpisodeProgress();
-            }
-            print('set orientation');
-
-            Navigator.pop(context);
-            playerCache.updateThread = null;
-            print('killed thread');
-            playerCache.controller = null;
-            print('unlinked object');
-            return false;
-          },
-          child: _playlistLoaded && playerCache.controller != null ? Stack (
-              children: [
-                GestureDetector(
-                  onTap: (){
-                    showControls = showControls?false:true;
-                    showControlStart = DateTime.now();
-                    if(showControls){
-                      //SystemChrome.setEnabledSystemUIOverlays([
-                      /*SystemUiOverlay.top,
-                        SystemUiOverlay.bottom*/
-                      //]);
+      body: RawKeyboardListener(
+        autofocus: true,
+          focusNode: FocusNode(),
+          onKey: (RawKeyEvent event){
+            if( Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent ){
+              RawKeyEventDataAndroid eventDataAndroid = event.data;
+              switch(eventDataAndroid.keyCode){
+                case KEY_MEDIA_PLAY_PAUSE:
+                  playerCache.controller.value.isPlaying
+                      ? playerCache.controller.pause()
+                      : playerCache.controller.play();
+                  break;
+                case KEY_MEDIA_SKIP_FORWARD:
+                  jumpToNextEpisode();
+                  break;
+                case KEY_MEDIA_STEP_FORWARD:
+                  if(playerCache.controller.value.duration.inSeconds <= playerCache.controller.value.position.inSeconds+30){
+                    this.jumpToNextEpisode();
+                  }else{
+                    playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds+30));
+                    setState(() {
                       initDelayedControlsHide();
-                    }else{
-                      //SystemChrome.setEnabledSystemUIOverlays([]);
-                    }
-                    setState(() {});
-                  },
-                  onVerticalDragStart: (DragStartDetails value){
-                    this.showVolume = true;
-                    this.showVolumeStart = DateTime.now();
-                  },
-                  onVerticalDragUpdate: (DragUpdateDetails update){
-                    if(update.globalPosition.dx > MediaQuery.of(context).size.width * 0.5){
-                      playerCache.controller.setVolume(
-                          playerCache.controller.value.volume+((update.delta.dy/(MediaQuery.of(context).size.height/100*0.8))/100)*-1
-                      );
-                      setState(() {});
-                    }
-                  },
-                  onVerticalDragEnd: (DragEndDetails value){
-                    Timer(Duration(seconds: 5),(){
-                      if(DateTime.now().difference(showVolumeStart).inSeconds >= 5){
-                        showVolume = false;
-                      }
                     });
-                  },
-                  child: Container(
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                          color: Colors.black
-                      ),
-                      child: _playlistLoaded && playerCache.controller != null && playerCache.controller.value != null && playerCache.controller.value.initialized
-                          ? AspectRatio(
-                        aspectRatio: playerCache.controller.value.aspectRatio,
-                        child: VideoPlayer(playerCache.controller),
-                      )
-                          : Container()
-                  ),
-                ),
-                settings.playerSettings.alwaysShowProgress && !showControls ? Positioned(
-                    width: MediaQuery.of(context).size.width,
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      height: 5,
-                      width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                        color: Color.fromRGBO(53, 54, 56, 1),
-                      ),
-                    )
-                ):Container(),
-                showVolume && playerCache.controller.value != null
-                    ? Positioned(
-                  right: MediaQuery.of(context).size.width * 0.05,
-                  top: MediaQuery.of(context).size.height *0.15,
-                  child: Container(
-                    height: MediaQuery.of(context).size.height *0.7,
-                    width: 30,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                          color: primaryColor,
-                          width: 3
-                      ),
-                    ),
-                    child: Column(
-                        children: [
-                          Container(
-                            height: ((MediaQuery.of(context).size.height * 0.7)-6) * (playerCache.controller.value.volume*-1+1),
-                            decoration: BoxDecoration(
+                  }
+                  break;
+                case KEY_MEDIA_STEP_BACKWARD:
+                  playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds-10));
+                  setState(() {
+                    initDelayedControlsHide();
+                  });
+                  break;
+              }
+            }
+          },
+          child: WillPopScope(
+            onWillPop: () async {
+              print('exit player');
+              widget.receivePort.close();
+              print('closed port');
+              await playerCache.controller.pause();
+              print('paused video');
+              playerCache.updateThread.cancel();
+              playerCache.timeTrackThread.cancel();
+              if(settings.playerSettings.saveEpisodeProgress){
+                playerCache.episodeTracker.cancel();
+                this.saveEpisodeProgress();
+              }
+              print('set orientation');
 
-                            ),
-                          ),
-                          Container(
-                            height: ((MediaQuery.of(context).size.height * 0.7)-6) * playerCache.controller.value.volume,
-                            decoration: BoxDecoration(
-                                color: Theme.of(context).accentColor
-                            ),
-                          ),
-                        ]
+              Navigator.pop(context);
+              playerCache.updateThread = null;
+              print('killed thread');
+              playerCache.controller = null;
+              print('unlinked object');
+              return false;
+            },
+            child: _playlistLoaded && playerCache.controller != null ? Stack (
+                children: [
+                  GestureDetector(
+                    onTap: (){
+                      showControls = showControls?false:true;
+                      showControlStart = DateTime.now();
+                      if(showControls){
+                        //SystemChrome.setEnabledSystemUIOverlays([
+                        /*SystemUiOverlay.top,
+                        SystemUiOverlay.bottom*/
+                        //]);
+                        initDelayedControlsHide();
+                      }else{
+                        //SystemChrome.setEnabledSystemUIOverlays([]);
+                      }
+                      setState(() {});
+                    },
+                    onVerticalDragStart: (DragStartDetails value){
+                      this.showVolume = true;
+                      this.showVolumeStart = DateTime.now();
+                    },
+                    onVerticalDragUpdate: (DragUpdateDetails update){
+                      if(update.globalPosition.dx > MediaQuery.of(context).size.width * 0.5){
+                        playerCache.controller.setVolume(
+                            playerCache.controller.value.volume+((update.delta.dy/(MediaQuery.of(context).size.height/100*0.8))/100)*-1
+                        );
+                        setState(() {});
+                      }
+                    },
+                    onVerticalDragEnd: (DragEndDetails value){
+                      Timer(Duration(seconds: 5),(){
+                        if(DateTime.now().difference(showVolumeStart).inSeconds >= 5){
+                          showVolume = false;
+                        }
+                      });
+                    },
+                    child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            color: Colors.black
+                        ),
+                        child: _playlistLoaded && playerCache.controller != null && playerCache.controller.value != null && playerCache.controller.value.initialized
+                            ? AspectRatio(
+                          aspectRatio: playerCache.controller.value.aspectRatio,
+                          child: VideoPlayer(playerCache.controller),
+                        )
+                            : Container()
                     ),
                   ),
-                )
-                    :Container(),
-                showControls && _playlistLoaded
-                    ? VideoControls(this)
-                    : _playlistLoaded && settings.playerSettings.alwaysShowProgress ? VideoProgress(): Container(height: 0),
-                showControls && _playlistLoaded
-                    ? VideoIntel(this)
-                    : Container(),
-                playerCache.controller.value.isBuffering
-                    ? Positioned.fill(
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: SpinKitFadingCircle(
-                        size: 80,
-                        duration: Duration( seconds: 2 ),
-                        //color: Colors.white,
-                        itemBuilder: (BuildContext context, int index) {
-                          return DecoratedBox(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: Theme.of(context).accentColor,
-                            ),
-                          );
-                        },
-                      ),
-                    )
-                )
-                    : Container()
-              ]
-          ):Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
-            ),
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            child: Stack (
-              alignment: Alignment.center,
-              children: [
-                SpinKitFadingCircle(
-                  size: 80,
-                  duration: Duration( seconds: 2 ),
-                  //color: Colors.white,
-                  itemBuilder: (BuildContext context, int index) {
-                    return DecoratedBox(
+                  settings.playerSettings.alwaysShowProgress && !showControls ? Positioned(
+                      width: MediaQuery.of(context).size.width,
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        height: 5,
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                          color: Color.fromRGBO(53, 54, 56, 1),
+                        ),
+                      )
+                  ):Container(),
+                  showVolume && playerCache.controller.value != null
+                      ? Positioned(
+                    right: MediaQuery.of(context).size.width * 0.05,
+                    top: MediaQuery.of(context).size.height *0.15,
+                    child: Container(
+                      height: MediaQuery.of(context).size.height *0.7,
+                      width: 30,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Theme.of(context).accentColor,
+                        border: Border.all(
+                            color: primaryColor,
+                            width: 3
+                        ),
                       ),
-                    );
-                  },
-                ),
-              ],
+                      child: Column(
+                          children: [
+                            Container(
+                              height: ((MediaQuery.of(context).size.height * 0.7)-6) * (playerCache.controller.value.volume*-1+1),
+                              decoration: BoxDecoration(
+
+                              ),
+                            ),
+                            Container(
+                              height: ((MediaQuery.of(context).size.height * 0.7)-6) * playerCache.controller.value.volume,
+                              decoration: BoxDecoration(
+                                  color: Theme.of(context).accentColor
+                              ),
+                            ),
+                          ]
+                      ),
+                    ),
+                  )
+                      :Container(),
+                  showControls && _playlistLoaded
+                      ? VideoControls(this)
+                      : _playlistLoaded && settings.playerSettings.alwaysShowProgress ? VideoProgress(): Container(height: 0),
+                  showControls && _playlistLoaded
+                      ? VideoIntel(this)
+                      : Container(),
+                  playerCache.controller.value.isBuffering
+                      ? Positioned.fill(
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: SpinKitFadingCircle(
+                          size: 80,
+                          duration: Duration( seconds: 2 ),
+                          //color: Colors.white,
+                          itemBuilder: (BuildContext context, int index) {
+                            return DecoratedBox(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: Theme.of(context).accentColor,
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                  )
+                      : Container()
+                ]
+            ):Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+              ),
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: Stack (
+                alignment: Alignment.center,
+                children: [
+                  SpinKitFadingCircle(
+                    size: 80,
+                    duration: Duration( seconds: 2 ),
+                    //color: Colors.white,
+                    itemBuilder: (BuildContext context, int index) {
+                      return DecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Theme.of(context).accentColor,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-        )
+          )
+      ),
     );
   }
 

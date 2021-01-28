@@ -6,11 +6,12 @@
 import 'dart:convert';
 import 'dart:isolate';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:unoffical_aod_app/caches/app.dart';
 import 'package:unoffical_aod_app/caches/episode_progress.dart';
+import 'package:unoffical_aod_app/caches/focusnode.dart';
 import 'package:unoffical_aod_app/caches/home.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
@@ -37,22 +38,27 @@ class AodApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Inoffizielle AoD App',
-      routes: <String,WidgetBuilder> {
-        '/base': (BuildContext context) => BaseWidget(),
-        '/home': (BuildContext context) => HomePage(),
-        '/player': (BuildContext context) => PlayerWidget(),
-        '/anime': (BuildContext context) => AnimePage(),
-        '/animes': (BuildContext context) => AnimesPage(),
-        '/settings': (BuildContext context) => SettingsPage(),
-        '/about': (BuildContext context) => AboutPage()
-      },
-      theme: ThemeData(
-          primaryColor: const Color.fromRGBO(53, 54, 56, 1),
-          accentColor: const Color.fromRGBO(171, 191, 57, 1)
-      ),
-      home: BaseWidget(),
+    return Shortcuts(
+        shortcuts: {
+          LogicalKeySet(LogicalKeyboardKey.select): ActivateIntent(),
+        },
+        child: MaterialApp(
+          title: 'Inoffizielle AoD App',
+          routes: <String,WidgetBuilder> {
+            '/base': (BuildContext context) => BaseWidget(),
+            '/home': (BuildContext context) => HomePage(),
+            '/player': (BuildContext context) => PlayerWidget(),
+            '/anime': (BuildContext context) => AnimePage(),
+            '/animes': (BuildContext context) => AnimesPage(),
+            '/settings': (BuildContext context) => SettingsPage(),
+            '/about': (BuildContext context) => AboutPage()
+          },
+          theme: ThemeData(
+              primaryColor: const Color.fromRGBO(53, 54, 56, 1),
+              accentColor: const Color.fromRGBO(171, 191, 57, 1)
+          ),
+          home: BaseWidget(),
+        )
     );
   }
 }
@@ -70,91 +76,100 @@ class LoadingState extends State<BaseWidget>{
 
   Widget startScreensScaffold(Widget content){
     return Scaffold(
-          body: WillPopScope(
-            onWillPop: () async => false,
-            child: content,
+        body: WillPopScope(
+          onWillPop: () async => false,
+          child: content,
         )
     );
   }
 
   parseMessage(message, BuildContext context){
 
-        if (message is String) {
-          switch(message){
-            case 'connection error':
-              connectionError = true;
-              showDialog(
-                context: context,
-                child: LoadingConnectionErrorDialog(),
-                barrierDismissible: false
-              );
-              break;
-            case 'login check done':
-              loginDataChecked = true;
-              connectionError = false;
-              settings = Settings();
-              break;
-            case 'login storage check done':
-              loginStorageChecked = true;
-              break;
-            case 'login success':
-              loginSuccess = true;
-              break;
-            case 'active abo':
-              aboActive = true;
-              break;
-            case 'inactive abo':
-              aboActive = false;
-              break;
-            default:
-              if(message.startsWith('remaining abo days:')){
-                aboDaysLeft = int.parse(message.split(':')[1]);
-              } else {
-                Map<String, dynamic> data;
-                try {
-                  data = jsonDecode(message);
-                } catch (e) {
-                  print('isnt a json string');
-                  print(e.toString());
-                  print(message);
-                }
-                if (data.containsKey('cookies')) {
-                  headerHandler.cookies =
-                      data['cookies'].map<String, String>((String key, value) =>
-                          MapEntry(key, value.toString()));
-                  headerHandler.writeCookiesInHeader();
-                } else if (data.containsKey('animes')) {
-                  data['animes'].forEach(
-                          (String title,anime) =>
-                          animesCache.animes.addAll(
-                              {
-                                title: Anime.fromMap(
-                                    anime.map<String, String>((key, value) =>
-                                        MapEntry(key.toString(), value.toString())))
-                              }
-                          )
-                  );
-                  episodeProgressCache = EpisodeProgressCache();
-                } else if (data.containsKey('newEpisodes')) {
-                  newEpisodes.addAll(
-                      List.from(data['newEpisodes'])
-                  );
-                } else if (data.containsKey('newCatalogTitles')) {
-                  newCatalogTitles.addAll(data['newCatalogTitles']);
-                } else if (data.containsKey('newSimulcastTitles')) {
-                  newSimulcastTitles.addAll(data['newSimulcastTitles']);
-                } else if (data.containsKey('topTen')) {
-                  topTen.addAll(data['topTen']);
-                } else {
-                  print('data contains unknown key');
-                }
-              }
-            }
-        } else if (message is Map<String,Anime>) {
+    if (message is String) {
+      switch(message){
+        case 'connection error':
+          connectionError = true;
+          showDialog(
+              context: context,
+              child: LoadingConnectionErrorDialog(),
+              barrierDismissible: false
+          );
+          break;
+        case 'login check done':
+          loginDataChecked = true;
           connectionError = false;
-          animesCache.animes = message;
-        }
-        setState(() {});
+          settings = Settings();
+          break;
+        case 'login storage check done':
+          loginStorageChecked = true;
+          break;
+        case 'login success':
+          loginSuccess = true;
+          break;
+        case 'active abo':
+          aboActive = true;
+          break;
+        case 'inactive abo':
+          aboActive = false;
+          break;
+        default:
+          if(message.startsWith('remaining abo days:')){
+            aboDaysLeft = int.parse(message.split(':')[1]);
+          } else {
+            Map<String, dynamic> data;
+            try {
+              data = jsonDecode(message);
+            } catch (e) {
+              print('isnt a json string');
+              print(e.toString());
+              print(message);
+            }
+            if (data.containsKey('cookies')) {
+              headerHandler.cookies =
+                  data['cookies'].map<String, String>((String key, value) =>
+                      MapEntry(key, value.toString()));
+              headerHandler.writeCookiesInHeader();
+            } else if (data.containsKey('animes')) {
+              data['animes'].forEach(
+                      (String title,anime) =>
+                      animesCache.animes.addAll(
+                          {
+                            title: Anime.fromMap(
+                                anime.map<String, String>((key, value) =>
+                                    MapEntry(key.toString(), value.toString())))
+                          }
+                      )
+              );
+              animesCache.animes.forEach((_,__)  => animeFocusNodes.add(
+                  FocusNode(
+                    //onKey: (_,__) => false
+                  )
+              ));
+              episodeProgressCache = EpisodeProgressCache();
+            } else if (data.containsKey('newEpisodes')) {
+              newEpisodes.addAll(
+                  List.from(data['newEpisodes'])
+              );
+              newEpisodes.forEach((_) => newEpisodesFocusNodes.add(FocusNode()));
+            } else if (data.containsKey('newCatalogTitles')) {
+              newCatalogTitles.addAll(data['newCatalogTitles']);
+              newCatalogTitles.forEach((_) => newCatalogTitlesFocusNodes.add(FocusNode()));
+            } else if (data.containsKey('newSimulcastTitles')) {
+              newSimulcastTitles.addAll(data['newSimulcastTitles']);
+              newSimulcastTitles.forEach((_) => newSimulcastsFocusNodes.add(FocusNode()));
+            } else if (data.containsKey('topTen')) {
+              topTen.addAll(data['topTen']);
+              topTen.forEach((_) => topTenFocusNodes.add(FocusNode()));
+            } else {
+              print('data contains unknown key');
+            }
+          }
+      }
+    } else if (message is Map<String,Anime>) {
+      connectionError = false;
+      animesCache.animes = message;
+    }
+    setState(() {});
   }
 
   @override
@@ -201,14 +216,14 @@ appBootUp(SendPort sendPort) async {
       sendPort.send('connection error');
     }else{
       Map<String,dynamic> animes = Map<String,dynamic>();
-        animes.addEntries(
-            [
-              MapEntry(
-                  'animes',
-                  animesCache.animes.map((title, Anime anime) => MapEntry(title, anime.toMap()) )
-              )
-            ]
-        );
+      animes.addEntries(
+          [
+            MapEntry(
+                'animes',
+                animesCache.animes.map((title, Anime anime) => MapEntry(title, anime.toMap()) )
+            )
+          ]
+      );
       sendPort.send(jsonEncode(animes));
     }
     if(aboActive){

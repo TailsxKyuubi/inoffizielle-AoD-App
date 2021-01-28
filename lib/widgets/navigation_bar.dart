@@ -1,50 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:unoffical_aod_app/caches/focusnode.dart';
 
-class NavigationBar extends StatelessWidget{
+class NavigationBar extends StatefulWidget{
+
+  NavigationBar();
   @override
-  Widget build(BuildContext context) {
-    int index = this.getRouteIndex(context);
-    return BottomNavigationBar(
-        currentIndex: index,
-        unselectedItemColor: Colors.white,
-        selectedItemColor: Theme.of(context).accentColor,
-        backgroundColor: Theme.of(context).primaryColor,
-        onTap: (int i){
-          String routeName;
-          switch(i){
-            case 0:
-              routeName = '/home';
-              break;
-            case 1:
-              routeName = '/animes';
-              break;
-            case 2:
-              routeName = '/settings';
-              break;
-            default:
-              routeName = '/home';
-              break;
-          }
-          Navigator.pushReplacementNamed(context, routeName);
-        },
-        items: [
-          BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Startseite'
-          ),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.video_library),
-              label: 'Anime'
-          ),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: 'Einstellungen'
-          ),
-        ]
-    );
-  }
+  State<StatefulWidget> createState() => _NavigationBarState();
+}
 
-  int getRouteIndex(context){
+class _NavigationBarState extends State<NavigationBar> {
+
+  int getRouteIndex(){
     ModalRoute route = ModalRoute.of(context);
     String routeName = '';
     int index;
@@ -67,5 +33,61 @@ class NavigationBar extends StatelessWidget{
         index = 0;
     }
     return index;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    int index = this.getRouteIndex();
+    return RawKeyboardListener(
+        focusNode: menuBarFocusNode,
+        onKey: (event){
+          print('focus is on the menu');
+        },
+        child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            currentIndex: index,
+            unselectedItemColor: Colors.white,
+            selectedItemColor: Theme.of(context).accentColor,
+            backgroundColor: Theme.of(context).primaryColor,
+            onTap: (int i){
+              String routeName;
+              FocusScopeNode scopeFocusNode = FocusScope.of(context);
+              switch(i){
+                case 0:
+                  routeName = '/home';
+                  scopeFocusNode.requestFocus(homeFocusNode);
+                  break;
+                case 1:
+                  routeName = '/animes';
+                  animeFocusNodesIndex = -1;
+                  scopeFocusNode.requestFocus(animeFocusNode);
+                  break;
+                case 2:
+                  routeName = '/settings';
+                  break;
+                default:
+                  routeName = '/home';
+                  scopeFocusNode.requestFocus(homeFocusNode);
+                  break;
+              }
+              Navigator.pushReplacementNamed(context, routeName);
+              //widget.firstFocusNode.requestFocus();
+            },
+            items: [
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  label: 'Startseite'
+              ),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.video_library),
+                  label: 'Anime'
+              ),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.settings),
+                  label: 'Einstellungen'
+              ),
+            ]
+        )
+    );
   }
 }

@@ -290,7 +290,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                     children: [
                                       Container(
                                         margin: EdgeInsets.only(
-                                            left: 10
+                                            left: 10,
                                         ),
                                         child: ! this.movie
                                             ? Text(
@@ -323,8 +323,11 @@ class AnimeWidgetState extends State<AnimeWidget>{
                               Container(
                                   child: Row(
                                     children: [
-                                      GestureDetector(
-                                          onTap: (){
+                                      FlatButton(
+                                          focusColor: Colors.white,
+                                          focusNode: FocusNode(),
+                                          padding: EdgeInsets.zero,
+                                          onPressed: (){
                                             if(episode.languages.indexOf('Deutsch') != -1) {
                                               Navigator.pushNamed(
                                                   context,
@@ -344,7 +347,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                             width: firstWidth,
                                             margin: EdgeInsets.only(
                                                 top: 5,
-                                                left: 0
+                                                left: 0,
+                                                right: 2.5
                                             ),
                                             padding: EdgeInsets.only(
                                               top: 5,
@@ -366,8 +370,11 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                             ),
                                           )
                                       ),
-                                      GestureDetector(
-                                          onTap: (){
+                                      FlatButton(
+                                          focusNode: FocusNode(),
+                                          focusColor: Colors.white,
+                                          padding: EdgeInsets.zero,
+                                          onPressed: (){
                                             if(episode.languages.indexOf('Japanisch (UT)') != -1){
                                               Navigator.pushNamed(
                                                   context,
@@ -387,7 +394,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                             width: secondWidth,
                                             margin: EdgeInsets.only(
                                                 top: 5,
-                                                left: 5
+                                                left: 2.5
                                             ),
                                             padding: EdgeInsets.only(
                                               top: 5,

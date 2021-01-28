@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
 
-FocusNode homeButton = FocusNode();
-FocusNode animeButton = FocusNode();
-FocusNode settingsButton = FocusNode();
+FocusNode menuBarFocusNode = FocusNode();
 
-List<FocusNode> animeList = List<FocusNode>();
+List<FocusNode> menuBarElementsFocusNodes = [
+  FocusNode(),
+  FocusNode(),
+  FocusNode()
+];
+int menuBarIndex = 0;
 
-List<FocusNode> newEpisodes = List<FocusNode>();
-List<FocusNode> newSimulcasts = List<FocusNode>();
-List<FocusNode> newCatalogTitles = List<FocusNode>();
-List<FocusNode> top10 = List<FocusNode>();
+FocusNode homeFocusNode = FocusNode();
+List<FocusNode> newEpisodesFocusNodes = [];
+List<FocusNode> newSimulcastsFocusNodes = [];
+List<FocusNode> newCatalogTitlesFocusNodes = [];
+List<FocusNode> topTenFocusNodes = [];
+int homeRowIndex = 0;
+int homeRowItemIndex = -1;
 
+FocusNode searchFocusNode = FocusNode();
+List<FocusNode> animeFocusNodes = [];
+int animeFocusNodesIndex = -1;
+FocusNode animeFocusNode = FocusNode();
+
+FocusNode settingsFocusNode = FocusNode();
