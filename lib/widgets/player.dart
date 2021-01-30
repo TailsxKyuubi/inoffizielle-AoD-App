@@ -49,9 +49,11 @@ class PlayerState extends State<PlayerWidget> {
     playerCache.updateThread = Timer.periodic(Duration(milliseconds: 500), (timer) {
       setState(() {});
     });
-    playerCache.timeTrackThread = Timer.periodic(
-        Duration(seconds: 30), this.sendAodTrackingRequest
-    );
+    if( playerCache.timeTrackThread == null || ! playerCache.timeTrackThread.isActive ){
+      playerCache.timeTrackThread = Timer.periodic(
+          Duration(seconds: 30), this.sendAodTrackingRequest
+      );
+    }
   }
 
   sendAodTrackingRequest([timer]) async{
@@ -307,11 +309,15 @@ class PlayerState extends State<PlayerWidget> {
                     setState(() {});
                   },
                   onVerticalDragStart: (DragStartDetails value){
-                    this.showVolume = true;
-                    this.showVolumeStart = DateTime.now();
+                    if(value.globalPosition.dx > MediaQuery.of(context).size.width * 0.5) {
+                      this.showVolume = true;
+                      this.showVolumeStart = DateTime.now();
+                    }
                   },
                   onVerticalDragUpdate: (DragUpdateDetails update){
                     if(update.globalPosition.dx > MediaQuery.of(context).size.width * 0.5){
+                      this.showVolume = true;
+                      this.showVolumeStart = DateTime.now();
                       playerCache.controller.setVolume(
                           playerCache.controller.value.volume+((update.delta.dy/(MediaQuery.of(context).size.height/100*0.8))/100)*-1
                       );
@@ -352,7 +358,7 @@ class PlayerState extends State<PlayerWidget> {
                 ):Container(),
                 showVolume && playerCache.controller.value != null
                     ? Positioned(
-                  right: MediaQuery.of(context).size.width * 0.05,
+                  left: MediaQuery.of(context).size.width * 0.05,
                   top: MediaQuery.of(context).size.height *0.15,
                   child: Container(
                     height: MediaQuery.of(context).size.height *0.7,
