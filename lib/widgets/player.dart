@@ -52,9 +52,11 @@ class PlayerState extends State<PlayerWidget> {
     playerCache.updateThread = Timer.periodic(Duration(milliseconds: 500), (timer) {
       setState(() {});
     });
-    playerCache.timeTrackThread = Timer.periodic(
-        Duration(seconds: 30), this.sendAodTrackingRequest
-    );
+    if( playerCache.timeTrackThread == null || ! playerCache.timeTrackThread.isActive ){
+      playerCache.timeTrackThread = Timer.periodic(
+          Duration(seconds: 30), this.sendAodTrackingRequest
+      );
+    }
   }
 
   sendAodTrackingRequest([timer]) async{
@@ -333,22 +335,26 @@ class PlayerState extends State<PlayerWidget> {
                         /*SystemUiOverlay.top,
                         SystemUiOverlay.bottom*/
                         //]);
-                        initDelayedControlsHide();
-                      }else{
-                        //SystemChrome.setEnabledSystemUIOverlays([]);
-                      }
-                      setState(() {});
-                    },
-                    onVerticalDragStart: (DragStartDetails value){
+                      initDelayedControlsHide();
+                    }else{
+                      //SystemChrome.setEnabledSystemUIOverlays([]);
+                    }
+                    setState(() {});
+                  },
+                  onVerticalDragStart: (DragStartDetails value){
+                    if(value.globalPosition.dx > MediaQuery.of(context).size.width * 0.5) {
                       this.showVolume = true;
                       this.showVolumeStart = DateTime.now();
-                    },
-                    onVerticalDragUpdate: (DragUpdateDetails update){
-                      if(update.globalPosition.dx > MediaQuery.of(context).size.width * 0.5){
-                        playerCache.controller.setVolume(
-                            playerCache.controller.value.volume+((update.delta.dy/(MediaQuery.of(context).size.height/100*0.8))/100)*-1
-                        );
-                        setState(() {});
+                    }
+                  },
+                  onVerticalDragUpdate: (DragUpdateDetails update){
+                    if(update.globalPosition.dx > MediaQuery.of(context).size.width * 0.5){
+                      this.showVolume = true;
+                      this.showVolumeStart = DateTime.now();
+                      playerCache.controller.setVolume(
+                          playerCache.controller.value.volume+((update.delta.dy/(MediaQuery.of(context).size.height/100*0.8))/100)*-1
+                      );
+                      setState(() {});
                       }
                     },
                     onVerticalDragEnd: (DragEndDetails value){
@@ -381,30 +387,28 @@ class PlayerState extends State<PlayerWidget> {
                         decoration: BoxDecoration(
                           color: Color.fromRGBO(53, 54, 56, 1),
                         ),
-                      )
-                  ):Container(),
-                  showVolume && playerCache.controller.value != null
-                      ? Positioned(
-                    right: MediaQuery.of(context).size.width * 0.05,
-                    top: MediaQuery.of(context).size.height *0.15,
-                    child: Container(
-                      height: MediaQuery.of(context).size.height *0.7,
-                      width: 30,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                            color: primaryColor,
-                            width: 3
-                        ),
+                    )
+                ):Container(),
+                showVolume && playerCache.controller.value != null
+                    ? Positioned(
+                  left: MediaQuery.of(context).size.width * 0.05,
+                  top: MediaQuery.of(context).size.height *0.15,
+                  child: Container(
+                    height: MediaQuery.of(context).size.height *0.7,
+                    width: 30,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                          color: primaryColor,
+                          width: 3
                       ),
-                      child: Column(
-                          children: [
-                            Container(
-                              height: ((MediaQuery.of(context).size.height * 0.7)-6) * (playerCache.controller.value.volume*-1+1),
-                              decoration: BoxDecoration(
-
-                              ),
-                            ),
-                            Container(
+                    ),
+                    child: Column(
+                        children: [
+                          Container(
+                            height: ((MediaQuery.of(context).size.height * 0.7)-6) * (playerCache.controller.value.volume*-1+1),
+                            decoration: BoxDecoration(),
+                          ),
+                          Container(
                               height: ((MediaQuery.of(context).size.height * 0.7)-6) * playerCache.controller.value.volume,
                               decoration: BoxDecoration(
                                   color: Theme.of(context).accentColor

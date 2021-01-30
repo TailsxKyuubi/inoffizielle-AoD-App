@@ -4,7 +4,7 @@
  */
 class HeaderHandler {
   Map<String,String> _headers = {
-    'User-Agent': 'inoffizielle AoD App/0.7.0',
+    'User-Agent': 'inoffizielle AoD App/0.7.1',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
     'Accept-Language': 'de,en-US;q=0.7,en;q=0.3',
     'Accept-Encoding': 'gzip, deflate, br',
