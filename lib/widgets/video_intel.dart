@@ -41,12 +41,6 @@ class VideoIntel extends StatelessWidget {
                   print('video halted');
                   playerCache.updateThread.cancel();
                   playerCache.timeTrackThread.cancel();
-                  await SystemChrome.setPreferredOrientations(
-                      [
-                        DeviceOrientation.portraitUp,
-                        DeviceOrientation.portraitDown
-                      ]
-                  );
                   print('switched orientation');
                   Navigator.pop(context);
                   playerCache.controller = null;

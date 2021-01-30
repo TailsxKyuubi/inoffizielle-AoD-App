@@ -28,6 +28,7 @@ dependencies:
   cached_network_image: ^2.3.3
   shared_preferences: ^0.5.12+2
   url_launcher: ^5.7.10
+  toast: ^0.1.5
   flutter:
     sdk: flutter
 

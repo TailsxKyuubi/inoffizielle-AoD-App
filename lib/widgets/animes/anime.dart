@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:unoffical_aod_app/caches/anime.dart';
 import 'package:unoffical_aod_app/caches/animes.dart';
+import 'package:unoffical_aod_app/caches/focusnode.dart';
 
 class AnimeSmallWidget extends StatelessWidget{
   final Anime _anime;
@@ -34,20 +35,22 @@ class AnimeSmallWidget extends StatelessWidget{
     }else{
       animeName = this._anime.name;
     }
-    return GestureDetector(
-        onTap: (){
+    return FlatButton(
+        onPressed: (){
           Navigator.pushNamed(
             context,
             '/anime',
             arguments: this._anime
           );
         },
+        focusNode: animeFocusNodes[i-1],
+        focusColor: Theme.of(context).accentColor,
+        padding: EdgeInsets.all(3.5),
         child: Container(
             width: elementWidth,
             margin: EdgeInsets.only(
-              top: 10,
-              right: i % 2 == 1 ? 10 : 0,
-              bottom: animes.length == i?10:0,
+              //right: i % 4 != 0 ? 10 : 0,
+              bottom: 0,
             ),
             decoration: BoxDecoration(
                 boxShadow: [
