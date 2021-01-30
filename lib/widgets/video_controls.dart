@@ -26,6 +26,7 @@ class _VideoControlsState extends State<VideoControls> {
   bool thirtySecondsForwardTap = false;
   bool tenSecondsBackwardTap = false;
   bool thirtySecondsBackwardTap = false;
+  Duration videoPosition = Duration();
 
   void jumpTo(details){
     print('seek triggered');
@@ -37,7 +38,8 @@ class _VideoControlsState extends State<VideoControls> {
 
   @override
   Widget build(BuildContext context) {
-    int positionSeconds = playerCache.controller.value.position.inSeconds == null ? 0 : playerCache.controller.value.position.inSeconds;
+    videoPosition = playerCache.controller.value.position;
+    int positionSeconds = videoPosition == null ? 0 : videoPosition.inSeconds;
     int durationSeconds = playerCache.controller.value.duration == null ? 0 : playerCache.controller.value.duration.inSeconds;
     TextStyle timeStyle = TextStyle(
       color: Colors.white,
@@ -47,12 +49,11 @@ class _VideoControlsState extends State<VideoControls> {
     }
     double baseWidth = (MediaQuery.of(context).size.width-142)/100;
     double positionWidth = (positionSeconds / (durationSeconds/100))*baseWidth;
-    double bufferedWidth = playerCache.controller.value.buffered.isNotEmpty
+    double bufferedWidth = playerCache.controller.value.buffered.isNotEmpty && playerCache.controller.value.buffered.last.end.inSeconds > positionSeconds
         ? ((playerCache.controller.value.buffered.last.end.inSeconds-positionSeconds) / (durationSeconds/100))*baseWidth
         : 0;
     double placeholderWidth = baseWidth*100-positionWidth-bufferedWidth;
     //placeholderWidth -= ((MediaQuery.of(context).size.width-142)-placeholderWidth-positionWidth-bufferedWidth);
-    print(((MediaQuery.of(context).size.width-142)-placeholderWidth-positionWidth-bufferedWidth));
     Color accentColor = Theme.of(context).accentColor;
     return Positioned(
         bottom: 0,
@@ -139,10 +140,17 @@ class _VideoControlsState extends State<VideoControls> {
                           });
                         },
                         onTap: (){
-                          playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds-30));
                           setState(() {
-                            this.thirtySecondsBackwardTap = false;
+                            playerCache.updateThread.cancel();
+                            playerCache.updateThread = null;
+                            videoPosition = Duration(seconds: playerCache.controller.value.position.inSeconds-30);
+                            playerCache.controller.seekTo(videoPosition).then((_){
+                              widget.playerState.initUpdateThread();
+                            });
+                          });
+                          setState(() {
                             widget.playerState.initDelayedControlsHide();
+                            this.thirtySecondsBackwardTap = false;
                           });
                         },
                         child: Container(
@@ -167,7 +175,14 @@ class _VideoControlsState extends State<VideoControls> {
                           });
                         },
                         onTap: (){
-                          playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds-10));
+                          setState(() {
+                            playerCache.updateThread.cancel();
+                            playerCache.updateThread = null;
+                            videoPosition = Duration(seconds: playerCache.controller.value.position.inSeconds-10);
+                            playerCache.controller.seekTo(videoPosition).then((_){
+                              widget.playerState.initUpdateThread();
+                            });
+                          });
                           setState(() {
                             widget.playerState.initDelayedControlsHide();
                             this.tenSecondsBackwardTap = false;
@@ -234,11 +249,17 @@ class _VideoControlsState extends State<VideoControls> {
                           if(playerCache.controller.value.duration.inSeconds <= playerCache.controller.value.position.inSeconds+10){
                             this.widget.playerState.jumpToNextEpisode();
                           }else {
-                            playerCache.controller.seekTo(Duration(seconds: playerCache.controller
-                                .value.position.inSeconds + 10));
                             setState(() {
-                              this.tenSecondsForwardTap = false;
+                              playerCache.updateThread.cancel();
+                              playerCache.updateThread = null;
+                              videoPosition = Duration(seconds: playerCache.controller.value.position.inSeconds+10);
+                              playerCache.controller.seekTo(videoPosition).then((_){
+                                widget.playerState.initUpdateThread();
+                              });
+                            });
+                            setState(() {
                               widget.playerState.initDelayedControlsHide();
+                              this.tenSecondsForwardTap = false;
                             });
                           }
                         },
@@ -267,7 +288,14 @@ class _VideoControlsState extends State<VideoControls> {
                           if(playerCache.controller.value.duration.inSeconds <= playerCache.controller.value.position.inSeconds+30){
                             this.widget.playerState.jumpToNextEpisode();
                           }else{
-                            playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds+30));
+                            setState(() {
+                              playerCache.updateThread.cancel();
+                              playerCache.updateThread = null;
+                              videoPosition = Duration(seconds: playerCache.controller.value.position.inSeconds+30);
+                              playerCache.controller.seekTo(videoPosition).then((_){
+                                widget.playerState.initUpdateThread();
+                              });
+                            });
                             setState(() {
                               widget.playerState.initDelayedControlsHide();
                               this.thirtySecondsForwardTap = false;

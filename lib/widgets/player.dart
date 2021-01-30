@@ -49,9 +49,11 @@ class PlayerState extends State<PlayerWidget> {
     playerCache.updateThread = Timer.periodic(Duration(milliseconds: 500), (timer) {
       setState(() {});
     });
-    playerCache.timeTrackThread = Timer.periodic(
-        Duration(seconds: 30), this.sendAodTrackingRequest
-    );
+    if( playerCache.timeTrackThread == null || ! playerCache.timeTrackThread.isActive ){
+      playerCache.timeTrackThread = Timer.periodic(
+          Duration(seconds: 30), this.sendAodTrackingRequest
+      );
+    }
   }
 
   sendAodTrackingRequest([timer]) async{
