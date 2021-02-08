@@ -54,8 +54,10 @@ class AodApp extends StatelessWidget {
             '/about': (BuildContext context) => AboutPage()
           },
           theme: ThemeData(
-              primaryColor: const Color.fromRGBO(53, 54, 56, 1),
-              accentColor: const Color.fromRGBO(171, 191, 57, 1)
+              primaryColor: Color.fromRGBO(53, 54, 56, 1),
+              accentColor: Color.fromRGBO(171, 191, 57, 1),
+              focusColor: Color.fromRGBO(171, 191, 57, 0.4),
+              hoverColor: Color.fromRGBO(171, 191, 57, 0.4),
           ),
           home: BaseWidget(),
         )

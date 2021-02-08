@@ -11,6 +11,7 @@ import 'package:unoffical_aod_app/caches/anime.dart';
 import 'package:unoffical_aod_app/caches/focusnode.dart';
 import 'package:unoffical_aod_app/caches/home.dart';
 import 'package:unoffical_aod_app/caches/keycodes.dart';
+import 'package:unoffical_aod_app/widgets/navigation_bar.dart';
 import 'package:unoffical_aod_app/widgets/navigation_bar_custom.dart';
 
 class HomePage extends StatefulWidget {
@@ -66,7 +67,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
-        bottomNavigationBar: NavigationBarCustom(),
+        bottomNavigationBar: NavigationBar(),
         //drawer: DrawerWidget(),
         body: RawKeyboardListener(
             focusNode: homeFocusNode,
