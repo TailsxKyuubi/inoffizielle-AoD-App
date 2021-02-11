@@ -45,7 +45,12 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    double elementWidth = MediaQuery.of(context).size.width / 7 * 3;
+    double elementWidth;
+    if(MediaQuery.of(context).orientation == Orientation.portrait){
+      elementWidth = MediaQuery.of(context).size.width / 7 * 3;
+    }else{
+      elementWidth = MediaQuery.of(context).size.width / 11 * 2;
+    }
     double elementHeight = elementWidth / 16 * 9 + 40;
     int newEpisodesCount = 0;
     int newSimulcastsCount = 0;
