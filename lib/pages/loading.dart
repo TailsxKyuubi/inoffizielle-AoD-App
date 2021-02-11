@@ -8,6 +8,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 class LoadingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    Orientation orientation = MediaQuery.of(context).orientation;
     return Container(
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
@@ -18,8 +19,10 @@ class LoadingPage extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(top: MediaQuery.of(context).size.height*0.1),
             ),
-            Image.asset('images/logo.png',scale: 4,),
-            //Flexible(child: Container()),
+            Image.asset('images/logo.png',scale: orientation == Orientation.landscape?4:3,),
+            orientation == Orientation.portrait
+                ? Flexible(child: Container())
+                : Container(),
             Padding(
               padding: EdgeInsets.all(20),
               child: Text(
