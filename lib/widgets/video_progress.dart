@@ -13,13 +13,13 @@ class VideoProgress extends StatefulWidget {
 class _VideoProgressState extends State<VideoProgress> {
   @override
   Widget build(BuildContext context) {
-    return playerCache.controller.value != null && playerCache.controller.value.initialized?AnimatedPositioned(
-        duration: playerCache.controller.value.duration,
+    return playerCache.controller!.value.isInitialized?AnimatedPositioned(
+        duration: playerCache.controller!.value.duration,
         bottom: 0,
         left: 0,
         child: Container(
             height: 5,
-            width: MediaQuery.of(context).size.width / 100 * ( playerCache.controller.value.position.inSeconds / (playerCache.controller.value.duration.inSeconds / 100)),
+            width: MediaQuery.of(context).size.width / 100 * ( playerCache.controller!.value.position.inSeconds / (playerCache.controller!.value.duration.inSeconds / 100)),
             color: Color.fromRGBO(171, 191, 57, 1)
         )
     ):Container(height:0 );

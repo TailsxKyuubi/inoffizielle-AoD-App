@@ -43,7 +43,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
     double elementWidth = (MediaQuery.of(context).size.width-40)*0.5-7;
     double elementHeight = elementWidth / 16 * 9;
     Radius radius = Radius.circular(2);
-    List<Widget> animeList = List<Widget>();
+    List<Widget> animeList = [];
     this.searchResult.forEach(
             (String title,Anime anime) => animeList.add( AnimeSmallWidget(
             anime,

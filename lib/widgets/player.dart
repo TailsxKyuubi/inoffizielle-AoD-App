@@ -4,6 +4,7 @@
  */
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter/rendering.dart';
@@ -39,17 +40,17 @@ class PlayerState extends State<PlayerWidget> {
   bool _playlistLoaded = false;
   bool showControls = false;
   bool showVolume = false;
-  DateTime showControlStart;
-  DateTime showVolumeStart;
-  PlayerTransfer args;
+  DateTime showControlStart = DateTime.now();
+  DateTime showVolumeStart = DateTime.now();
+  PlayerTransfer? args;
   bool bootUp = true;
-  double basicVolume;
+  double basicVolume = 1;
 
   initUpdateThread() async {
     playerCache.updateThread = Timer.periodic(Duration(milliseconds: 500), (timer) {
       setState(() {});
     });
-    if( playerCache.timeTrackThread == null || ! playerCache.timeTrackThread.isActive ){
+    if( playerCache.timeTrackThread == null || ! playerCache.timeTrackThread!.isActive ){
       playerCache.timeTrackThread = Timer.periodic(
           Duration(seconds: 30), this.sendAodTrackingRequest
       );
@@ -62,17 +63,17 @@ class PlayerState extends State<PlayerWidget> {
           'https://anime-on-demand.de/interfaces/startedstream/'
               + playerCache.playlist[playerCache.playlistIndex]['mediaid']
               .toString()
-              + '/' + playerCache.controller.value.position.inSeconds.toString()
-              + '/30/' + playerCache.language + '/'
-              + (settings.playerSettings.defaultQuality == 0
-              ? '720' : settings.playerSettings.defaultQuality.toString()),
+              + '/' + playerCache.controller!.value.position.inSeconds.toString()
+              + '/30/' + playerCache.language! + '/'
+              + (settings!.playerSettings!.defaultQuality == 0
+              ? '720' : settings!.playerSettings!.defaultQuality.toString()),
           headers: headerHandler.getHeaders());
     }catch(exception){
-      showDialog(
+      /*showDialog(
         context: context,
         child: PlayerConnectionErrorDialog(args),
         barrierDismissible: false,
-      );
+      );*/
     }
   }
 
@@ -91,15 +92,15 @@ class PlayerState extends State<PlayerWidget> {
   }
 
   saveEpisodeProgress([timer]){
-    if(settings.playerSettings.saveEpisodeProgress){
-      Duration duration = (playerCache.controller.value.position.inSeconds > (playerCache.controller.value.duration.inSeconds - 120))
+    if(settings!.playerSettings!.saveEpisodeProgress){
+      Duration duration = (playerCache.controller!.value.position.inSeconds > (playerCache.controller!.value.duration.inSeconds - 120))
           ? Duration()
-          : playerCache.controller.value.position;
+          : playerCache.controller!.value.position;
 
-      episodeProgressCache.addEpisode(
+      episodeProgressCache?.addEpisode(
           playerCache.playlist[playerCache.playlistIndex]['mediaid'],
           duration,
-          this.args.episode.languages[this.args.languageIndex]
+          this.args!.episode.languages[this.args!.languageIndex]
       );
     }
   }
@@ -107,10 +108,10 @@ class PlayerState extends State<PlayerWidget> {
   jumpToNextEpisode() async{
     this.saveEpisodeProgress();
     if(playerCache.playlist.length <= (playerCache.playlistIndex+1)){
-      await playerCache.controller.pause();
+      await playerCache.controller?.pause();
       print('video halted');
-      playerCache.updateThread.cancel();
-      playerCache.timeTrackThread.cancel();
+      playerCache.updateThread?.cancel();
+      playerCache.timeTrackThread?.cancel();
       await SystemChrome.setPreferredOrientations(
           [
             DeviceOrientation.portraitUp,
@@ -124,7 +125,7 @@ class PlayerState extends State<PlayerWidget> {
       print('cleared controller');
       return false;
     }
-    await playerCache.controller.pause();
+    await playerCache.controller?.pause();
     this._playlistLoaded = false;
     showControls = false;
     setState(() {});
@@ -134,19 +135,19 @@ class PlayerState extends State<PlayerWidget> {
     String m3u8 = playerCache.playlist[playerCache.playlistIndex]['sources'][0]['file'];
     m3u8 = await this.checkVideoQuality(m3u8);
     playerCache.controller = VideoPlayerController.network(m3u8);
-    await playerCache.controller.initialize();
+    await playerCache.controller?.initialize();
     setState(() {
       _playlistLoaded = true;
-      playerCache.controller.play();
+      playerCache.controller?.play();
     });
   }
 
   Future<String> checkVideoQuality(String m3u8) async{
-    if(settings.playerSettings.defaultQuality != 0){
+    if(settings!.playerSettings!.defaultQuality != 0){
       http.Response res = await http.get(m3u8,headers: headerHandler.getHeaders());
       List<String> lines = res.body.split('\n');
       for(int i = 0;i<lines.length;i++){
-        if(lines[i].split(':')[0] == '#EXT-X-STREAM-INF' && lines[i].split('x').last == settings.playerSettings.defaultQuality.toString()){
+        if(lines[i].split(':')[0] == '#EXT-X-STREAM-INF' && lines[i].split('x').last == settings!.playerSettings!.defaultQuality.toString()){
           List<String> oldLinkArray = m3u8.split('/');
           oldLinkArray.removeLast();
           oldLinkArray.add(lines[i+1].trim());
@@ -167,31 +168,36 @@ class PlayerState extends State<PlayerWidget> {
     print('building headers');
     Map headers = headerHandler.getHeaders();
     headers['Accept'] = 'application/json, text/javascript, */*; q=0.01';
-    headers['X-CSRF-Token'] = args.csrf;
-    headers['Referrer'] = 'https://anime-on-demand.de/anime/'+args.anime.id.toString();
+    headers['X-CSRF-Token'] = args!.csrf;
+    headers['Referrer'] = 'https://anime-on-demand.de/anime/'+args!.anime.id.toString();
     headers['X-Requested-With'] = 'XMLHttpRequest';
     print('headers build');
     print('starting request');
-    playerCache.language = Uri.parse(args.episode.playlistUrl[args.languageIndex]).path.split('/')[3] == 'OmU' ? 'jap' : 'ger';
-    http.Response value;
+    playerCache.language = Uri.parse(args!.episode.playlistUrl[args!.languageIndex]).path.split('/')[3] == 'OmU' ? 'jap' : 'ger';
+    String value;
     try{
-      value = await http.get(args.episode.playlistUrl[args.languageIndex], headers: headers);
+      //value = await http.get(args!.episode.playlistUrl[args!.languageIndex], headers: headers);
+      HttpClient httpClient = HttpClient();
+      HttpClientRequest req = await httpClient.getUrl(Uri.parse(args!.episode.playlistUrl[args!.languageIndex]));
+      headers.forEach((key, value) => req.headers.add(key, value));
+      HttpClientResponse res = await req.close();
+      value = await res.transform(utf8.decoder).join();
     }catch(exception){
-      showDialog(
+      /*showDialog(
         context: context,
         child: PlayerLoadingConnectionErrorDialog(args),
         barrierDismissible: false,
-      );
+      );*/
       return;
     }
 
     print('request finished');
     try{
-      playerCache.playlist = jsonDecode(value.body)['playlist'];
+      playerCache.playlist = jsonDecode(value)['playlist'];
 
-      if(playerCache.playlist.length > 1 && args.countEpisodes != args.positionEpisodes){
-        playerCache.playlist.removeRange(((playerCache.playlist.length - args.positionEpisodes)), playerCache.playlist.length);
-      }else if(playerCache.playlist.length > 1 && args.countEpisodes == args.positionEpisodes){
+      if(playerCache.playlist.length > 1 && args!.countEpisodes != args!.positionEpisodes){
+        playerCache.playlist.removeRange(((playerCache.playlist.length - args!.positionEpisodes)), playerCache.playlist.length);
+      }else if(playerCache.playlist.length > 1 && args!.countEpisodes == args!.positionEpisodes){
         playerCache.playlist.removeRange(1, playerCache.playlist.length);
       }
 
@@ -202,34 +208,34 @@ class PlayerState extends State<PlayerWidget> {
         ..initialize().then((_) {
           // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
           setState(() {
-            if(settings.playerSettings.saveEpisodeProgress){
-              Duration episodeTimeCode = episodeProgressCache
-                  .getEpisodeDuration(playerCache.playlist[0]['mediaid'],this.args.episode.languages[this.args.languageIndex]);
-              int difference = playerCache.controller.value.duration.inSeconds - episodeTimeCode.inSeconds;
+            if(settings!.playerSettings!.saveEpisodeProgress){
+              Duration episodeTimeCode = episodeProgressCache!
+                  .getEpisodeDuration(playerCache.playlist[0]['mediaid'],this.args!.episode.languages[this.args!.languageIndex]);
+              int difference = playerCache.controller!.value.duration.inSeconds - episodeTimeCode.inSeconds;
               if(difference > 120){
-                this.args.startTime = episodeTimeCode;
+                this.args!.startTime = episodeTimeCode;
               }else{
-                episodeProgressCache.addEpisode(playerCache.playlist[0]['mediaid'], Duration.zero, this.args.episode.languages[this.args.languageIndex]);
+                episodeProgressCache?.addEpisode(playerCache.playlist[0]['mediaid'], Duration.zero, this.args!.episode.languages[this.args!.languageIndex]);
               }
               playerCache.episodeTracker = Timer.periodic(Duration(seconds: 10), this.saveEpisodeProgress);
             }
-            playerCache.controller.seekTo(this.args.startTime);
-            playerCache.controller.play();
+            playerCache.controller?.seekTo(this.args!.startTime);
+            playerCache.controller?.play();
           });
         })
         ..addListener(() {
-          if(playerCache.controller.value.hasError){
-            showDialog(
+          if(playerCache.controller!.value.hasError){
+            /*showDialog(
               context: context,
               child: PlayerConnectionErrorDialog(this.args),
               barrierDismissible: false,
-            );
+            );*/
           }
         });
     }catch(exception){
       print('error occurred');
-      print(args.episode.playlistUrl[args.languageIndex]);
-      print(value.body);
+      print(args!.episode.playlistUrl[args!.languageIndex]);
+      print(value);
       print(exception);
     }
   }
@@ -242,14 +248,17 @@ class PlayerState extends State<PlayerWidget> {
       initUpdateThread();
     }
     if( playerCache.controller == null && this.bootUp ){
-      this.args = ModalRoute.of(context).settings.arguments;
+      Object playerTransfer = ModalRoute.of(context)!.settings.arguments!;
+      if(playerTransfer is PlayerTransfer){
+        this.args = playerTransfer;
+      }
       initPlayer();
     }
-    if( playerCache.controller != null && playerCache.controller.value != null ){
-      if( playerCache.controller.value.isBuffering && playerCache.timeTrackThread.isActive ){
-        playerCache.timeTrackThread.cancel();
-      }else if( ! playerCache.controller.value.isBuffering && ! playerCache.timeTrackThread.isActive ){
-        playerCache.timeTrackThread = Timer(Duration(seconds: ((playerCache.controller.value.position.inSeconds % 30)-30)*-1),() {
+    if( playerCache.controller != null ){
+      if( playerCache.controller!.value.isBuffering && playerCache.timeTrackThread!.isActive ){
+        playerCache.timeTrackThread?.cancel();
+      }else if( ! playerCache.controller!.value.isBuffering && ! playerCache.timeTrackThread!.isActive ){
+        playerCache.timeTrackThread = Timer(Duration(seconds: ((playerCache.controller!.value.position.inSeconds % 30)-30)*-1),() {
           playerCache.timeTrackThread = Timer.periodic(
               Duration(seconds: 30), this.sendAodTrackingRequest
           );
@@ -257,10 +266,10 @@ class PlayerState extends State<PlayerWidget> {
       }
     }
     SystemChrome.setEnabledSystemUIOverlays([]);
-    if(playerCache.controller != null && playerCache.controller.value != null && playerCache.controller.value.position != null && playerCache.controller.value.duration != null &&
-        playerCache.controller.value.duration.inSeconds == playerCache.controller.value.position.inSeconds) {
+    if(playerCache.controller != null && playerCache.controller?.value != null && playerCache.controller?.value.position != null && playerCache.controller?.value.duration != null &&
+        playerCache.controller!.value.duration.inSeconds == playerCache.controller!.value.position.inSeconds) {
       jumpToNextEpisode();
-      if(settings.playerSettings.saveEpisodeProgress){
+      if(settings!.playerSettings!.saveEpisodeProgress){
         this.saveEpisodeProgress();
       }
     }
@@ -270,12 +279,12 @@ class PlayerState extends State<PlayerWidget> {
             print('exit player');
             widget.receivePort.close();
             print('closed port');
-            await playerCache.controller.pause();
+            await playerCache.controller?.pause();
             print('paused video');
-            playerCache.updateThread.cancel();
-            playerCache.timeTrackThread.cancel();
-            if(settings.playerSettings.saveEpisodeProgress){
-              playerCache.episodeTracker.cancel();
+            playerCache.updateThread?.cancel();
+            playerCache.timeTrackThread?.cancel();
+            if(settings!.playerSettings!.saveEpisodeProgress){
+              playerCache.episodeTracker?.cancel();
               this.saveEpisodeProgress();
             }
             await SystemChrome.setPreferredOrientations([
@@ -318,8 +327,8 @@ class PlayerState extends State<PlayerWidget> {
                     if(update.globalPosition.dx > MediaQuery.of(context).size.width * 0.5){
                       this.showVolume = true;
                       this.showVolumeStart = DateTime.now();
-                      playerCache.controller.setVolume(
-                          playerCache.controller.value.volume+((update.delta.dy/(MediaQuery.of(context).size.height/100*0.8))/100)*-1
+                      playerCache.controller?.setVolume(
+                          playerCache.controller!.value.volume+((update.delta.dy/(MediaQuery.of(context).size.height/100*0.8))/100)*-1
                       );
                       setState(() {});
                     }
@@ -336,15 +345,15 @@ class PlayerState extends State<PlayerWidget> {
                       decoration: BoxDecoration(
                           color: Colors.black
                       ),
-                      child: _playlistLoaded && playerCache.controller != null && playerCache.controller.value != null && playerCache.controller.value.initialized
+                      child: _playlistLoaded && playerCache.controller != null && playerCache.controller?.value != null && playerCache.controller!.value.isInitialized
                           ? AspectRatio(
-                        aspectRatio: playerCache.controller.value.aspectRatio,
-                        child: VideoPlayer(playerCache.controller),
+                        aspectRatio: playerCache.controller!.value.aspectRatio,
+                        child: VideoPlayer(playerCache.controller!),
                       )
                           : Container()
                   ),
                 ),
-                settings.playerSettings.alwaysShowProgress && !showControls ? Positioned(
+                settings!.playerSettings!.alwaysShowProgress && !showControls ? Positioned(
                     width: MediaQuery.of(context).size.width,
                     bottom: 0,
                     right: 0,
@@ -356,7 +365,7 @@ class PlayerState extends State<PlayerWidget> {
                       ),
                     )
                 ):Container(),
-                showVolume && playerCache.controller.value != null
+                showVolume && playerCache.controller?.value != null
                     ? Positioned(
                   left: MediaQuery.of(context).size.width * 0.05,
                   top: MediaQuery.of(context).size.height *0.15,
@@ -372,13 +381,13 @@ class PlayerState extends State<PlayerWidget> {
                     child: Column(
                         children: [
                           Container(
-                            height: ((MediaQuery.of(context).size.height * 0.7)-6) * (playerCache.controller.value.volume*-1+1),
+                            height: ((MediaQuery.of(context).size.height * 0.7)-6) * (playerCache.controller!.value.volume*-1+1),
                             decoration: BoxDecoration(
 
                             ),
                           ),
                           Container(
-                            height: ((MediaQuery.of(context).size.height * 0.7)-6) * playerCache.controller.value.volume,
+                            height: ((MediaQuery.of(context).size.height * 0.7)-6) * playerCache.controller!.value.volume,
                             decoration: BoxDecoration(
                                 color: Theme.of(context).accentColor
                             ),
@@ -390,11 +399,11 @@ class PlayerState extends State<PlayerWidget> {
                     :Container(),
                 showControls && _playlistLoaded
                     ? VideoControls(this)
-                    : _playlistLoaded && settings.playerSettings.alwaysShowProgress ? VideoProgress(): Container(height: 0),
+                    : _playlistLoaded && settings!.playerSettings!.alwaysShowProgress ? VideoProgress(): Container(height: 0),
                 showControls && _playlistLoaded
                     ? VideoIntel(this)
                     : Container(),
-                playerCache.controller.value.isBuffering
+                playerCache.controller!.value.isBuffering
                     ? Positioned.fill(
                     child: Align(
                       alignment: Alignment.center,

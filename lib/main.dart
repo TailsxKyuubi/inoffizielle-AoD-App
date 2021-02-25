@@ -83,11 +83,11 @@ class LoadingState extends State<BaseWidget>{
           switch(message){
             case 'connection error':
               connectionError = true;
-              showDialog(
+              /*showDialog(
                 context: context,
                 child: LoadingConnectionErrorDialog(),
                 barrierDismissible: false
-              );
+              );*/
               break;
             case 'login check done':
               loginDataChecked = true;
@@ -117,6 +117,7 @@ class LoadingState extends State<BaseWidget>{
                   print('isnt a json string');
                   print(e.toString());
                   print(message);
+                  return;
                 }
                 if (data.containsKey('cookies')) {
                   headerHandler.cookies =
@@ -162,11 +163,11 @@ class LoadingState extends State<BaseWidget>{
     //SystemChrome.setEnabledSystemUIOverlays([]);
     if(bootUpReceivePort == null){
       bootUpReceivePort = ReceivePort();
-      bootUpReceivePort.listen((message) => parseMessage(message, context));
-      FlutterIsolate.spawn(appBootUp, bootUpReceivePort.sendPort);
+      bootUpReceivePort?.listen((message) => parseMessage(message, context));
+      FlutterIsolate.spawn(appBootUp, bootUpReceivePort?.sendPort);
     }
     print('loading widget build');
-    if(loginStorageChecked && ! loginSuccess ) {
+    if(loginStorageChecked == true && ! loginSuccess ) {
       return startScreensScaffold(LoginPage());
     }else if(loginSuccess && animesCache.animes == null){
       return startScreensScaffold(LoadingPage());
@@ -183,9 +184,9 @@ appBootUp(SendPort sendPort) async {
   await checkLogin();
   if(connectionError){
     sendPort.send('connection error');
-  }else if(loginStorageChecked){
+  }else if(loginStorageChecked == true){
     sendPort.send('login storage check done');
-    if(loginDataChecked){
+    if(loginDataChecked == true){
       sendPort.send('login check done');
     }
   }
@@ -211,7 +212,7 @@ appBootUp(SendPort sendPort) async {
         );
       sendPort.send(jsonEncode(animes));
     }
-    if(aboActive){
+    if(aboActive == true){
       sendPort.send('active abo');
       sendPort.send('remaining abo days:'+aboDaysLeft.toString());
     }else{

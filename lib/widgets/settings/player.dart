@@ -31,10 +31,10 @@ class _PlayerSettingsState extends State<PlayerSettingsWidget> {
               trailing: Switch(
                 onChanged: (bool value) {
                   setState(() {
-                    settings.playerSettings.setAlwaysShowProgress(value);
+                    settings!.playerSettings!.setAlwaysShowProgress(value);
                   });
                 },
-                value: settings.playerSettings.alwaysShowProgress,
+                value: settings!.playerSettings!.alwaysShowProgress,
               ),
             ),
             ListTile(
@@ -48,10 +48,10 @@ class _PlayerSettingsState extends State<PlayerSettingsWidget> {
                 onChanged: (value) {
 
                   setState(() {
-                    settings.playerSettings.setDefaultQuality(int.parse(value));
+                    settings!.playerSettings!.setDefaultQuality(int.parse(value!));
                   });
                 },
-                value: settings.playerSettings.defaultQuality.toString(),
+                value: settings!.playerSettings!.defaultQuality.toString(),
                 style: TextStyle(
                   color: Colors.white,
                 ),
@@ -115,10 +115,10 @@ class _PlayerSettingsState extends State<PlayerSettingsWidget> {
               trailing: Switch(
                 onChanged: (bool value) {
                   setState(() {
-                    settings.playerSettings.setSaveEpisodeProgress(value);
+                    settings!.playerSettings!.setSaveEpisodeProgress(value);
                   });
                 },
-                value: settings.playerSettings.saveEpisodeProgress,
+                value: settings!.playerSettings!.saveEpisodeProgress,
               ),
             ),
           ],

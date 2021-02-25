@@ -23,7 +23,7 @@ class LoadingPage extends StatelessWidget {
             Padding(
               padding: EdgeInsets.all(20),
               child: Text(
-                loginDataChecked?'Animeliste wird geladen':'Anmeldedaten werden überprüft',
+                loginDataChecked == true?'Animeliste wird geladen':'Anmeldedaten werden überprüft',
                 style: TextStyle(
                   color: Colors.white,
                 ),

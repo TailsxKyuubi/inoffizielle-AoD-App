@@ -10,15 +10,15 @@ import 'package:unoffical_aod_app/caches/settings/settings.dart';
 class PlayerLoadingConnectionErrorDialog extends StatelessWidget {
   final PlayerTransfer args;
   PlayerLoadingConnectionErrorDialog(this.args){
-    if(settings.playerSettings.saveEpisodeProgress && playerCache.episodeTracker != null && playerCache.episodeTracker.isActive){
-      playerCache.episodeTracker.cancel();
+    if(settings!.playerSettings!.saveEpisodeProgress && playerCache.episodeTracker != null && playerCache.episodeTracker!.isActive){
+      playerCache.episodeTracker?.cancel();
       playerCache.episodeTracker = null;
     }
-    if(playerCache.updateThread.isActive){
-      playerCache.updateThread.cancel();
+    if(playerCache.updateThread!.isActive){
+      playerCache.updateThread?.cancel();
       playerCache.updateThread = null;
     }
-    playerCache.timeTrackThread.cancel();
+    playerCache.timeTrackThread?.cancel();
     playerCache.timeTrackThread = null;
   }
 

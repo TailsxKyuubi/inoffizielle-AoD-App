@@ -28,33 +28,33 @@ class AnimeWidget extends StatefulWidget {
 
 
 class AnimeWidgetState extends State<AnimeWidget>{
-  Anime _anime;
+  Anime? _anime;
   List<Episode> episodes = [];
-  String _csrf;
+  String? _csrf;
   bool movie = false;
   bool showFullDescription = false;
-  PlayerTransfer _nextEpisode;
+  PlayerTransfer? _nextEpisode;
   bool bootUp = true;
 
   Future getAnime() async{
     print('get anime init');
     http.Response res;
     try {
-      res = await http.get('https://anime-on-demand.de/anime/' + this._anime.id.toString(),headers: headerHandler.getHeaders());
+      res = await http.get('https://anime-on-demand.de/anime/' + this._anime!.id.toString(),headers: headerHandler.getHeaders());
     }catch(exception){
       connectionError = true;
       return false;
     }
     dom.Document doc = parse(res.body);
     headerHandler.decodeCookiesString(res.headers['set-cookie']);
-    this._csrf = doc.querySelector('meta[name=csrf-token]').attributes['content'];
+    this._csrf = doc.querySelector('meta[name=csrf-token]').attributes['content']!;
     List<dom.Element> episodesRaw = doc.querySelectorAll('div.three-box.episodebox.flip-container');
     if(episodesRaw.isEmpty){
       movie = true;
       episodesRaw = doc.querySelectorAll('.two-column-container');
     }
-    this._anime.imageUrl = doc.querySelector('img.fullwidth-image.anime-top-image').attributes['src'];
-    this._anime.description = parse(doc.querySelector('div[itemprop=description] > p').innerHtml).documentElement.text.replaceAll('\n', '');
+    this._anime!.imageUrl = doc.querySelector('img.fullwidth-image.anime-top-image').attributes['src'];
+    this._anime!.description = parse(doc.querySelector('div[itemprop=description] > p').innerHtml).documentElement.text.replaceAll('\n', '');
     print('init anime episodes iterating');
     List<Episode> episodes = [];
     episodesRaw.forEach((element) {
@@ -65,24 +65,25 @@ class AnimeWidgetState extends State<AnimeWidget>{
       Episode tmpEpisode = Episode();
       print('start anime episodes play button parsing');
       if(playButtons.length > 0){
-        tmpEpisode.mediaId = int.tryParse(playButtons[0].attributes['data-playlist'].split('/')[2]);
+        String mediaId = playButtons[0].attributes['data-playlist']!.split('/')[2];
+        tmpEpisode.mediaId = int.parse(mediaId);
       }
       playButtons.forEach((dom.Element playButton) {
-        tmpEpisode.languages.add(playButton.attributes['value']);
+        tmpEpisode.languages.add(playButton.attributes['value']!);
         tmpEpisode.playlistUrl.add('https://anime-on-demand.de' +
-            playButton.attributes['data-playlist']);
+            playButton.attributes['data-playlist']!);
       });
 
       String tmpNameString;
       if(movie){
         tmpEpisode.name = doc.querySelector('h1[itemprop=name]').text;
-        tmpEpisode.imageUrl = Uri.parse(doc.querySelector('img.anime-top-image').attributes['src']);
+        tmpEpisode.imageUrl = Uri.parse(doc.querySelector('img.anime-top-image').attributes['src']!);
       } else {
         dom.Element content = element.querySelector('.three-box-content');
         if(content.children.last.className.isEmpty){
           tmpEpisode.noteText = content.children.last.text;
         }
-        tmpEpisode.imageUrl = Uri.parse(element.querySelector('.episodebox-image').children[0].attributes['src']);
+        tmpEpisode.imageUrl = Uri.parse(element.querySelector('.episodebox-image').children[0].attributes['src']!);
         tmpNameString = element
             .querySelector('h3.episodebox-title')
             .innerHtml
@@ -100,17 +101,17 @@ class AnimeWidgetState extends State<AnimeWidget>{
     });
     this.episodes = episodes;
 
-    if(settings.playerSettings.saveEpisodeProgress){
+    if(settings!.playerSettings!.saveEpisodeProgress){
       int episodesCounter = 0;
       this.episodes.forEach((Episode episode) {
         int langCounter = 0;
         episode.languages.forEach((String lang) {
-          if(episodeProgressCache.getEpisodeDuration(episode.mediaId,lang).inSeconds > 0){
+          if(episodeProgressCache!.getEpisodeDuration(episode.mediaId,lang).inSeconds > 0){
             this._nextEpisode = PlayerTransfer(
                 episode,
                 langCounter,
-                this._csrf,
-                this._anime,
+                this._csrf!,
+                this._anime!,
                 episodesCounter,
                 episodes.length
             );
@@ -123,8 +124,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
         this._nextEpisode = PlayerTransfer(
             this.episodes[0],
             0,
-            this._csrf,
-            this._anime,
+            this._csrf!,
+            this._anime!,
             0,
             this.episodes.length
         );
@@ -167,10 +168,10 @@ class AnimeWidgetState extends State<AnimeWidget>{
       int japCount = -1;
       return Scaffold(
         appBar: AppBar(
-          title: Text(this._anime.name),
+          title: Text(this._anime!.name!),
           backgroundColor: Theme.of(context).primaryColor,
         ),
-        floatingActionButton:settings.playerSettings.saveEpisodeProgress && aboActive
+        floatingActionButton:settings!.playerSettings!.saveEpisodeProgress && aboActive == true
             ? FloatingActionButton(
           child: Container(
             decoration: BoxDecoration(
@@ -193,7 +194,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
             child: ListView(
                 children: [
                   CachedNetworkImage(
-                    imageUrl: this._anime.imageUrl,
+                    imageUrl: this._anime!.imageUrl,
                     fit: BoxFit.fill,
                   ),
                   Container(
@@ -201,15 +202,15 @@ class AnimeWidgetState extends State<AnimeWidget>{
                         right: 15,left: 15,top: 10
                     ),
                     child: Text(
-                      showFullDescription || this._anime.description.length <= 150
-                          ?this._anime.description
-                          :this._anime.description.substring(0,this._anime.description.indexOf(' ',150)) + ' ...',
+                      showFullDescription == true || this._anime!.description!.length <= 150
+                          ?this._anime!.description!
+                          :this._anime!.description!.substring(0,this._anime!.description!.indexOf(' ',150)) + ' ...',
                       style: TextStyle(
                         color: Colors.white,
                       ),
                     ),
                   ),
-                  this._anime.description.length > 150
+                  this._anime!.description!.length > 150
                       ? Container(
                       margin: EdgeInsets.only(
                           right: 15,left: 15
@@ -231,7 +232,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                       )
                   )
                       : Container(),
-                  !aboActive
+                  aboActive == false
                       ? Container(
                       margin: EdgeInsets.only(
                           right: 15,left: 15,top: 10
@@ -332,8 +333,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                                   arguments: PlayerTransfer(
                                                       episode,
                                                       0,
-                                                      this._csrf,
-                                                      this._anime,
+                                                      this._csrf!,
+                                                      this._anime!,
                                                       gerIndex,
                                                       this.episodes.length
                                                   )
@@ -375,8 +376,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                                   arguments: PlayerTransfer(
                                                       episode,
                                                       episode.languages.indexOf('Japanisch (UT)'),
-                                                      this._csrf,
-                                                      this._anime,
+                                                      this._csrf!,
+                                                      this._anime!,
                                                       japIndex,
                                                       this.episodes.length
                                                   )
@@ -438,7 +439,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
     }else {
       return Scaffold(
         appBar: AppBar(
-          title: Text(this._anime.name),
+          title: Text(this._anime!.name!),
           backgroundColor: Theme.of(context).primaryColor,
         ),
         body: Container(

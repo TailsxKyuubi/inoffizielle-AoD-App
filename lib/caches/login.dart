@@ -13,10 +13,10 @@ import 'package:unoffical_aod_app/caches/home.dart';
 
 HeaderHandler headerHandler = HeaderHandler();
 FlutterSecureStorage _storage = FlutterSecureStorage();
-bool loginStorageChecked = false;
-bool loginDataChecked = false;
+bool? loginStorageChecked = false;
+bool? loginDataChecked = false;
 bool loginSuccess = false;
-bool aboActive = false;
+bool? aboActive = false;
 int aboDaysLeft = 0;
 bool connectionError = false;
 
@@ -52,7 +52,7 @@ Future<bool> validateCredentialsAndSave( String username, String password ) asyn
   parseHomePage(mainDoc);
   print('parsed home page');
   Element form = mainDoc.querySelector('form.form');
-  String authenticityToken = form.querySelector('input[name=authenticity_token]').attributes['value'];
+  String? authenticityToken = form.querySelector('input[name=authenticity_token]').attributes['value'];
   headerHandler.decodeCookiesString(mainRes.headers['set-cookie']);
   print('generated headers for login');
   print('preparing data for login');

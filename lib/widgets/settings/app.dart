@@ -30,10 +30,10 @@ class AppSettingsState extends State<AppSettingsWidget>{
             trailing: Switch(
               onChanged: (bool value) {
                 setState(() {
-                  settings.appSettings.setKeepSession(value);
+                  settings!.appSettings!.setKeepSession(value);
                 });
               },
-              value: settings.appSettings.keepSession,
+              value: settings!.appSettings!.keepSession,
             ),
           ),
           ListTile(

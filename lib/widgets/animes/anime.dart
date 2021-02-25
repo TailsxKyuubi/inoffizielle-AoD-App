@@ -21,18 +21,18 @@ class AnimeSmallWidget extends StatelessWidget{
     String animeName;
     int limiter = 14;
     int maxLimiter = 17;
-    if(this._anime.name.length > limiter){
-      int index = this._anime.name.indexOf(' ',limiter);
+    if(this._anime.name!.length > limiter){
+      int index = this._anime.name!.indexOf(' ',limiter);
       if(index != -1 && index <= maxLimiter) {
-        animeName = this._anime.name.substring(
-            0, this._anime.name.indexOf(' ', limiter)) + ' ...';
-      }else if(index > maxLimiter || this._anime.name.length > maxLimiter){
-        animeName = this._anime.name.substring(0,maxLimiter) + ' ...';
+        animeName = this._anime.name!.substring(
+            0, this._anime.name!.indexOf(' ', limiter)) + ' ...';
+      }else if(index > maxLimiter || this._anime.name!.length > maxLimiter){
+        animeName = this._anime.name!.substring(0,maxLimiter) + ' ...';
       }else{
-        animeName = this._anime.name;
+        animeName = this._anime.name!;
       }
     }else{
-      animeName = this._anime.name;
+      animeName = this._anime.name!;
     }
     return GestureDetector(
         onTap: (){
@@ -92,9 +92,9 @@ class AnimeSmallWidget extends StatelessWidget{
                           bottom: 3
                       ),
                       child: Text(
-                        this._anime.name.length > 15
+                        this._anime.name!.length > 15
                             ? animeName
-                            : this._anime.name,
+                            : this._anime.name!,
                         textAlign: TextAlign.center,
                       ),
                     )

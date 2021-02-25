@@ -9,8 +9,8 @@ import 'package:video_player/video_player.dart';
 
 List playlist = [];
 int playlistIndex = 0;
-VideoPlayerController controller;
-Timer updateThread;
-Timer timeTrackThread;
-Timer episodeTracker;
-String language;
+VideoPlayerController? controller;
+Timer? updateThread;
+Timer? timeTrackThread;
+Timer? episodeTracker;
+String? language;

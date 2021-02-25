@@ -3,19 +3,22 @@
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 class Anime {
-  final String name;
-  String imageUrl;
-  String description;
-  final int id;
+  final String? name;
+  String? imageUrl;
+  String? description;
+  final int? id;
   Anime({this.name,this.imageUrl,this.description,this.id});
   static Anime fromMap(Map<String,String> animeMap){
-
-    return Anime(
-      id: int.parse(animeMap['id']),
-      name: animeMap['name'],
-      description: animeMap['description'],
-      imageUrl: animeMap['imageUrl']
-    );
+    String? id = animeMap['id'];
+    if(id != null){
+      return Anime(
+          id: int.parse(id),
+          name: animeMap['name'],
+          description: animeMap['description'],
+          imageUrl: animeMap['imageUrl']
+      );
+    }
+    return Anime();
   }
   toMap(){
     return {

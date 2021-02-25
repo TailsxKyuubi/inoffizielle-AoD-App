@@ -32,7 +32,7 @@ Future getAllAnimesV2() async{
   dom.Document animePageDoc = parse(res.body);
   parseAnimePage(animePageDoc);
   validateAbo(animePageDoc);
-  if( ! aboActive ){
+  if( aboActive == true ){
     print('inactive abo detected');
     http.Response resAllAnimePage;
     try {
@@ -67,8 +67,12 @@ void parseAnimePage(dom.Document animePageDoc){
           .querySelector('h3.animebox-title')
           .innerHtml;
       if( ! animes.containsKey( title ) ) {
-        int id = int.parse(element.querySelector('.animebox-link a').attributes['href'].split('/').last);
-        String imageUrl = element
+        String? url = element.querySelector('.animebox-link a').attributes['href'];
+        if(url == null){
+          return;
+        }
+        int id = int.parse(url.split('/').last);
+        String? imageUrl = element
             .querySelector('.animebox-image img')
             .attributes['src'];
         Anime tmpAnime = Anime(
@@ -88,7 +92,7 @@ Map<String,Anime> filterAnimes(String searchQuery){
   HtmlEscape escape = HtmlEscape();
   List<String> words = searchQuery.toLowerCase().split(' ').map((String e) => escape.convert(e)).toList();
   String query = '(?=.*'+ words.join(')(?=.*') + ')';
-  animes.forEach((String title,Anime element) => element.name.toLowerCase().indexOf( RegExp( query ) ) == -1
+  animes.forEach((String title,Anime element) => element.name?.toLowerCase().indexOf( RegExp( query ) ) == -1
       ? null
       : filteredResults.addAll({title:element}));
   return filteredResults;

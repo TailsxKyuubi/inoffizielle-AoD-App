@@ -27,20 +27,20 @@ class VideoIntel extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () async{
-                  await playerCache.controller.pause();
-                  if(settings.playerSettings.saveEpisodeProgress){
+                  await playerCache.controller?.pause();
+                  if(settings!.playerSettings!.saveEpisodeProgress){
                     if(playerCache.episodeTracker != null){
-                      playerCache.episodeTracker.cancel();
+                      playerCache.episodeTracker?.cancel();
                     }
-                    episodeProgressCache.addEpisode(
+                    episodeProgressCache?.addEpisode(
                         playerCache.playlist[playerCache.playlistIndex]['mediaid'],
-                        playerCache.controller.value.position,
-                        this._playerState.args.episode.languages[this._playerState.args.languageIndex]
+                        playerCache.controller!.value.position,
+                        this._playerState.args!.episode.languages[this._playerState.args!.languageIndex]
                     );
                   }
                   print('video halted');
-                  playerCache.updateThread.cancel();
-                  playerCache.timeTrackThread.cancel();
+                  playerCache.updateThread?.cancel();
+                  playerCache.timeTrackThread?.cancel();
                   await SystemChrome.setPreferredOrientations(
                       [
                         DeviceOrientation.portraitUp,

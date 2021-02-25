@@ -45,11 +45,11 @@ class NavigationBar extends StatelessWidget{
   }
 
   int getRouteIndex(context){
-    ModalRoute route = ModalRoute.of(context);
+    ModalRoute route = ModalRoute.of(context)!;
     String routeName = '';
     int index;
     if(route != null){
-      routeName = route.settings.name;
+      routeName = route.settings.name!;
     }
 
     switch(routeName){
