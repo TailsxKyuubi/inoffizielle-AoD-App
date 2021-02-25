@@ -3,6 +3,7 @@
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'package:flutter/material.dart';
+import 'package:unoffical_aod_app/caches/focusnode.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
 
@@ -28,6 +29,8 @@ class AppSettingsState extends State<AppSettingsWidget>{
               ),
             ),
             trailing: Switch(
+              focusColor: Theme.of(context).accentColor,
+              focusNode: appSettingsFocusNodes[0],
               onChanged: (bool value) {
                 setState(() {
                   settings.appSettings.setKeepSession(value);
@@ -37,6 +40,8 @@ class AppSettingsState extends State<AppSettingsWidget>{
             ),
           ),
           ListTile(
+            focusColor: Theme.of(context).accentColor,
+            focusNode: appSettingsFocusNodes[1],
             title: Text(
               'Logout',
               style: TextStyle(
@@ -49,6 +54,8 @@ class AppSettingsState extends State<AppSettingsWidget>{
             },
           ),
           ListTile(
+            focusColor: Theme.of(context).accentColor,
+            focusNode: appSettingsFocusNodes[2],
             title: Text(
               'Über die App',
               style: TextStyle(
