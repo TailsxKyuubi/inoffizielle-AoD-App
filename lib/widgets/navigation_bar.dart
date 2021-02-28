@@ -55,19 +55,19 @@ class _NavigationBarState extends State<NavigationBar> {
               switch(i){
                 case 0:
                   routeName = '/home';
-                  scopeFocusNode.requestFocus(homeFocusNode);
+                  //scopeFocusNode.requestFocus(homeFocusNode);
                   break;
                 case 1:
                   routeName = '/animes';
                   animeFocusNodesIndex = -1;
-                  scopeFocusNode.requestFocus(animeFocusNode);
+                  //scopeFocusNode.requestFocus(animeFocusNode);
                   break;
                 case 2:
                   routeName = '/settings';
                   break;
                 default:
                   routeName = '/home';
-                  scopeFocusNode.requestFocus(homeFocusNode);
+                  //scopeFocusNode.requestFocus(homeFocusNode);
                   break;
               }
               Navigator.pushReplacementNamed(context, routeName);
