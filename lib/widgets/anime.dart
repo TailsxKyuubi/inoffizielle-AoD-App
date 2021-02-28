@@ -3,17 +3,20 @@
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:unoffical_aod_app/caches/anime.dart';
 import 'package:unoffical_aod_app/caches/episode.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
 import 'package:html/dom.dart' as dom;
 import 'package:unoffical_aod_app/caches/episode_progress.dart';
+import 'package:unoffical_aod_app/caches/keycodes.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
 import 'package:unoffical_aod_app/transfermodels/player.dart';
@@ -36,6 +39,9 @@ class AnimeWidgetState extends State<AnimeWidget>{
   bool showFullDescription = false;
   PlayerTransfer _nextEpisode;
   bool bootUp = true;
+  int episodeIndex = 0;
+
+  ScrollController get _scrollController => ScrollController();
 
   Future getAnime() async{
     print('get anime init');
@@ -178,7 +184,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
           title: Text(this._anime.name),
           backgroundColor: Theme.of(context).primaryColor,
         ),
-        floatingActionButton:settings.playerSettings.saveEpisodeProgress && aboActive
+        /*floatingActionButton:settings.playerSettings.saveEpisodeProgress && aboActive
             ? FloatingActionButton(
           child: Container(
             decoration: BoxDecoration(
@@ -193,328 +199,354 @@ class AnimeWidgetState extends State<AnimeWidget>{
             Navigator.pushNamed(context, '/player',arguments: this._nextEpisode);
           },
         )
-            : Container(),
-        body: Container(
-            decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor
-            ),
-            child: ListView(
-                children: [
-                  Container(
-                    height: deviceOrientation == Orientation.landscape ? mediaQuery.size.height * 0.4 : width / 16 * 9,
-                    decoration: BoxDecoration(
+            : Container(),*/
+        body: RawKeyboardListener(
+          focusNode: FocusNode(),
+          autofocus: true,
+          onKey: (RawKeyEvent event){
+            if( Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.data is RawKeyUpEvent){
+              RawKeyEventDataAndroid rawKeyEventData = event.data;
+              FocusScope.of(context);
+              switch(rawKeyEventData.keyCode){
+                case KEY_DOWN:
+                case KEY_UP:
+                  if(rawKeyEventData.keyCode == KEY_DOWN){
+                    this.episodeIndex++;
+                  }else{
+                    if(episodeIndex >= 0){
+                      this.episodeIndex--;
+                    }
+                  }
+                  this._scrollController.animateTo((200.0+40)*(this.episodeIndex-1)+MediaQuery.of(context).size.height*0.5, duration: Duration(milliseconds: 300), curve: Curves.ease);
+                  break;
+              }
+            }
+          },
+          child: Container(
+              decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor
+              ),
+              child: ListView(
+                controller: this._scrollController,
+                  children: [
+                    Container(
+                      height: deviceOrientation == Orientation.landscape ? mediaQuery.size.height * 0.4 : width / 16 * 9,
+                      decoration: BoxDecoration(
                         image: DecorationImage(
-                          fit: BoxFit.fitWidth,
+                            fit: BoxFit.fitWidth,
                             repeat: ImageRepeat.noRepeat,
                             image: CachedNetworkImageProvider(
                                 this._anime.imageUrl,
                                 scale: 0.1
                             )
                         ),
-                    ),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                      child: Container(
-                        padding: EdgeInsets.only(
-                          top: 15,
-                          bottom: 15
-                        ),
-                        color: Colors.black.withOpacity(0.1),
-                        child: CachedNetworkImage(
-                            imageUrl: this._anime.imageUrl
-                        ),
                       ),
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(
-                        right: 15,left: 15,top: 10
-                    ),
-                    child: Text(
-                      showFullDescription || this._anime.description.length <= 150
-                          ?this._anime.description
-                          :this._anime.description.substring(0,this._anime.description.indexOf(' ',150)) + ' ...',
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  this._anime.description.length > 150
-                      ? Container(
-                      margin: EdgeInsets.only(
-                          right: 15,left: 15
-                      ),
-                      child:
-                      GestureDetector(
-                        onTap: (){
-                          this.showFullDescription = !this.showFullDescription;
-                          setState(() {});
-                        },
-                        child: Text(
-                          showFullDescription
-                              ? 'Weniger anzeigen'
-                              : 'Mehr anzeigen',
-                          style: TextStyle(
-                              color: Theme.of(context).accentColor
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                        child: Container(
+                          padding: EdgeInsets.only(
+                              top: 15,
+                              bottom: 15
+                          ),
+                          color: Colors.black.withOpacity(0.1),
+                          child: CachedNetworkImage(
+                              imageUrl: this._anime.imageUrl
                           ),
                         ),
-                      )
-                  )
-                      : Container(),
-                  !aboActive
-                      ? Container(
+                      ),
+                    ),
+                    Container(
                       margin: EdgeInsets.only(
-                          right: 15,
-                          left: 15,
-                          top: 10
+                          right: 15,left: 15,top: 10
                       ),
                       child: Text(
-                        'Ohne Premium Abo hast du gegebenenfalls nur eingeschränkt Zugriff auf die Inhalte',
+                        showFullDescription || this._anime.description.length <= 150
+                            ?this._anime.description
+                            :this._anime.description.substring(0,this._anime.description.indexOf(' ',150)) + ' ...',
                         style: TextStyle(
-                            color: Colors.redAccent
+                          color: Colors.white,
                         ),
-                      )
-                  )
-                      : Container(),
-                  Container(
-                    margin: EdgeInsets.only(
-                      top: 10,
-                      left: 10,
-                      right: 10,
-                    ),
-                    height: 1,
-                    decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                            colors: [
-                              Color.fromRGBO(0,0,0,0),
-                              Theme.of(context).accentColor,
-                              Theme.of(context).accentColor,
-                              Color.fromRGBO(0,0,0,0)
-                            ]
-                        )
-                    ),
-                  ),
-                  Container(
-                      padding: EdgeInsets.only(
-                          left: padding,
-                          right: padding
                       ),
-                      child: ListView(
-                        physics: ClampingScrollPhysics(),
-                        shrinkWrap: true,
-                        children: this.episodes.map((Episode episode) {
-                          int gerIndex = ++gerCount;
-                          int japIndex = ++japCount;
-                          return Padding(
-                              padding: EdgeInsets.only(
-                                  top:10,
-                                  bottom: 10,
-                                  left: 15,
-                                  right: 15
-                              ),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Container(
-                                        width: deviceOrientation == Orientation.landscape ? (width-60) * 0.25 : width * 0.5,
-                                        child: CachedNetworkImage(
-                                          imageUrl: 'https://'+episode.imageUrl.host+episode.imageUrl.path,
-                                          fit: BoxFit.fill,
+                    ),
+                    this._anime.description.length > 150
+                        ? Container(
+                        margin: EdgeInsets.only(
+                            right: 15,
+                            left: 15
+                        ),
+                        child:
+                        GestureDetector(
+                          onTap: (){
+                            this.showFullDescription = !this.showFullDescription;
+                            setState(() {});
+                          },
+                          child: Text(
+                            showFullDescription
+                                ? 'Weniger anzeigen'
+                                : 'Mehr anzeigen',
+                            style: TextStyle(
+                                color: Theme.of(context).accentColor
+                            ),
+                          ),
+                        )
+                    )
+                        : Container(),
+                    !aboActive
+                        ? Container(
+                        margin: EdgeInsets.only(
+                            right: 15,
+                            left: 15,
+                            top: 10
+                        ),
+                        child: Text(
+                          'Ohne Premium Abo hast du gegebenenfalls nur eingeschränkt Zugriff auf die Inhalte',
+                          style: TextStyle(
+                              color: Colors.redAccent
+                          ),
+                        )
+                    )
+                        : Container(),
+                    Container(
+                      margin: EdgeInsets.only(
+                        top: 10,
+                        left: 10,
+                        right: 10,
+                      ),
+                      height: 1,
+                      decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                              colors: [
+                                Color.fromRGBO(0,0,0,0),
+                                Theme.of(context).accentColor,
+                                Theme.of(context).accentColor,
+                                Color.fromRGBO(0,0,0,0)
+                              ]
+                          )
+                      ),
+                    ),
+                    Container(
+                        padding: EdgeInsets.only(
+                            left: padding,
+                            right: padding
+                        ),
+                        child: ListView(
+                          physics: ClampingScrollPhysics(),
+                          shrinkWrap: true,
+                          children: this.episodes.map((Episode episode) {
+                            int gerIndex = ++gerCount;
+                            int japIndex = ++japCount;
+                            return Padding(
+                                padding: EdgeInsets.only(
+                                    top:10,
+                                    bottom: 10,
+                                    left: 15,
+                                    right: 15
+                                ),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Container(
+                                          width: deviceOrientation == Orientation.landscape ? (width-60) * 0.25 : width * 0.5,
+                                          child: CachedNetworkImage(
+                                            imageUrl: 'https://'+episode.imageUrl.host+episode.imageUrl.path,
+                                            fit: BoxFit.fill,
+                                          ),
                                         ),
-                                      ),
-                                      Column(
-                                        children: [
-                                          Container(
-                                            margin: EdgeInsets.only(
-                                              left: 10,
-                                            ),
-                                            child: ! this.movie
-                                                ? Text(
-                                              'Folge ' + episode.number,
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
+                                        Column(
+                                          children: [
+                                            Container(
+                                              margin: EdgeInsets.only(
+                                                left: 10,
                                               ),
-                                              textAlign: TextAlign.start,
-                                            ): Container(),
-                                          ),
-                                          Container(
-                                            margin: EdgeInsets.only(
-                                                left: 10
+                                              child: ! this.movie
+                                                  ? Text(
+                                                'Folge ' + episode.number,
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                textAlign: TextAlign.start,
+                                              ): Container(),
                                             ),
-                                            width: deviceOrientation == Orientation.landscape ?(width-60)*0.25-10:(width-30)*0.5-10,
-                                            child: Text(
-                                              unescape.convert(episode.name),
-                                              softWrap: true,
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                  color: Colors.white
+                                            Container(
+                                              margin: EdgeInsets.only(
+                                                  left: 10
+                                              ),
+                                              width: deviceOrientation == Orientation.landscape ?(width-60)*0.25-10:(width-30)*0.5-10,
+                                              child: Text(
+                                                unescape.convert(episode.name),
+                                                softWrap: true,
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    color: Colors.white
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                  Container(
-                                      child: Row(
-                                        children: [
-                                          FlatButton(
-                                              focusColor: Colors.white,
-                                              focusNode: FocusNode(),
-                                              padding: EdgeInsets.zero,
-                                              onPressed: (){
-                                                if(episode.languages.indexOf('Deutsch') != -1) {
-                                                  Navigator.pushNamed(
-                                                      context,
-                                                      '/player',
-                                                      arguments: PlayerTransfer(
-                                                          episode,
-                                                          0,
-                                                          this._csrf,
-                                                          this._anime,
-                                                          gerIndex,
-                                                          this.episodes.length
-                                                      )
-                                                  );
-                                                }
-                                              },
-                                              child: Container(
-                                                width: firstWidth,
-                                                margin: EdgeInsets.only(
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                    Container(
+                                        child: Row(
+                                          children: [
+                                            FlatButton(
+                                                focusColor: Colors.white,
+                                                focusNode: FocusNode(),
+                                                padding: EdgeInsets.zero,
+                                                onPressed: (){
+                                                  if(episode.languages.indexOf('Deutsch') != -1) {
+                                                    Navigator.pushNamed(
+                                                        context,
+                                                        '/player',
+                                                        arguments: PlayerTransfer(
+                                                            episode,
+                                                            0,
+                                                            this._csrf,
+                                                            this._anime,
+                                                            gerIndex,
+                                                            this.episodes.length
+                                                        )
+                                                    );
+                                                  }
+                                                },
+                                                child: Container(
+                                                  width: firstWidth,
+                                                  margin: EdgeInsets.only(
+                                                      top: 5,
+                                                      left: 0,
+                                                      right: 2.5
+                                                  ),
+                                                  padding: EdgeInsets.only(
                                                     top: 5,
-                                                    left: 0,
-                                                    right: 2.5
-                                                ),
-                                                padding: EdgeInsets.only(
-                                                  top: 5,
-                                                  bottom: 5,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                    color: episode.languages.length > 0 && episode.languages[0] == 'Deutsch' ? Theme.of(context).accentColor : Colors.grey
-                                                ),
-                                                child: Row(
-                                                    children: [
-                                                      Icon(
-                                                          Icons.play_arrow
-                                                      ),
-                                                      Text(
-                                                        'Deutsch',
-                                                        textAlign: TextAlign.center,
-                                                      )
-                                                    ]
-                                                ),
-                                              )
-                                          ),
-                                          FlatButton(
-                                              focusNode: FocusNode(),
-                                              focusColor: Colors.white,
-                                              padding: EdgeInsets.zero,
-                                              onPressed: (){
-                                                if(episode.languages.indexOf('Japanisch (UT)') != -1){
-                                                  Navigator.pushNamed(
-                                                      context,
-                                                      '/player',
-                                                      arguments: PlayerTransfer(
-                                                          episode,
-                                                          episode.languages.indexOf('Japanisch (UT)'),
-                                                          this._csrf,
-                                                          this._anime,
-                                                          japIndex,
-                                                          this.episodes.length
-                                                      )
-                                                  );
-                                                }
-                                              },
-                                              child: Container(
-                                                width: secondWidth,
-                                                margin: EdgeInsets.only(
+                                                    bottom: 5,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                      color: episode.languages.length > 0 && episode.languages[0] == 'Deutsch' ? Theme.of(context).accentColor : Colors.grey
+                                                  ),
+                                                  child: Row(
+                                                      children: [
+                                                        Icon(
+                                                            Icons.play_arrow
+                                                        ),
+                                                        Text(
+                                                          'Deutsch',
+                                                          textAlign: TextAlign.center,
+                                                        )
+                                                      ]
+                                                  ),
+                                                )
+                                            ),
+                                            FlatButton(
+                                                focusNode: FocusNode(),
+                                                focusColor: Colors.white,
+                                                padding: EdgeInsets.zero,
+                                                onPressed: (){
+                                                  if(episode.languages.indexOf('Japanisch (UT)') != -1){
+                                                    Navigator.pushNamed(
+                                                        context,
+                                                        '/player',
+                                                        arguments: PlayerTransfer(
+                                                            episode,
+                                                            episode.languages.indexOf('Japanisch (UT)'),
+                                                            this._csrf,
+                                                            this._anime,
+                                                            japIndex,
+                                                            this.episodes.length
+                                                        )
+                                                    );
+                                                  }
+                                                },
+                                                child: Container(
+                                                  width: secondWidth,
+                                                  margin: EdgeInsets.only(
+                                                      top: 5,
+                                                      left: 2.5
+                                                  ),
+                                                  padding: EdgeInsets.only(
                                                     top: 5,
-                                                    left: 2.5
-                                                ),
-                                                padding: EdgeInsets.only(
-                                                  top: 5,
-                                                  bottom: 5,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                    color: episode.languages.indexOf('Japanisch (UT)') != -1
-                                                        ? Theme.of(context).accentColor
-                                                        : Colors.grey
-                                                ),
-                                                child: Row(
-                                                    children: [
-                                                      Icon(
-                                                          Icons.play_arrow
-                                                      ),
-                                                      Text(
-                                                        'Japanisch (UT)',
-                                                        textAlign: TextAlign.center,
-                                                      )
-                                                    ]
-                                                ),
-                                              )
-                                          )
-                                        ],
-                                      )
-                                  ),
-                                  episode.noteText.isNotEmpty
-                                      ? Padding(
-                                      padding: EdgeInsets.only(top: 10),
-                                      child: Text(
-                                        episode.noteText,
-                                        style: TextStyle(
-                                            color: Colors.white
-                                        ),
-                                      )
-                                  )
-                                      : Container()
-                                ],
-                              )
-                          );
-                        }
-                        ).toList(),
-                      )
-                  )
-                ]
-            )
+                                                    bottom: 5,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                      color: episode.languages.indexOf('Japanisch (UT)') != -1
+                                                          ? Theme.of(context).accentColor
+                                                          : Colors.grey
+                                                  ),
+                                                  child: Row(
+                                                      children: [
+                                                        Icon(
+                                                            Icons.play_arrow
+                                                        ),
+                                                        Text(
+                                                          'Japanisch (UT)',
+                                                          textAlign: TextAlign.center,
+                                                        )
+                                                      ]
+                                                  ),
+                                                )
+                                            )
+                                          ],
+                                        )
+                                    ),
+                                    episode.noteText.isNotEmpty
+                                        ? Padding(
+                                        padding: EdgeInsets.only(top: 10),
+                                        child: Text(
+                                          episode.noteText,
+                                          style: TextStyle(
+                                              color: Colors.white
+                                          ),
+                                        )
+                                    )
+                                        : Container()
+                                  ],
+                                )
+                            );
+                          }
+                          ).toList(),
+                        )
+                    )
+                  ]
+              )
+          ),
         ),
       );
     }else {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(this._anime.name),
-          backgroundColor: Theme.of(context).primaryColor,
-        ),
-        body: Container(
-          decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor
+          appBar: AppBar(
+            title: Text(this._anime.name),
+            backgroundColor: Theme.of(context).primaryColor,
           ),
-          child: Center(
-            child: Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      "Die Episodenliste wird geladen",
-                      style: TextStyle(
-                          color: Colors.white
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      "Bitte warten",
-                      style: TextStyle(
-                          color: Colors.white
-                      ),
-                    ),
-                  ),
-                ]
+          body: Container(
+            decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor
             ),
-          ),
-        ),
+            child: Center(
+              child: Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text(
+                        "Die Episodenliste wird geladen",
+                        style: TextStyle(
+                            color: Colors.white
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text(
+                        "Bitte warten",
+                        style: TextStyle(
+                            color: Colors.white
+                        ),
+                      ),
+                    ),
+                  ]
+              ),
+
+            ),
+          )
       );
     }
   }

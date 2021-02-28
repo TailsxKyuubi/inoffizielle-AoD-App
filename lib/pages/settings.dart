@@ -18,7 +18,7 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return
       RawKeyboardListener(
-          focusNode: settingsFocusNode,
+          focusNode: FocusNode(),
           autofocus: true,
           onKey: (event){
             print('triggered');

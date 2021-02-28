@@ -30,7 +30,7 @@ class AppSettingsState extends State<AppSettingsWidget>{
             ),
             trailing: Switch(
               focusColor: Theme.of(context).accentColor,
-              focusNode: appSettingsFocusNodes[0],
+              focusNode: FocusNode(),
               onChanged: (bool value) {
                 setState(() {
                   settings.appSettings.setKeepSession(value);
@@ -41,7 +41,7 @@ class AppSettingsState extends State<AppSettingsWidget>{
           ),
           ListTile(
             focusColor: Theme.of(context).accentColor,
-            focusNode: appSettingsFocusNodes[1],
+            focusNode: FocusNode(),
             title: Text(
               'Logout',
               style: TextStyle(
@@ -55,7 +55,7 @@ class AppSettingsState extends State<AppSettingsWidget>{
           ),
           ListTile(
             focusColor: Theme.of(context).accentColor,
-            focusNode: appSettingsFocusNodes[2],
+            focusNode: FocusNode(),
             title: Text(
               'Über die App',
               style: TextStyle(
