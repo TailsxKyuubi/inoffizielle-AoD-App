@@ -155,8 +155,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                 if( Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyDownEvent ){
                   RawKeyEventDataAndroid rawKeyEventData = keyEvent.data;
                   if(rawKeyEventData.keyCode == KEY_LEFT){
-                    setState(() {});
                     FocusScope.of(context).requestFocus(this.germanFocusNodes[this.episodeIndex]);
+                    setState(() {});
                     return true;
                   }else{
                     int oldIndex = this.episodeIndex;
@@ -583,12 +583,12 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                                 }
                                               },
                                               child: Container(
-                                                width: this.omuFocusNodes[japIndex].hasPrimaryFocus ? secondWidth - 2.5 : secondWidth,
+                                                width: secondWidth - 2.5,
                                                 margin: EdgeInsets.only(
-                                                  top: this.omuFocusNodes[japIndex].hasPrimaryFocus ? 2.5 : 0,
+                                                  top: 2.5,
                                                   left: 2.5,
-                                                  right: this.omuFocusNodes[japIndex].hasPrimaryFocus ? 2.5 : 0,
-                                                  bottom: this.omuFocusNodes[japIndex].hasPrimaryFocus ? 2.5 : 0,
+                                                  right:  2.5,
+                                                  bottom: 2.5,
                                                 ),
                                                 padding: EdgeInsets.only(
                                                   top: 5,
