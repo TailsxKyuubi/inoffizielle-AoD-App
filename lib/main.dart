@@ -22,6 +22,7 @@ import 'package:unoffical_aod_app/pages/home.dart';
 import 'package:unoffical_aod_app/pages/loading.dart';
 import 'package:unoffical_aod_app/pages/login.dart';
 import 'package:unoffical_aod_app/pages/settings.dart';
+import 'package:unoffical_aod_app/pages/updates.dart';
 import 'package:unoffical_aod_app/widgets/loading_connection_error.dart';
 import 'package:unoffical_aod_app/widgets/player.dart';
 import 'caches/anime.dart';
@@ -51,7 +52,8 @@ class AodApp extends StatelessWidget {
             '/anime': (BuildContext context) => AnimePage(),
             '/animes': (BuildContext context) => AnimesPage(),
             '/settings': (BuildContext context) => SettingsPage(),
-            '/about': (BuildContext context) => AboutPage()
+            '/about': (BuildContext context) => AboutPage(),
+            '/updates': (BuildContext context) => UpdatesPage()
           },
           theme: ThemeData(
               primaryColor: Color.fromRGBO(53, 54, 56, 1),

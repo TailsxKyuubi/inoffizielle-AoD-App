@@ -79,6 +79,26 @@ class AppSettingsState extends State<AppSettingsWidget> {
               Navigator.pushNamed(context, '/about');
             },
           ),
+          FlatButton(
+            focusColor: Theme.of(context).accentColor,
+            focusNode: FocusNode(),
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              child: Text(
+                'Updates',
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ),
+            onPressed: (){
+              print('go to updates');
+              Navigator.pushNamed(context, '/updates');
+            },
+          ),
         ],
       ),
     );
