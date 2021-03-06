@@ -5,7 +5,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:unoffical_aod_app/caches/anime.dart';
-import 'package:unoffical_aod_app/caches/animes.dart';
 import 'package:unoffical_aod_app/caches/focusnode.dart';
 
 class AnimeSmallWidget extends StatelessWidget{

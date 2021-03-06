@@ -6,9 +6,6 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:unoffical_aod_app/caches/focusnode.dart';
-import 'package:unoffical_aod_app/caches/keycodes.dart';
 import 'package:unoffical_aod_app/widgets/navigation_bar.dart';
 import 'package:unoffical_aod_app/widgets/settings/app.dart';
 import 'package:unoffical_aod_app/widgets/settings/player.dart';

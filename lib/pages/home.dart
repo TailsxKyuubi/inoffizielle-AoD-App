@@ -6,11 +6,8 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:unoffical_aod_app/caches/anime.dart';
-import 'package:unoffical_aod_app/caches/focusnode.dart';
 import 'package:unoffical_aod_app/caches/home.dart';
-import 'package:unoffical_aod_app/caches/keycodes.dart';
 import 'package:unoffical_aod_app/widgets/navigation_bar.dart';
 
 class HomePage extends StatefulWidget {
@@ -32,22 +29,6 @@ class _HomePageState extends State<HomePage> {
   List<FocusNode> newCatalogTitlesFocusNodes = [];
   List<FocusNode> topTenFocusNodes = [];
 
-  List<FocusNode> _getRowFocusNodesByIndex(int index){
-    switch(index){
-      case 1:
-        return newEpisodesFocusNodes;
-      case 2:
-        return newSimulcastsFocusNodes;
-      case 3:
-        return newCatalogTitlesFocusNodes;
-      case 4:
-        return topTenFocusNodes;
-      default:
-        return newEpisodesFocusNodes;
-    }
-  }
-
-
   @override
   void initState() {
 
@@ -63,126 +44,7 @@ class _HomePageState extends State<HomePage> {
       elementWidth = MediaQuery.of(context).size.width / 11 * 2;
     }
     double elementHeight = elementWidth / 16 * 9 + 40;
-    int newEpisodesCount = 0;
-    int newSimulcastsCount = 0;
-    int newCatalogTitlesCount = 0;
-    int topTenCount = 0;
-    return /*RawKeyboardListener(
-        focusNode: homeFocusNode,
-        autofocus: true,
-        onKey: (RawKeyEvent event){
-          print('onKey triggered');
-          if( Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent ){
-            RawKeyEventDataAndroid eventDataAndroid = event.data;
-            FocusScopeNode scope = FocusScope.of(context);
-            if(homeFocusNode.hasPrimaryFocus){
-              print('primary focus lies on root Node');
-              scope.unfocus();
-              scope.requestFocus(newEpisodesFocusNodes.first);
-              homeRowIndex = 1;
-            }else if(menuBarFocusNode.hasFocus){
-              switch(eventDataAndroid.keyCode){
-                case KEY_RIGHT:
-                  break;
-                case KEY_LEFT:
-
-                  break;
-                case KEY_UP:
-                  homeRowIndex = 1;
-                  homeRowItemIndex = 0;
-                  break;
-              }
-            }else{
-              switch(eventDataAndroid.keyCode){
-                case KEY_UP:
-                  homeRowIndex--;
-                  switch(homeRowIndex) {
-                    case 0:
-                      homeRowIndex = 1;
-                      scope.requestFocus(newEpisodesFocusNodes.first);
-                      break;
-                    case 1:
-                      scope.requestFocus(newEpisodesFocusNodes.first);
-                      break;
-                    case 2:
-                      scope.requestFocus(newSimulcastsFocusNodes.first);
-                      break;
-                    case 3:
-                      scope.requestFocus(newCatalogTitlesFocusNodes.first);
-                      break;
-                  }
-                  print('homeRowIndex: $homeRowIndex');
-                  print('homeRowItemIndex: $homeRowItemIndex');
-                  homeRowItemIndex = 0;
-                  break;
-                case KEY_DOWN:
-                  homeRowIndex++;
-                  switch(homeRowIndex){
-                    case 2:
-                      scope.requestFocus(newSimulcastsFocusNodes.first);
-                      break;
-                    case 3:
-                      scope.requestFocus(newCatalogTitlesFocusNodes.first);
-                      break;
-                    case 4:
-                      scope.requestFocus(topTenFocusNodes.first);
-                      break;
-                    case 5:
-                      homeRowIndex = 4;
-                      scope.requestFocus(topTenFocusNodes.first);
-                      break;
-                  }
-                  print('homeRowIndex: $homeRowIndex');
-                  print('homeRowItemIndex: $homeRowItemIndex');
-                  homeRowItemIndex = 0;
-                  break;
-                case KEY_LEFT:
-                case KEY_RIGHT:
-                  if( eventDataAndroid.keyCode == KEY_LEFT ){
-                    homeRowItemIndex--;
-                  }else{
-                    homeRowItemIndex++;
-                  }
-                  List<FocusNode> focusNodes = _getRowFocusNodesByIndex(homeRowIndex);
-                  if(homeRowItemIndex < 0){
-                    //homeRowIndex--;
-                    homeRowItemIndex++;
-                  }else if(homeRowItemIndex >= focusNodes.length){
-                    //homeRowIndex += 1;
-                    homeRowItemIndex--;
-                  }
-                  print('homeRowIndex: $homeRowIndex');
-                  print('homeRowItemIndex: $homeRowItemIndex');
-                  //focusNodes = _getRowFocusNodesByIndex(homeRowIndex);
-                  scope.requestFocus(focusNodes[homeRowItemIndex]);
-                  break;
-                case KEY_MENU:
-                  scope.requestFocus(menuBarFocusNode);
-                  break;
-              }
-
-              ScrollController controller;
-              switch(homeRowIndex){
-                case 1:
-                  controller = _newEpisodesScrollController;
-                  break;
-                case 2:
-                  controller = _newSimulcastsScrollController;
-                  break;
-                case 3:
-                  controller = _newCatalogTitlesScrollController;
-                  break;
-                case 4:
-                  controller = _topTenScrollController;
-                  break;
-              }
-              controller.animateTo(elementWidth*homeRowItemIndex, curve: Curves.ease, duration: Duration(milliseconds: 300));
-              this._scrollController.animateTo((elementHeight+40)*(homeRowIndex-1), duration: Duration(milliseconds: 300), curve: Curves.ease);
-            }
-            //setState(() {});
-          }
-        },
-        child:*/  Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: Text('Startseite'),
           /*leading: FlatButton(
