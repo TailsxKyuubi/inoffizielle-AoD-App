@@ -552,7 +552,6 @@ class _HomePageState extends State<HomePage> {
                             padding: EdgeInsets.all(3),
                             child: Container(
                                 width: elementWidth,
-                                margin: EdgeInsets.only(right: 5,left: 5),
                                 child: ClipRRect(
                                     borderRadius: BorderRadius.all(
                                         Radius.circular(5)
