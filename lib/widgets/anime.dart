@@ -583,10 +583,12 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                                 }
                                               },
                                               child: Container(
-                                                width: secondWidth,
+                                                width: this.omuFocusNodes[japIndex].hasPrimaryFocus ? secondWidth - 2.5 : secondWidth,
                                                 margin: EdgeInsets.only(
-                                                    top: this.omuFocusNodes[japIndex].hasPrimaryFocus ? 2.5 : 0,
-                                                    left: 2.5
+                                                  top: this.omuFocusNodes[japIndex].hasPrimaryFocus ? 2.5 : 0,
+                                                  left: 2.5,
+                                                  right: this.omuFocusNodes[japIndex].hasPrimaryFocus ? 2.5 : 0,
+                                                  bottom: this.omuFocusNodes[japIndex].hasPrimaryFocus ? 2.5 : 0,
                                                 ),
                                                 padding: EdgeInsets.only(
                                                   top: 5,
