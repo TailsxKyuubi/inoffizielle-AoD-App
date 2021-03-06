@@ -66,6 +66,12 @@ class AnimeWidgetState extends State<AnimeWidget>{
               case KEY_UP:
                 focusScope.requestFocus(this.backFocusNode);
                 break;
+              case KEY_CENTER:
+                this.showFullDescription = !this.showFullDescription;
+                //this.generateFixedFocusNode();
+                //FocusScope.of(context).requestFocus(this.readMoreFocusNode);
+                setState(() {});
+                break;
             }
             setState(() {});
           }
@@ -80,6 +86,10 @@ class AnimeWidgetState extends State<AnimeWidget>{
             switch(rawKeyEventData.keyCode){
               case KEY_DOWN:
                 focusScope.requestFocus(this.readMoreFocusNode);
+                setState(() {});
+                break;
+              case KEY_CENTER:
+                Navigator.pop(context);
                 break;
             }
           }
@@ -100,6 +110,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
       }else{
         print('try to jump to readmore');
         FocusScope.of(context).requestFocus(this.readMoreFocusNode);
+        setState(() {});
       }
     }
   }
