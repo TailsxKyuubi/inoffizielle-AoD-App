@@ -43,18 +43,26 @@ class _AnimesWidgetState extends State<AnimesWidget> {
       DeviceOrientation.portraitDown
     ]);*/
     int i = 0;
-    double elementWidth = (MediaQuery.of(context).size.width-40)*0.25-7.5;
+    double elementWidth;
+    MediaQueryData mediaQuery = MediaQuery.of(context);
+    if(mediaQuery.orientation == Orientation.landscape){
+      elementWidth = (mediaQuery.size.width-40)*0.25-7.5;
+    }else{
+      elementWidth = (mediaQuery.size.width-40)*0.5-7.5;
+    }
     double elementHeight = elementWidth / 16 * 9;
     Radius radius = Radius.circular(2);
     List<Widget> animeList = [];
     this.searchResult.forEach(
-            (String title,Anime anime) => animeList.add( AnimeSmallWidget(
-            anime,
-            elementWidth,
-            elementHeight,
-            radius,
-            ++i
-        ))
+            (String title,Anime anime) => animeList.add(
+            AnimeSmallWidget(
+                anime,
+                elementWidth,
+                elementHeight,
+                radius,
+                ++i
+            )
+        )
     );
     return RawKeyboardListener(
         focusNode: animeFocusNode,
@@ -133,7 +141,6 @@ class _AnimesWidgetState extends State<AnimesWidget> {
               if(eventDataAndroid.keyCode == KEY_MENU){
                 ScaffoldState scaffold = Scaffold.of(context);
                 if( ! scaffold.isDrawerOpen ){
-                  scaffold.openDrawer();
                   scope.requestFocus(menuBarFocusNode);
                 }
               }

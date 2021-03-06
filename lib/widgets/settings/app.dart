@@ -3,6 +3,7 @@
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'package:flutter/material.dart';
+import 'package:unoffical_aod_app/caches/focusnode.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
 
@@ -11,7 +12,9 @@ class AppSettingsWidget extends StatefulWidget {
   State<StatefulWidget> createState() => AppSettingsState();
 }
 
-class AppSettingsState extends State<AppSettingsWidget>{
+class AppSettingsState extends State<AppSettingsWidget> {
+  FocusNode aboutFocusNode = FocusNode();
+  FocusNode logoutFocusNode = FocusNode();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -28,6 +31,7 @@ class AppSettingsState extends State<AppSettingsWidget>{
               ),
             ),
             trailing: Switch(
+              focusColor: Theme.of(context).accentColor,
               onChanged: (bool value) {
                 setState(() {
                   settings.appSettings.setKeepSession(value);
@@ -36,27 +40,63 @@ class AppSettingsState extends State<AppSettingsWidget>{
               value: settings.appSettings.keepSession,
             ),
           ),
-          ListTile(
-            title: Text(
-              'Logout',
-              style: TextStyle(
-                  color: Colors.white
+          FlatButton(
+            focusColor: Theme.of(context).accentColor,
+            focusNode: this.logoutFocusNode,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              child: Text(
+                'Logout',
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.normal
+                ),
               ),
             ),
-            onTap: () async{
+            onPressed: () async{
               await logout();
               Navigator.pushReplacementNamed(context, '/base');
             },
           ),
-          ListTile(
-            title: Text(
-              'Über die App',
-              style: TextStyle(
-                  color: Colors.white
+          FlatButton(
+            focusColor: Theme.of(context).accentColor,
+            focusNode: this.aboutFocusNode,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              child: Text(
+                'Über die App',
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.normal,
+                ),
               ),
             ),
-            onTap: (){
+            onPressed: (){
               Navigator.pushNamed(context, '/about');
+            },
+          ),
+          FlatButton(
+            focusColor: Theme.of(context).accentColor,
+            focusNode: FocusNode(),
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              child: Text(
+                'Updates',
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ),
+            onPressed: (){
+              print('go to updates');
+              Navigator.pushNamed(context, '/updates');
             },
           ),
         ],

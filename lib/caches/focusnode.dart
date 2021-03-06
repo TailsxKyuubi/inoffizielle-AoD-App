@@ -2,13 +2,6 @@ import 'package:flutter/material.dart';
 
 FocusNode menuBarFocusNode = FocusNode();
 
-List<FocusNode> menuBarElementsFocusNodes = [
-  FocusNode(),
-  FocusNode(),
-  FocusNode()
-];
-int menuBarIndex = 0;
-
 FocusNode homeFocusNode = FocusNode();
 List<FocusNode> newEpisodesFocusNodes = [];
 List<FocusNode> newSimulcastsFocusNodes = [];
@@ -23,3 +16,16 @@ int animeFocusNodesIndex = -1;
 FocusNode animeFocusNode = FocusNode();
 
 FocusNode settingsFocusNode = FocusNode();
+List<FocusNode> appSettingsFocusNodes = [
+  FocusNode(),
+  FocusNode(),
+  FocusNode()
+];
+int appSettingsFocusIndex = -1;
+
+List<FocusNode> playerSettingsFocusNodes = [
+  FocusNode(),
+  FocusNode(),
+  FocusNode()
+];
+int playerSettingsFocusIndex = -1;
