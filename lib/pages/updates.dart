@@ -24,7 +24,7 @@ class UpdatesPage extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(5),
               child: Text(
-                'Du verwendest die Version 0.7.1-1.0-tvalpha der App',
+                'Du verwendest die Version 0.7.1-tvalpha.1 der App',
                 style: TextStyle(
                     color: Colors.white
                 ),
