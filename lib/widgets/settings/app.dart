@@ -12,7 +12,9 @@ class AppSettingsWidget extends StatefulWidget {
   State<StatefulWidget> createState() => AppSettingsState();
 }
 
-class AppSettingsState extends State<AppSettingsWidget>{
+class AppSettingsState extends State<AppSettingsWidget> {
+  FocusNode aboutFocusNode = FocusNode();
+  FocusNode logoutFocusNode = FocusNode();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -30,7 +32,6 @@ class AppSettingsState extends State<AppSettingsWidget>{
             ),
             trailing: Switch(
               focusColor: Theme.of(context).accentColor,
-              focusNode: FocusNode(),
               onChanged: (bool value) {
                 setState(() {
                   settings.appSettings.setKeepSession(value);
@@ -39,30 +40,42 @@ class AppSettingsState extends State<AppSettingsWidget>{
               value: settings.appSettings.keepSession,
             ),
           ),
-          ListTile(
+          FlatButton(
             focusColor: Theme.of(context).accentColor,
-            focusNode: FocusNode(),
-            title: Text(
-              'Logout',
-              style: TextStyle(
-                  color: Colors.white
+            focusNode: this.logoutFocusNode,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              child: Text(
+                'Logout',
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.normal
+                ),
               ),
             ),
-            onTap: () async{
+            onPressed: () async{
               await logout();
               Navigator.pushReplacementNamed(context, '/base');
             },
           ),
-          ListTile(
+          FlatButton(
             focusColor: Theme.of(context).accentColor,
-            focusNode: FocusNode(),
-            title: Text(
-              'Über die App',
-              style: TextStyle(
-                  color: Colors.white
+            focusNode: this.aboutFocusNode,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              child: Text(
+                'Über die App',
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.normal,
+                ),
               ),
             ),
-            onTap: (){
+            onPressed: (){
               Navigator.pushNamed(context, '/about');
             },
           ),
