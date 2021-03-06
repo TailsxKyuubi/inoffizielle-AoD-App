@@ -68,9 +68,6 @@ class AnimeWidgetState extends State<AnimeWidget>{
                 break;
               case KEY_CENTER:
                 this.showFullDescription = !this.showFullDescription;
-                //this.generateFixedFocusNode();
-                //FocusScope.of(context).requestFocus(this.readMoreFocusNode);
-                setState(() {});
                 break;
             }
             setState(() {});
@@ -124,8 +121,23 @@ class AnimeWidgetState extends State<AnimeWidget>{
               onKey: (FocusNode focusNode,RawKeyEvent keyEvent){
                 if( Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyDownEvent ){
                   RawKeyEventDataAndroid rawKeyEventData = keyEvent.data;
-                  if(rawKeyEventData.keyCode == KEY_RIGHT){
-                    FocusScope.of(context).requestFocus(this.omuFocusNodes[this.episodeIndex]);
+                  if(rawKeyEventData.keyCode == KEY_RIGHT) {
+                    FocusScope.of(context).requestFocus(
+                        this.omuFocusNodes[this.episodeIndex]);
+                    return true;
+                  }else if(rawKeyEventData.keyCode == KEY_CENTER){
+                    Navigator.pushNamed(
+                        context,
+                        '/player',
+                        arguments: PlayerTransfer(
+                            this.episodes[episodeIndex],
+                            this.episodes[episodeIndex].languages.indexOf('Deutsch'),
+                            this._csrf,
+                            this._anime,
+                            this.episodeIndex,
+                            this.episodes.length
+                        )
+                    );
                     return true;
                   }else{
                     int oldIndex = this.episodeIndex;
@@ -154,10 +166,24 @@ class AnimeWidgetState extends State<AnimeWidget>{
               onKey: (FocusNode focusNode,RawKeyEvent keyEvent){
                 if( Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyDownEvent ){
                   RawKeyEventDataAndroid rawKeyEventData = keyEvent.data;
-                  if(rawKeyEventData.keyCode == KEY_LEFT){
-                    FocusScope.of(context).requestFocus(this.germanFocusNodes[this.episodeIndex]);
+                  if(rawKeyEventData.keyCode == KEY_LEFT) {
+                    FocusScope.of(context).requestFocus(
+                        this.germanFocusNodes[this.episodeIndex]);
                     setState(() {});
                     return true;
+                  }else if(rawKeyEventData.keyCode == KEY_CENTER){
+                    Navigator.pushNamed(
+                        context,
+                        '/player',
+                        arguments: PlayerTransfer(
+                            this.episodes[episodeIndex],
+                            this.episodes[episodeIndex].languages.indexOf('Japanisch (UT)'),
+                            this._csrf,
+                            this._anime,
+                            this.episodeIndex,
+                            this.episodes.length
+                        )
+                    );
                   }else{
                     int oldIndex = this.episodeIndex;
                     handleKeys(rawKeyEventData.keyCode);
