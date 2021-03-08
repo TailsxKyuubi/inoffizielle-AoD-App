@@ -126,18 +126,22 @@ class AnimeWidgetState extends State<AnimeWidget>{
                         this.omuFocusNodes[this.episodeIndex]);
                     return true;
                   }else if(rawKeyEventData.keyCode == KEY_CENTER){
-                    Navigator.pushNamed(
-                        context,
-                        '/player',
-                        arguments: PlayerTransfer(
-                            this.episodes[episodeIndex],
-                            this.episodes[episodeIndex].languages.indexOf('Deutsch'),
-                            this._csrf,
-                            this._anime,
-                            this.episodeIndex,
-                            this.episodes.length
-                        )
-                    );
+                    Episode episode = this.episodes[episodeIndex];
+                    if(episode.languages.indexOf('Deutsch') != -1) {
+                      Navigator.pushNamed(
+                          context,
+                          '/player',
+                          arguments: PlayerTransfer(
+                              episode,
+                              episode.languages.indexOf(
+                                  'Deutsch'),
+                              this._csrf,
+                              this._anime,
+                              this.episodeIndex,
+                              this.episodes.length
+                          )
+                      );
+                    }
                     return true;
                   }else{
                     int oldIndex = this.episodeIndex;
@@ -172,18 +176,22 @@ class AnimeWidgetState extends State<AnimeWidget>{
                     setState(() {});
                     return true;
                   }else if(rawKeyEventData.keyCode == KEY_CENTER){
-                    Navigator.pushNamed(
-                        context,
-                        '/player',
-                        arguments: PlayerTransfer(
-                            this.episodes[episodeIndex],
-                            this.episodes[episodeIndex].languages.indexOf('Japanisch (UT)'),
-                            this._csrf,
-                            this._anime,
-                            this.episodeIndex,
-                            this.episodes.length
-                        )
-                    );
+                    Episode episode = this.episodes[episodeIndex];
+                    if(episode.languages.indexOf('Japanisch (UT)') != -1) {
+                      Navigator.pushNamed(
+                          context,
+                          '/player',
+                          arguments: PlayerTransfer(
+                              episode,
+                              episode.languages.indexOf(
+                                  'Japanisch (UT)'),
+                              this._csrf,
+                              this._anime,
+                              this.episodeIndex,
+                              this.episodes.length
+                          )
+                      );
+                    }
                   }else{
                     int oldIndex = this.episodeIndex;
                     handleKeys(rawKeyEventData.keyCode);
