@@ -114,12 +114,12 @@ class PlayerState extends State<PlayerWidget> {
       print('video halted');
       playerCache.updateThread.cancel();
       playerCache.timeTrackThread.cancel();
-      await SystemChrome.setPreferredOrientations(
+      /*await SystemChrome.setPreferredOrientations(
           [
             DeviceOrientation.portraitUp,
             DeviceOrientation.portraitDown
           ]
-      );
+      );*/
       print('switched orientation');
       Navigator.pop(context);
       playerCache.controller = null;
