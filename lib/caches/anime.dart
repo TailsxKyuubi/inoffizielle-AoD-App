@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 TailsxKyuubi
+ * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 class Anime {
@@ -11,10 +11,10 @@ class Anime {
   static Anime fromMap(Map<String,String> animeMap){
 
     return Anime(
-      id: int.parse(animeMap['id']),
-      name: animeMap['name'],
-      description: animeMap['description'],
-      imageUrl: animeMap['imageUrl']
+        id: int.parse(animeMap['id']),
+        name: animeMap['name'],
+        description: animeMap['description'],
+        imageUrl: animeMap['imageUrl']
     );
   }
   toMap(){

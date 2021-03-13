@@ -1,3 +1,7 @@
+/*
+ * Copyright 2020-2021 TailsxKyuubi
+ * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
+ */
 const int KEY_UP                  = 19;
 const int KEY_DOWN                = 20;
 const int KEY_LEFT                = 21;

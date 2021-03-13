@@ -1,10 +1,13 @@
 /*
- * Copyright 2020 TailsxKyuubi
+ * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:unoffical_aod_app/caches/focusnode.dart';
+import 'package:unoffical_aod_app/caches/global_key.dart';
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
+import 'package:unoffical_aod_app/widgets/settings/custom_dropdown.dart';
 
 class PlayerSettingsWidget extends StatefulWidget{
   @override
@@ -29,6 +32,7 @@ class _PlayerSettingsState extends State<PlayerSettingsWidget> {
                 ),
               ),
               trailing: Switch(
+                focusNode: playerSettingsFocusNodes[0],
                 onChanged: (bool value) {
                   setState(() {
                     settings.playerSettings.setAlwaysShowProgress(value);
@@ -44,9 +48,10 @@ class _PlayerSettingsState extends State<PlayerSettingsWidget> {
                     color: Colors.white
                 ),
               ),
-              trailing: DropdownButton<String>(
+              trailing: CustomDropdownButton<String>(
+                key: qualityDropdownKey,
+                focusNode: playerSettingsFocusNodes[1],
                 onChanged: (value) {
-
                   setState(() {
                     settings.playerSettings.setDefaultQuality(int.parse(value));
                   });
@@ -113,6 +118,7 @@ class _PlayerSettingsState extends State<PlayerSettingsWidget> {
                 ),
               ),
               trailing: Switch(
+                focusNode: playerSettingsFocusNodes[2],
                 onChanged: (bool value) {
                   setState(() {
                     settings.playerSettings.setSaveEpisodeProgress(value);

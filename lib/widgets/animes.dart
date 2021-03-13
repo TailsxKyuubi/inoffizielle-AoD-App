@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 TailsxKyuubi
+ * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'dart:io';
@@ -11,6 +11,7 @@ import 'package:unoffical_aod_app/caches/anime.dart';
 import 'package:unoffical_aod_app/caches/focusnode.dart';
 import 'package:unoffical_aod_app/caches/keycodes.dart';
 import 'package:unoffical_aod_app/widgets/animes/anime.dart';
+import 'package:unoffical_aod_app/widgets/navigation_bar_custom.dart';
 import '../caches/animes.dart' as animes;
 
 class AnimesWidget extends StatefulWidget {
@@ -83,7 +84,9 @@ class _AnimesWidgetState extends State<AnimesWidget> {
           }
           break;
         case KEY_MENU:
-          scope.requestFocus(menuBarFocusNodes.first);
+          setState(() {
+            scope.requestFocus(menuBarFocusNodes.first);
+          });
           this._animeFocusIndex = 0;
           this._scrollController.animateTo(0, duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
           return true;
@@ -160,69 +163,76 @@ class _AnimesWidgetState extends State<AnimesWidget> {
             FocusScope.of(context).requestFocus(this.animeFocusNodes.first);
           }
         },
-        child: Container(
-            decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor
+        child: Scaffold(
+            appBar: AppBar(
+              backgroundColor: Theme.of(context).primaryColor,
+              title: Text('Meine Anime'),
             ),
-            height: MediaQuery.of(context).size.height,
-            padding: EdgeInsets.only(left: 20, right: 20),
-            child: ListView(
-                controller: _scrollController,
-                children: [
-                  Container(
-                    margin: EdgeInsets.only(top: 10),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.all(
-                          Radius.circular(5)
-                      ),
+            bottomNavigationBar: NavigationBarCustom(this.animeFocusNodes.first),
+            body: Container(
+                decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor
+                ),
+                height: MediaQuery.of(context).size.height,
+                padding: EdgeInsets.only(left: 20, right: 20),
+                child: ListView(
+                    controller: _scrollController,
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(top: 10),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.all(
+                              Radius.circular(5)
+                          ),
 
-                      child: Container(
-                        height: 40,
-                        padding: EdgeInsets.symmetric(horizontal: 5),
-                        decoration: BoxDecoration(
-                            color: Colors.grey
-                        ),
-                        child: TextField(
-                          controller: this._controller,
-                          focusNode: searchFocusNode,
-                          cursorColor: Theme.of(context).accentColor,
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: -14),
-                            hintText: 'Suche',
-                            hintStyle: TextStyle(
-                                color: Colors.white
+                          child: Container(
+                            height: 40,
+                            padding: EdgeInsets.symmetric(horizontal: 5),
+                            decoration: BoxDecoration(
+                                color: Colors.grey
+                            ),
+                            child: TextField(
+                              controller: this._controller,
+                              focusNode: searchFocusNode,
+                              cursorColor: Theme.of(context).accentColor,
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(vertical: -14),
+                                hintText: 'Suche',
+                                hintStyle: TextStyle(
+                                    color: Colors.white
+                                ),
+                              ),
+                              style: TextStyle(
+                                  color: Colors.white
+                              ),
+                              textInputAction: TextInputAction.next,
+                              onEditingComplete: (){
+                                setState(() {
+                                  print('Editing Complete');
+                                  this._animeFocusIndex = 0;
+                                  FocusScope.of(context).requestFocus(animeFocusNodes.first);
+                                });
+                              },
+                              onSubmitted: (_){
+                                setState(() {
+                                  print('search submitted');
+                                  this._animeFocusIndex = 0;
+                                  FocusScope.of(context).requestFocus(animeFocusNodes.first);
+                                });
+                              },
                             ),
                           ),
-                          style: TextStyle(
-                              color: Colors.white
-                          ),
-                          textInputAction: TextInputAction.next,
-                          onEditingComplete: (){
-                            setState(() {
-                              print('Editing Complete');
-                              this._animeFocusIndex = 0;
-                              FocusScope.of(context).requestFocus(animeFocusNodes.first);
-                            });
-                          },
-                          onSubmitted: (_){
-                            setState(() {
-                              print('search submitted');
-                              this._animeFocusIndex = 0;
-                              FocusScope.of(context).requestFocus(animeFocusNodes.first);
-                            });
-                          },
                         ),
                       ),
-                    ),
-                  ),
-                  Container(
-                      margin: EdgeInsets.only( top: 10, bottom: 10 ),
-                      child: Wrap(
-                        direction: Axis.horizontal,
-                        children: animeList,
+                      Container(
+                          margin: EdgeInsets.only( top: 10, bottom: 10 ),
+                          child: Wrap(
+                            direction: Axis.horizontal,
+                            children: animeList,
+                          )
                       )
-                  )
-                ]
+                    ]
+                )
             )
         )
     );

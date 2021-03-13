@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 TailsxKyuubi
+ * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'dart:io';
@@ -27,10 +27,10 @@ class _HomePageState extends State<HomePage> {
   ScrollController _newCatalogTitlesScrollController = ScrollController();
   ScrollController _topTenScrollController = ScrollController();
 
-  List<FocusNode> newEpisodesFocusNodes = [];
-  List<FocusNode> newSimulcastsFocusNodes = [];
-  List<FocusNode> newCatalogTitlesFocusNodes = [];
-  List<FocusNode> topTenFocusNodes = [];
+  List<FocusNode> _newEpisodesFocusNodes = [];
+  List<FocusNode> _newSimulcastsFocusNodes = [];
+  List<FocusNode> _newCatalogTitlesFocusNodes = [];
+  List<FocusNode> _topTenFocusNodes = [];
 
   FocusNode mainFocusNode;
 
@@ -42,22 +42,22 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState(){
-    newEpisodes.forEach((_) => this.newEpisodesFocusNodes.add(
+    newEpisodes.forEach((_) => this._newEpisodesFocusNodes.add(
         FocusNode(
             onKey: handleKeyEvent
         )
     ));
-    newSimulcastTitles.forEach((_) => this.newSimulcastsFocusNodes.add(
+    newSimulcastTitles.forEach((_) => this._newSimulcastsFocusNodes.add(
         FocusNode(
             onKey: handleKeyEvent
         )
     ));
-    newCatalogTitles.forEach((_) => this.newCatalogTitlesFocusNodes.add(
+    newCatalogTitles.forEach((_) => this._newCatalogTitlesFocusNodes.add(
         FocusNode(
             onKey: handleKeyEvent
         )
     ));
-    topTen.forEach((_) => this.topTenFocusNodes.add(
+    topTen.forEach((_) => this._topTenFocusNodes.add(
         FocusNode(
             onKey: handleKeyEvent
         )
@@ -68,14 +68,14 @@ class _HomePageState extends State<HomePage> {
   List<FocusNode> getRowList(){
     switch(this.rowIndex){
       case 3:
-        return this.topTenFocusNodes;
+        return this._topTenFocusNodes;
       case 2:
-        return this.newCatalogTitlesFocusNodes;
+        return this._newCatalogTitlesFocusNodes;
       case 1:
-        return this.newSimulcastsFocusNodes;
+        return this._newSimulcastsFocusNodes;
       case 0:
       default:
-        return this.newEpisodesFocusNodes;
+        return this._newEpisodesFocusNodes;
     }
   }
 
@@ -154,7 +154,9 @@ class _HomePageState extends State<HomePage> {
           break;
         case KEY_MENU:
           this._scrollController.animateTo(0, duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
-          FocusScope.of(context).requestFocus(menuBarFocusNodes.first);
+          setState(() {
+            FocusScope.of(context).requestFocus(menuBarFocusNodes.first);
+          });
           this.rowIndex = 0;
           this.itemIndex = 0;
           return true;
@@ -215,14 +217,14 @@ class _HomePageState extends State<HomePage> {
         autofocus: true,
         onKey: (RawKeyEvent event){
           if(this.mainFocusNode.hasPrimaryFocus){
-            FocusScope.of(context).requestFocus(this.newEpisodesFocusNodes.first);
+            FocusScope.of(context).requestFocus(this._newEpisodesFocusNodes.first);
           }
         },
         child: Scaffold(
             appBar: AppBar(
               title: Text('Startseite'),
             ),
-            bottomNavigationBar: NavigationBarCustom(this.newEpisodesFocusNodes[0]),
+            bottomNavigationBar: NavigationBarCustom(this._newEpisodesFocusNodes.first),
             //drawer: DrawerWidget(),
             body: Container(
               padding: EdgeInsets.only(top: 10),
@@ -283,7 +285,7 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   );
                                 },
-                                focusNode: newEpisodesFocusNodes[newEpisodesCount++],
+                                focusNode: this._newEpisodesFocusNodes[newEpisodesCount++],
                                 //focusNode: FocusNode(),
                                 child: Container(
                                     width: elementWidth,
@@ -393,7 +395,7 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   );
                                 },
-                                focusNode: newSimulcastsFocusNodes[newSimulcastsCount++],
+                                focusNode: _newSimulcastsFocusNodes[newSimulcastsCount++],
                                 child: Container(
                                     width: elementWidth,
                                     //margin: EdgeInsets.only(right: 5,left: 5),
@@ -471,7 +473,7 @@ class _HomePageState extends State<HomePage> {
                               animeName = e['series_name'];
                             }
                             return FlatButton(
-                                focusNode: newCatalogTitlesFocusNodes[newCatalogTitlesCount++],
+                                focusNode: _newCatalogTitlesFocusNodes[newCatalogTitlesCount++],
                                 focusColor: Theme.of(context).accentColor,
                                 padding: EdgeInsets.all(3),
                                 onPressed: () {
@@ -572,7 +574,7 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   );
                                 },
-                                focusNode: topTenFocusNodes[topTenCount++],
+                                focusNode: _topTenFocusNodes[topTenCount++],
                                 focusColor: Theme.of(context).accentColor,
                                 padding: EdgeInsets.all(3),
                                 child: Container(

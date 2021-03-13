@@ -1,3 +1,7 @@
+/*
+ * Copyright 2020-2021 TailsxKyuubi
+ * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
+ */
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -75,6 +79,7 @@ class _NavigationBarCustomState extends State<NavigationBarCustom> {
         case KEY_MENU:
         case KEY_UP:
           FocusScope.of(context).requestFocus(this.firstFocusNode);
+          setState(() {});
           break;
       }
       if(positionChanged){

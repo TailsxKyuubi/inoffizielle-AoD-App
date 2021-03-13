@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 TailsxKyuubi
+ * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'dart:async';
@@ -63,6 +63,14 @@ class AnimeWidgetState extends State<AnimeWidget>{
             switch(rawKeyEventData.keyCode){
               case KEY_DOWN:
                 focusScope.requestFocus(this.germanFocusNodes.first);
+                RenderBox box = this.germanFocusNodes.first.context.findRenderObject();
+                this._scrollController.animateTo(
+                    this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5),
+                    duration: Duration(
+                        milliseconds: 500
+                    ),
+                    curve: Curves.easeInOut
+                );
                 break;
               case KEY_UP:
                 focusScope.requestFocus(this.backFocusNode);
@@ -88,6 +96,14 @@ class AnimeWidgetState extends State<AnimeWidget>{
               case KEY_DOWN:
                 focusScope.requestFocus(this.readMoreFocusNode);
                 setState(() {});
+                RenderBox box = this.readMoreFocusNode.context.findRenderObject();
+                this._scrollController.animateTo(
+                    this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5),
+                    duration: Duration(
+                        milliseconds: 500
+                    ),
+                    curve: Curves.easeInOut
+                );
                 break;
               case KEY_CENTER:
                 Navigator.pop(context);
@@ -112,6 +128,14 @@ class AnimeWidgetState extends State<AnimeWidget>{
         print('try to jump to readmore');
         FocusScope.of(context).requestFocus(this.readMoreFocusNode);
         setState(() {});
+        RenderBox box = this.readMoreFocusNode.context.findRenderObject();
+        this._scrollController.animateTo(
+            this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5),
+            duration: Duration(
+                milliseconds: 500
+            ),
+            curve: Curves.easeInOut
+        );
       }
     }
   }
@@ -169,7 +193,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                       curve: Curves.easeInOut
                   );
                 }
-                return false;
+                return true;
               }
           )
       );
@@ -362,7 +386,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
           autofocus: true,
           onKey: (RawKeyEvent event){
             if(this.mainFocusNode.hasPrimaryFocus){
-              FocusScope.of(context).requestFocus(this.readMoreFocusNode);
+              FocusScope.of(context).requestFocus(this.backFocusNode);
             }
           },
           child: Scaffold(
