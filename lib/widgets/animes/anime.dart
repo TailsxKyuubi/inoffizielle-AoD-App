@@ -10,11 +10,11 @@ import 'package:unoffical_aod_app/caches/focusnode.dart';
 class AnimeSmallWidget extends StatelessWidget{
   final Anime _anime;
   final double elementWidth;
-  final int i;
   final double elementHeight;
   final Radius radius;
+  final FocusNode _focusNode;
 
-  AnimeSmallWidget(this._anime,this.elementWidth,this.elementHeight,this.radius,this.i);
+  AnimeSmallWidget(this._anime,this.elementWidth,this.elementHeight,this.radius,this._focusNode);
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,7 @@ class AnimeSmallWidget extends StatelessWidget{
             arguments: this._anime
           );
         },
-        focusNode: animeFocusNodes[i-1],
+        focusNode: _focusNode,
         focusColor: Theme.of(context).accentColor,
         padding: EdgeInsets.all(3.5),
         child: Container(

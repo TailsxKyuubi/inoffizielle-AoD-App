@@ -22,8 +22,88 @@ class _AnimesWidgetState extends State<AnimesWidget> {
   TextEditingController _controller = TextEditingController();
   Map<String,Anime> searchResult = animes.animes;
   ScrollController _scrollController = ScrollController();
+  List<FocusNode> animeFocusNodes = [];
+  List<String> _focusNodeAnimeMapping = [];
+
+  FocusNode mainFocusNode;
+
+  int _animeFocusIndex = 0;
   _AnimesWidgetState(){
     this._controller.addListener(onTextInput);
+    animes.animes.forEach((_, __) => this.animeFocusNodes.add(
+        FocusNode(
+            onKey: handleKey
+        )
+    ));
+  }
+
+  bool handleKey(FocusNode focusNode, RawKeyEvent event){
+    if( Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent ){
+      RawKeyEventDataAndroid eventDataAndroid = event.data;
+      FocusScopeNode scope = FocusScope.of(context);
+      switch(eventDataAndroid.keyCode){
+        case KEY_DOWN:
+          this._animeFocusIndex += 4;
+          if(this._animeFocusIndex >= searchResult.length){
+            this._animeFocusIndex = this.animeFocusNodes.length - this._animeFocusIndex;
+          }
+          scope.requestFocus(
+              this.animeFocusNodes[this._animeFocusIndex]
+          );
+          break;
+        case KEY_UP:
+          _animeFocusIndex -= 4;
+          if(this._animeFocusIndex < 0){
+            this._animeFocusIndex = -1;
+            FocusScope.of(context).requestFocus(searchFocusNode);
+          }else{
+            scope.requestFocus(
+                this.animeFocusNodes[this._animeFocusIndex]
+            );
+          }
+          break;
+        case KEY_RIGHT:
+          this._animeFocusIndex++;
+          if(this._animeFocusIndex >= searchResult.length){
+            this._animeFocusIndex = 0;
+          }
+          scope.requestFocus(
+              this.animeFocusNodes[this._animeFocusIndex]
+          );
+          break;
+        case KEY_LEFT:
+          this._animeFocusIndex--;
+          if(this._animeFocusIndex < 0){
+            this._animeFocusIndex = -1;
+            FocusScope.of(context).requestFocus(searchFocusNode);
+          }else{
+            scope.requestFocus(
+                this.animeFocusNodes[this._animeFocusIndex]
+            );
+          }
+          break;
+        case KEY_MENU:
+          scope.requestFocus(menuBarFocusNodes.first);
+          this._animeFocusIndex = 0;
+          this._scrollController.animateTo(0, duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
+          return true;
+        case KEY_BACK:
+          exit(0);
+          return true;
+        case KEY_CENTER:
+          Navigator.pushNamed(
+              context,
+              '/anime',
+              arguments: animes.animes[this._focusNodeAnimeMapping[this._animeFocusIndex]]
+          );
+      }
+      this._scrollController.animateTo(
+          (this.animeFocusNodes.indexOf(scope.focusedChild) / 4).floor() * scope.focusedChild.size.height,
+          curve: Curves.easeIn,
+          duration: Duration(milliseconds: 200)
+      );
+    }
+    return true;
   }
 
   onTextInput(){
@@ -50,106 +130,34 @@ class _AnimesWidgetState extends State<AnimesWidget> {
     }else{
       elementWidth = (mediaQuery.size.width-40)*0.5-7.5;
     }
+
+    this._focusNodeAnimeMapping.clear();
+
     double elementHeight = elementWidth / 16 * 9;
     Radius radius = Radius.circular(2);
     List<Widget> animeList = [];
     this.searchResult.forEach(
-            (String title,Anime anime) => animeList.add(
-            AnimeSmallWidget(
-                anime,
-                elementWidth,
-                elementHeight,
-                radius,
-                ++i
-            )
-        )
+            (String title,Anime anime) {
+          this._focusNodeAnimeMapping.add(title);
+          animeList.add(
+              AnimeSmallWidget(
+                  anime,
+                  elementWidth,
+                  elementHeight,
+                  radius,
+                  this.animeFocusNodes[i++]
+              )
+          );
+        }
     );
-    return RawKeyboardListener(
-        focusNode: animeFocusNode,
-        autofocus: true,
-        onKey: ( RawKeyEvent event ){
-          if( Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent ){
-            RawKeyEventDataAndroid eventDataAndroid = event.data;
-            FocusScopeNode scope = FocusScope.of(context);
-            if(animeFocusNode.hasPrimaryFocus){
-              setState(() {
-                print('primary focus lies on root Node');
-                animeFocusNode.unfocus();
-                scope.requestFocus(animeFocusNodes.first);
-              });
-            }else{
-              //scope.unfocus();
-              switch(eventDataAndroid.keyCode){
-                case KEY_DOWN:
-                  if( animeFocusNodes.contains( scope.focusedChild ) ){
 
-                    animeFocusNodesIndex += 4;
-                    if(animeFocusNodesIndex >= searchResult.length){
-                      animeFocusNodesIndex = animeFocusNodes.length - animeFocusNodesIndex;
-                    }
-                    scope.requestFocus(
-                        animeFocusNodes[
-                        animeFocusNodesIndex
-                        ]
-                    );
-                  }
-                  break;
-                case KEY_UP:
-                  if( animeFocusNodes.contains( scope.focusedChild ) ){
-                    animeFocusNodesIndex -= 4;
-                    if(animeFocusNodesIndex < 0){
-                      animeFocusNodesIndex = -1;
-                      FocusScope.of(context).requestFocus(searchFocusNode);
-                    }else{
-                      scope.requestFocus(
-                          animeFocusNodes[
-                          animeFocusNodesIndex
-                          ]
-                      );
-                    }
-                  }
-                  break;
-                case KEY_RIGHT:
-                  if( animeFocusNodes.contains( scope.focusedChild ) ){
-                    animeFocusNodesIndex++;
-                    if(animeFocusNodesIndex >= searchResult.length){
-                      animeFocusNodesIndex = 0;
-                    }
-                    scope.requestFocus(
-                        animeFocusNodes[
-                        animeFocusNodesIndex
-                        ]
-                    );
-                  }
-                  break;
-                case KEY_LEFT:
-                  if( animeFocusNodes.contains( scope.focusedChild ) ){
-                    animeFocusNodesIndex--;
-                    if(animeFocusNodesIndex < 0){
-                      animeFocusNodesIndex = -1;
-                      FocusScope.of(context).requestFocus(searchFocusNode);
-                    }else{
-                      scope.requestFocus(
-                          animeFocusNodes[
-                          animeFocusNodesIndex
-                          ]
-                      );
-                    }
-                  }
-                  break;
-              }
-              if(eventDataAndroid.keyCode == KEY_MENU){
-                ScaffoldState scaffold = Scaffold.of(context);
-                if( ! scaffold.isDrawerOpen ){
-                  scope.requestFocus(menuBarFocusNodes.first);
-                }
-              }
-              this._scrollController.animateTo(
-                  (animeFocusNodes.indexOf(scope.focusedChild) / 4).floor() * scope.focusedChild.size.height,
-                  curve: Curves.easeIn,
-                  duration: Duration(milliseconds: 200)
-              );
-            }
+    this.mainFocusNode = FocusNode();
+    return RawKeyboardListener(
+        focusNode: this.mainFocusNode,
+        autofocus: true,
+        onKey: (RawKeyEvent event){
+          if(this.mainFocusNode.hasPrimaryFocus){
+            FocusScope.of(context).requestFocus(this.animeFocusNodes.first);
           }
         },
         child: Container(
@@ -192,29 +200,26 @@ class _AnimesWidgetState extends State<AnimesWidget> {
                           onEditingComplete: (){
                             setState(() {
                               print('Editing Complete');
-                              animeFocusNodesIndex = 0;
-                              FocusScope.of(context).requestFocus(animeFocusNode);
+                              this._animeFocusIndex = 0;
+                              FocusScope.of(context).requestFocus(animeFocusNodes.first);
                             });
                           },
                           onSubmitted: (_){
                             setState(() {
                               print('search submitted');
-                              animeFocusNodesIndex = 0;
-                              FocusScope.of(context).requestFocus(animeFocusNode);
+                              this._animeFocusIndex = 0;
+                              FocusScope.of(context).requestFocus(animeFocusNodes.first);
                             });
                           },
                         ),
                       ),
                     ),
                   ),
-                  RawKeyboardListener(
-                      focusNode: FocusNode(),
-                      child: Container(
-                          margin: EdgeInsets.only( top: 10, bottom: 10 ),
-                          child: Wrap(
-                            direction: Axis.horizontal,
-                            children: animeList,
-                          )
+                  Container(
+                      margin: EdgeInsets.only( top: 10, bottom: 10 ),
+                      child: Wrap(
+                        direction: Axis.horizontal,
+                        children: animeList,
                       )
                   )
                 ]

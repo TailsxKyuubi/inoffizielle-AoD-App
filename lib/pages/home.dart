@@ -32,6 +32,8 @@ class _HomePageState extends State<HomePage> {
   List<FocusNode> newCatalogTitlesFocusNodes = [];
   List<FocusNode> topTenFocusNodes = [];
 
+  FocusNode mainFocusNode;
+
   int rowIndex = 0;
   int itemIndex = 0;
 
@@ -205,405 +207,417 @@ class _HomePageState extends State<HomePage> {
     int newSimulcastsCount = 0;
     int newCatalogTitlesCount = 0;
     int topTenCount = 0;
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('Startseite'),
-        ),
-        bottomNavigationBar: NavigationBarCustom(this.newEpisodesFocusNodes[0]),
-        //drawer: DrawerWidget(),
-        body: Container(
-          padding: EdgeInsets.only(top: 10),
-          decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor
-          ),
-          child: ListView(
-              controller: _scrollController,
-              children:[
-                Container(
-                  margin: EdgeInsets.only(
-                      bottom: 10,left: 10
-                  ),
-                  child: Text(
-                    'NEUE EPISODEN',
-                    style: TextStyle(
-                      color: Theme.of(context).accentColor,
-                      fontSize: 20,
-                      fontFamily: 'Cabin Condensed',
-                    ),
-                  ),
-                ),
-                Container(
-                    height: elementHeight+10,
-                    child: ListView(
-                      controller: _newEpisodesScrollController,
-                      scrollDirection: Axis.horizontal,
-                      children: newEpisodes.map<Widget>((e){
-                        Uri url = Uri.parse(e['image']);
-                        //String seriesName = e['series_name'].split(':')[0];
-                        String animeName;
-                        int limiter = 14;
-                        int maxLimiter = 17;
-                        if(e['series_name'].length > limiter){
-                          int index = e['series_name'].indexOf(' ',limiter);
-                          if(index != -1 && index <= maxLimiter) {
-                            animeName = e['series_name'].substring(
-                                0, e['series_name'].indexOf(' ', limiter)) + ' ...';
-                          }else if(index > maxLimiter || e['series_name'].length > maxLimiter){
-                            animeName = e['series_name'].substring(0,maxLimiter) + ' ...';
-                          }else{
-                            animeName = e['series_name'];
-                          }
-                        }else{
-                          animeName = e['series_name'];
-                        }
 
-                        return FlatButton(
-                            focusColor: Theme.of(context).accentColor,
-                            padding: EdgeInsets.all(3),
-                            onPressed: (){
-                              Navigator.pushNamed(
-                                context,
-                                '/anime',
-                                arguments: Anime(
-                                  name: e['series_name'],
-                                  id: int.parse(e['series_id']),
-                                ),
-                              );
-                            },
-                            focusNode: newEpisodesFocusNodes[newEpisodesCount++],
-                            //focusNode: FocusNode(),
-                            child: Container(
-                                width: elementWidth,
-                                //margin: EdgeInsets.only(right: 5,left: 5),
-                                child: ClipRRect(
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(5)
+    this.mainFocusNode = FocusNode();
+
+    return RawKeyboardListener(
+        focusNode: this.mainFocusNode,
+        autofocus: true,
+        onKey: (RawKeyEvent event){
+          if(this.mainFocusNode.hasPrimaryFocus){
+            FocusScope.of(context).requestFocus(this.newEpisodesFocusNodes.first);
+          }
+        },
+        child: Scaffold(
+            appBar: AppBar(
+              title: Text('Startseite'),
+            ),
+            bottomNavigationBar: NavigationBarCustom(this.newEpisodesFocusNodes[0]),
+            //drawer: DrawerWidget(),
+            body: Container(
+              padding: EdgeInsets.only(top: 10),
+              decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor
+              ),
+              child: ListView(
+                  controller: _scrollController,
+                  children:[
+                    Container(
+                      margin: EdgeInsets.only(
+                          bottom: 10,left: 10
+                      ),
+                      child: Text(
+                        'NEUE EPISODEN',
+                        style: TextStyle(
+                          color: Theme.of(context).accentColor,
+                          fontSize: 20,
+                          fontFamily: 'Cabin Condensed',
+                        ),
+                      ),
+                    ),
+                    Container(
+                        height: elementHeight+10,
+                        child: ListView(
+                          controller: _newEpisodesScrollController,
+                          scrollDirection: Axis.horizontal,
+                          children: newEpisodes.map<Widget>((e){
+                            Uri url = Uri.parse(e['image']);
+                            //String seriesName = e['series_name'].split(':')[0];
+                            String animeName;
+                            int limiter = 14;
+                            int maxLimiter = 17;
+                            if(e['series_name'].length > limiter){
+                              int index = e['series_name'].indexOf(' ',limiter);
+                              if(index != -1 && index <= maxLimiter) {
+                                animeName = e['series_name'].substring(
+                                    0, e['series_name'].indexOf(' ', limiter)) + ' ...';
+                              }else if(index > maxLimiter || e['series_name'].length > maxLimiter){
+                                animeName = e['series_name'].substring(0,maxLimiter) + ' ...';
+                              }else{
+                                animeName = e['series_name'];
+                              }
+                            }else{
+                              animeName = e['series_name'];
+                            }
+
+                            return FlatButton(
+                                focusColor: Theme.of(context).accentColor,
+                                padding: EdgeInsets.all(3),
+                                onPressed: (){
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/anime',
+                                    arguments: Anime(
+                                      name: e['series_name'],
+                                      id: int.parse(e['series_id']),
                                     ),
-                                    child: Column(
-                                      children: [
-                                        CachedNetworkImage(
-                                          imageUrl: 'https://'+url.host+url.path,
-                                          width: elementWidth,
-                                          height: elementHeight-40,
+                                  );
+                                },
+                                focusNode: newEpisodesFocusNodes[newEpisodesCount++],
+                                //focusNode: FocusNode(),
+                                child: Container(
+                                    width: elementWidth,
+                                    //margin: EdgeInsets.only(right: 5,left: 5),
+                                    child: ClipRRect(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(5)
                                         ),
-                                        Container(
-                                          width: elementWidth,
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context).accentColor,
-                                          ),
-                                          child: Container(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 2,
-                                                  vertical: 3
+                                        child: Column(
+                                          children: [
+                                            CachedNetworkImage(
+                                              imageUrl: 'https://'+url.host+url.path,
+                                              width: elementWidth,
+                                              height: elementHeight-40,
+                                            ),
+                                            Container(
+                                              width: elementWidth,
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context).accentColor,
                                               ),
-                                              child: Text(
-                                                animeName,
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    color: Theme.of(context).primaryColor
+                                              child: Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 2,
+                                                      vertical: 3
+                                                  ),
+                                                  child: Text(
+                                                    animeName,
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                        color: Theme.of(context).primaryColor
+                                                    ),
+                                                  )
+                                              ),
+                                            ),
+                                            Container(
+                                                width: elementWidth,
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 3
                                                 ),
-                                              )
-                                          ),
-                                        ),
-                                        Container(
-                                            width: elementWidth,
-                                            padding: EdgeInsets.symmetric(
-                                                vertical: 3
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Color.fromRGBO(66,69,68,1),
-                                            ),
-                                            child: Text
-                                              (
-                                              'Folge ' + e['episode_number']
-                                                  .replaceAll('GRATIS','')
-                                                  .replaceAll('(Dub-Upgrade)',''),
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                  color: Colors.white
-                                              ),
+                                                decoration: BoxDecoration(
+                                                  color: Color.fromRGBO(66,69,68,1),
+                                                ),
+                                                child: Text
+                                                  (
+                                                  'Folge ' + e['episode_number']
+                                                      .replaceAll('GRATIS','')
+                                                      .replaceAll('(Dub-Upgrade)',''),
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                      color: Colors.white
+                                                  ),
+                                                )
                                             )
+                                          ],
                                         )
-                                      ],
                                     )
                                 )
-                            )
-                        );
-                      }).toList(),
-                    )
-                ),
-                Container(
-                  margin: EdgeInsets.only(bottom: 10,left: 10,top: 15),
-                  child: Text(
-                    'NEUE SIMULCASTS',
-                    style: TextStyle(
-                      color: Theme.of(context).accentColor,
-                      fontSize: 20,
-                      fontFamily: 'Cabin Condensed',
+                            );
+                          }).toList(),
+                        )
                     ),
-                  ),
-                ),
-                Container(
-                    height: elementHeight-12,
-                    child: ListView(
-                      controller: _newSimulcastsScrollController,
-                      scrollDirection: Axis.horizontal,
-                      children: newSimulcastTitles.map<Widget>((e){
-                        Uri url = Uri.parse(e['image']);
-                        //String seriesName = e['series_name'].split(':')[0];
-                        String animeName;
-                        int limiter = 14;
-                        int maxLimiter = 17;
-                        if(e['series_name'].length > limiter){
-                          int index = e['series_name'].indexOf(' ',limiter);
-                          if(index != -1 && index <= maxLimiter) {
-                            animeName = e['series_name'].substring(
-                                0, e['series_name'].indexOf(' ', limiter)) + ' ...';
-                          }else if(index > maxLimiter || e['series_name'].length > maxLimiter){
-                            animeName = e['series_name'].substring(0,maxLimiter) + ' ...';
-                          }else{
-                            animeName = e['series_name'];
-                          }
-                        }else{
-                          animeName = e['series_name'];
-                        }
-                        return FlatButton(
-                            focusColor: Theme.of(context).accentColor,
-                            padding: EdgeInsets.all(3),
-                            onPressed: (){
-                              Navigator.pushNamed(
-                                context,
-                                '/anime',
-                                arguments: Anime(
-                                  name: e['series_name'],
-                                  id: int.parse(e['series_id']),
-                                ),
-                              );
-                            },
-                            focusNode: newSimulcastsFocusNodes[newSimulcastsCount++],
-                            child: Container(
-                                width: elementWidth,
-                                //margin: EdgeInsets.only(right: 5,left: 5),
-                                child: ClipRRect(
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(5)
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        CachedNetworkImage(
-                                          imageUrl: 'https://'+url.host+url.path,
-                                          width: elementWidth,
-                                          height: elementHeight-40,
-                                        ),
-                                        Container(
-                                          width: elementWidth,
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context).accentColor,
-                                          ),
-                                          child: Container(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 2,
-                                                  vertical: 3
-                                              ),
-                                              child: Text(
-                                                animeName,
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    color: Theme.of(context).primaryColor
-                                                ),
-                                              )
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                )
-                            )
-                        );
-                      }).toList(),
-                    )
-                ),
-                Container(
-                  margin: EdgeInsets.only(bottom: 10,left: 10,top: 15),
-                  child: Text(
-                    'NEUE ANIME-TITEL',
-                    style: TextStyle(
-                      color: Theme.of(context).accentColor,
-                      fontSize: 20,
-                      fontFamily: 'Cabin Condensed',
+                    Container(
+                      margin: EdgeInsets.only(bottom: 10,left: 10,top: 15),
+                      child: Text(
+                        'NEUE SIMULCASTS',
+                        style: TextStyle(
+                          color: Theme.of(context).accentColor,
+                          fontSize: 20,
+                          fontFamily: 'Cabin Condensed',
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                Container(
-                    height: elementHeight-12,
-                    child: ListView(
-                      controller: _newCatalogTitlesScrollController,
-                      scrollDirection: Axis.horizontal,
-                      children: newCatalogTitles.map<Widget>((e){
-                        Uri url = Uri.parse(e['image']);
-                        //String seriesName = e['series_name'].split(':')[0];
-                        String animeName;
-                        int limiter = 14;
-                        int maxLimiter = 17;
-                        if(e['series_name'].length > limiter){
-                          int index = e['series_name'].indexOf(' ',limiter);
-                          if(index != -1 && index <= maxLimiter) {
-                            animeName = e['series_name'].substring(
-                                0, e['series_name'].indexOf(' ', limiter)) + ' ...';
-                          }else if(index > maxLimiter || e['series_name'].length > maxLimiter){
-                            animeName = e['series_name'].substring(0,maxLimiter) + ' ...';
-                          }else{
-                            animeName = e['series_name'];
-                          }
-                        }else{
-                          animeName = e['series_name'];
-                        }
-                        return FlatButton(
-                            focusNode: newCatalogTitlesFocusNodes[newCatalogTitlesCount++],
-                            focusColor: Theme.of(context).accentColor,
-                            padding: EdgeInsets.all(3),
-                            onPressed: () {
-                              Navigator.pushNamed(
-                                context,
-                                '/anime',
-                                arguments: Anime(
-                                  name: e['series_name'],
-                                  id: int.parse(e['series_id']),
-                                ),
-                              );
-                            },
-                            child: Container(
-                                width: elementWidth,
-                                //margin: EdgeInsets.only(right: 5,left: 5),
-                                child: ClipRRect(
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(5)
+                    Container(
+                        height: elementHeight-12,
+                        child: ListView(
+                          controller: _newSimulcastsScrollController,
+                          scrollDirection: Axis.horizontal,
+                          children: newSimulcastTitles.map<Widget>((e){
+                            Uri url = Uri.parse(e['image']);
+                            //String seriesName = e['series_name'].split(':')[0];
+                            String animeName;
+                            int limiter = 14;
+                            int maxLimiter = 17;
+                            if(e['series_name'].length > limiter){
+                              int index = e['series_name'].indexOf(' ',limiter);
+                              if(index != -1 && index <= maxLimiter) {
+                                animeName = e['series_name'].substring(
+                                    0, e['series_name'].indexOf(' ', limiter)) + ' ...';
+                              }else if(index > maxLimiter || e['series_name'].length > maxLimiter){
+                                animeName = e['series_name'].substring(0,maxLimiter) + ' ...';
+                              }else{
+                                animeName = e['series_name'];
+                              }
+                            }else{
+                              animeName = e['series_name'];
+                            }
+                            return FlatButton(
+                                focusColor: Theme.of(context).accentColor,
+                                padding: EdgeInsets.all(3),
+                                onPressed: (){
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/anime',
+                                    arguments: Anime(
+                                      name: e['series_name'],
+                                      id: int.parse(e['series_id']),
                                     ),
-                                    child: Column(
-                                      children: [
-                                        CachedNetworkImage(
-                                          imageUrl: 'https://'+url.host+url.path,
-                                          width: elementWidth,
-                                          height: elementHeight-40,
+                                  );
+                                },
+                                focusNode: newSimulcastsFocusNodes[newSimulcastsCount++],
+                                child: Container(
+                                    width: elementWidth,
+                                    //margin: EdgeInsets.only(right: 5,left: 5),
+                                    child: ClipRRect(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(5)
                                         ),
-                                        Container(
-                                          width: elementWidth,
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context).accentColor,
-                                          ),
-                                          child: Container(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 2,
-                                                  vertical: 3
+                                        child: Column(
+                                          children: [
+                                            CachedNetworkImage(
+                                              imageUrl: 'https://'+url.host+url.path,
+                                              width: elementWidth,
+                                              height: elementHeight-40,
+                                            ),
+                                            Container(
+                                              width: elementWidth,
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context).accentColor,
                                               ),
-                                              child: Text(
-                                                animeName,
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    color: Theme.of(context).primaryColor
-                                                ),
-                                              )
-                                          ),
-                                        ),
-                                      ],
+                                              child: Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 2,
+                                                      vertical: 3
+                                                  ),
+                                                  child: Text(
+                                                    animeName,
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                        color: Theme.of(context).primaryColor
+                                                    ),
+                                                  )
+                                              ),
+                                            ),
+                                          ],
+                                        )
                                     )
                                 )
-                            )
-                        );
-                      }).toList(),
-                    )
-                ),
-                Container(
-                  margin: EdgeInsets.only(bottom: 10,left: 10,top: 15),
-                  child: Text(
-                    'ANIME TOP 10',
-                    style: TextStyle(
-                      color: Theme.of(context).accentColor,
-                      fontSize: 20,
-                      fontFamily: 'Cabin Condensed',
+                            );
+                          }).toList(),
+                        )
                     ),
-                  ),
-                ),
-                Container(
-                    height: elementHeight-12,
-                    margin: EdgeInsets.only(bottom: 10),
-                    child: ListView(
-                      controller: _topTenScrollController,
-                      scrollDirection: Axis.horizontal,
-                      children: topTen.map<Widget>((e){
-                        Uri url = Uri.parse(e['image']);
-                        //String seriesName = e['series_name'].split(':')[0];
-                        String animeName;
-                        int limiter = 14;
-                        int maxLimiter = 17;
-                        if(e['series_name'].length > limiter){
-                          int index = e['series_name'].indexOf(' ',limiter);
-                          if(index != -1 && index <= maxLimiter) {
-                            animeName = e['series_name'].substring(
-                                0, e['series_name'].indexOf(' ', limiter)) + ' ...';
-                          }else if(index > maxLimiter || e['series_name'].length > maxLimiter){
-                            animeName = e['series_name'].substring(0,maxLimiter) + ' ...';
-                          }else{
-                            animeName = e['series_name'];
-                          }
-                        }else{
-                          animeName = e['series_name'];
-                        }
-                        return FlatButton(
-                            onPressed: (){
-                              Navigator.pushNamed(
-                                context,
-                                '/anime',
-                                arguments: Anime(
-                                  name: e['series_name'],
-                                  id: int.parse(e['series_id']),
-                                ),
-                              );
-                            },
-                            focusNode: topTenFocusNodes[topTenCount++],
-                            focusColor: Theme.of(context).accentColor,
-                            padding: EdgeInsets.all(3),
-                            child: Container(
-                                width: elementWidth,
-                                child: ClipRRect(
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(5)
+                    Container(
+                      margin: EdgeInsets.only(bottom: 10,left: 10,top: 15),
+                      child: Text(
+                        'NEUE ANIME-TITEL',
+                        style: TextStyle(
+                          color: Theme.of(context).accentColor,
+                          fontSize: 20,
+                          fontFamily: 'Cabin Condensed',
+                        ),
+                      ),
+                    ),
+                    Container(
+                        height: elementHeight-12,
+                        child: ListView(
+                          controller: _newCatalogTitlesScrollController,
+                          scrollDirection: Axis.horizontal,
+                          children: newCatalogTitles.map<Widget>((e){
+                            Uri url = Uri.parse(e['image']);
+                            //String seriesName = e['series_name'].split(':')[0];
+                            String animeName;
+                            int limiter = 14;
+                            int maxLimiter = 17;
+                            if(e['series_name'].length > limiter){
+                              int index = e['series_name'].indexOf(' ',limiter);
+                              if(index != -1 && index <= maxLimiter) {
+                                animeName = e['series_name'].substring(
+                                    0, e['series_name'].indexOf(' ', limiter)) + ' ...';
+                              }else if(index > maxLimiter || e['series_name'].length > maxLimiter){
+                                animeName = e['series_name'].substring(0,maxLimiter) + ' ...';
+                              }else{
+                                animeName = e['series_name'];
+                              }
+                            }else{
+                              animeName = e['series_name'];
+                            }
+                            return FlatButton(
+                                focusNode: newCatalogTitlesFocusNodes[newCatalogTitlesCount++],
+                                focusColor: Theme.of(context).accentColor,
+                                padding: EdgeInsets.all(3),
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/anime',
+                                    arguments: Anime(
+                                      name: e['series_name'],
+                                      id: int.parse(e['series_id']),
                                     ),
-                                    child: Column(
-                                      children: [
-                                        CachedNetworkImage(
-                                          imageUrl: 'https://'+url.host+url.path,
-                                          width: elementWidth,
-                                          height: elementHeight-40,
+                                  );
+                                },
+                                child: Container(
+                                    width: elementWidth,
+                                    //margin: EdgeInsets.only(right: 5,left: 5),
+                                    child: ClipRRect(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(5)
                                         ),
-                                        Container(
-                                          width: elementWidth,
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context).accentColor,
-                                          ),
-                                          child: Container(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 2,
-                                                  vertical: 3
+                                        child: Column(
+                                          children: [
+                                            CachedNetworkImage(
+                                              imageUrl: 'https://'+url.host+url.path,
+                                              width: elementWidth,
+                                              height: elementHeight-40,
+                                            ),
+                                            Container(
+                                              width: elementWidth,
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context).accentColor,
                                               ),
-                                              child: Text(
-                                                animeName,
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    color: Theme.of(context).primaryColor
-                                                ),
-                                              )
-                                          ),
-                                        ),
-                                      ],
+                                              child: Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 2,
+                                                      vertical: 3
+                                                  ),
+                                                  child: Text(
+                                                    animeName,
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                        color: Theme.of(context).primaryColor
+                                                    ),
+                                                  )
+                                              ),
+                                            ),
+                                          ],
+                                        )
                                     )
                                 )
-                            )
-                        );
-                      }).toList(),
+                            );
+                          }).toList(),
+                        )
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(bottom: 10,left: 10,top: 15),
+                      child: Text(
+                        'ANIME TOP 10',
+                        style: TextStyle(
+                          color: Theme.of(context).accentColor,
+                          fontSize: 20,
+                          fontFamily: 'Cabin Condensed',
+                        ),
+                      ),
+                    ),
+                    Container(
+                        height: elementHeight-12,
+                        margin: EdgeInsets.only(bottom: 10),
+                        child: ListView(
+                          controller: _topTenScrollController,
+                          scrollDirection: Axis.horizontal,
+                          children: topTen.map<Widget>((e){
+                            Uri url = Uri.parse(e['image']);
+                            //String seriesName = e['series_name'].split(':')[0];
+                            String animeName;
+                            int limiter = 14;
+                            int maxLimiter = 17;
+                            if(e['series_name'].length > limiter){
+                              int index = e['series_name'].indexOf(' ',limiter);
+                              if(index != -1 && index <= maxLimiter) {
+                                animeName = e['series_name'].substring(
+                                    0, e['series_name'].indexOf(' ', limiter)) + ' ...';
+                              }else if(index > maxLimiter || e['series_name'].length > maxLimiter){
+                                animeName = e['series_name'].substring(0,maxLimiter) + ' ...';
+                              }else{
+                                animeName = e['series_name'];
+                              }
+                            }else{
+                              animeName = e['series_name'];
+                            }
+                            return FlatButton(
+                                onPressed: (){
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/anime',
+                                    arguments: Anime(
+                                      name: e['series_name'],
+                                      id: int.parse(e['series_id']),
+                                    ),
+                                  );
+                                },
+                                focusNode: topTenFocusNodes[topTenCount++],
+                                focusColor: Theme.of(context).accentColor,
+                                padding: EdgeInsets.all(3),
+                                child: Container(
+                                    width: elementWidth,
+                                    child: ClipRRect(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(5)
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            CachedNetworkImage(
+                                              imageUrl: 'https://'+url.host+url.path,
+                                              width: elementWidth,
+                                              height: elementHeight-40,
+                                            ),
+                                            Container(
+                                              width: elementWidth,
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context).accentColor,
+                                              ),
+                                              child: Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 2,
+                                                      vertical: 3
+                                                  ),
+                                                  child: Text(
+                                                    animeName,
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                        color: Theme.of(context).primaryColor
+                                                    ),
+                                                  )
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                    )
+                                )
+                            );
+                          }).toList(),
+                        )
                     )
-                )
-              ]
-          ),
+                  ]
+              ),
+            )
         )
       //)
     );

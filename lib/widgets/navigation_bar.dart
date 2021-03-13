@@ -57,7 +57,6 @@ class _NavigationBarState extends State<NavigationBar> {
                   break;
                 case 1:
                   routeName = '/animes';
-                  animeFocusNodesIndex = -1;
                   break;
                 case 2:
                   routeName = '/settings';

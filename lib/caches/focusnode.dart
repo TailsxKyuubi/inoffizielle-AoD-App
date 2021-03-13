@@ -5,8 +5,6 @@ List<FocusNode> menuBarFocusNodes = [];
 FocusNode homeFocusNode = FocusNode();
 
 FocusNode searchFocusNode = FocusNode();
-List<FocusNode> animeFocusNodes = [];
-int animeFocusNodesIndex = -1;
 FocusNode animeFocusNode = FocusNode();
 
 FocusNode settingsFocusNode = FocusNode();

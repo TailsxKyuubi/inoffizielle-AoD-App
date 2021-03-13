@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:unoffical_aod_app/caches/app.dart';
 import 'package:unoffical_aod_app/caches/episode_progress.dart';
-import 'package:unoffical_aod_app/caches/focusnode.dart';
 import 'package:unoffical_aod_app/caches/home.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
@@ -144,11 +143,6 @@ class LoadingState extends State<BaseWidget>{
                           }
                       )
               );
-              animesCache.animes.forEach((_,__)  => animeFocusNodes.add(
-                  FocusNode(
-                    //onKey: (_,__) => false
-                  )
-              ));
               episodeProgressCache = EpisodeProgressCache();
             } else if (data.containsKey('newEpisodes')) {
               newEpisodes.addAll(
