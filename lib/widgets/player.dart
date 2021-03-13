@@ -26,7 +26,6 @@ import 'package:wakelock/wakelock.dart';
 import 'package:unoffical_aod_app/caches/playercache.dart' as playerCache;
 
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:toast/toast.dart';
 
 class PlayerWidget extends StatefulWidget {
   final ReceivePort receivePort = ReceivePort();
