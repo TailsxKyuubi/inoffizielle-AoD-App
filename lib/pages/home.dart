@@ -153,6 +153,8 @@ class _HomePageState extends State<HomePage> {
         case KEY_MENU:
           this._scrollController.animateTo(0, duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
           FocusScope.of(context).requestFocus(menuBarFocusNodes.first);
+          this.rowIndex = 0;
+          this.itemIndex = 0;
           return true;
         case KEY_BACK:
           exit(0);
