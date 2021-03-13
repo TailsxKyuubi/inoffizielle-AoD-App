@@ -6,9 +6,12 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:unoffical_aod_app/caches/anime.dart';
+import 'package:unoffical_aod_app/caches/focusnode.dart';
 import 'package:unoffical_aod_app/caches/home.dart';
-import 'package:unoffical_aod_app/widgets/navigation_bar.dart';
+import 'package:unoffical_aod_app/caches/keycodes.dart';
+import 'package:unoffical_aod_app/widgets/navigation_bar_custom.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -29,35 +32,182 @@ class _HomePageState extends State<HomePage> {
   List<FocusNode> newCatalogTitlesFocusNodes = [];
   List<FocusNode> topTenFocusNodes = [];
 
-  @override
-  void initState() {
+  int rowIndex = 0;
+  int itemIndex = 0;
 
+  double elementHeight = 0;
+  double elementWidth = 0;
+
+  @override
+  void initState(){
+    newEpisodes.forEach((_) => this.newEpisodesFocusNodes.add(
+        FocusNode(
+            onKey: handleKeyEvent
+        )
+    ));
+    newSimulcastTitles.forEach((_) => this.newSimulcastsFocusNodes.add(
+        FocusNode(
+            onKey: handleKeyEvent
+        )
+    ));
+    newCatalogTitles.forEach((_) => this.newCatalogTitlesFocusNodes.add(
+        FocusNode(
+            onKey: handleKeyEvent
+        )
+    ));
+    topTen.forEach((_) => this.topTenFocusNodes.add(
+        FocusNode(
+            onKey: handleKeyEvent
+        )
+    ));
     super.initState();
+  }
+
+  List<FocusNode> getRowList(){
+    switch(this.rowIndex){
+      case 3:
+        return this.topTenFocusNodes;
+      case 2:
+        return this.newCatalogTitlesFocusNodes;
+      case 1:
+        return this.newSimulcastsFocusNodes;
+      case 0:
+      default:
+        return this.newEpisodesFocusNodes;
+    }
+  }
+
+  void increaseRowIndex(){
+    this.rowIndex++;
+    this.itemIndex = 0;
+    if(this.rowIndex > 3){
+      this.rowIndex = 0;
+    }
+  }
+
+  void decreaseRowIndex(){
+    this.rowIndex--;
+    this.itemIndex = 0;
+    if(this.rowIndex < 0){
+      this.rowIndex = 3;
+    }
+  }
+
+  bool handleKeyEvent(FocusNode focusNode, RawKeyEvent keyEvent){
+    if( Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent ){
+      RawKeyEventDataAndroid keyEventData = keyEvent.data;
+      bool positionChanged = false;
+      print(keyEventData.keyCode);
+      switch(keyEventData.keyCode){
+        case KEY_DOWN:
+          this.increaseRowIndex();
+          positionChanged = true;
+          break;
+        case KEY_RIGHT:
+          this.itemIndex++;
+          if((this.getRowList().length-1) < this.itemIndex){
+            this.increaseRowIndex();
+          }
+          positionChanged = true;
+          break;
+        case KEY_UP:
+          this.decreaseRowIndex();
+          positionChanged = true;
+          break;
+        case KEY_LEFT:
+          this.itemIndex--;
+          if(this.itemIndex < 0){
+            this.decreaseRowIndex();
+          }
+          positionChanged = true;
+          break;
+        case KEY_CENTER:
+          print('triggered key center');
+          List list = [];
+          switch(this.rowIndex){
+            case 0:
+              list = newEpisodes;
+              break;
+            case 1:
+              list = newSimulcastTitles;
+              break;
+            case 2:
+              list = newCatalogTitles;
+              break;
+            case 3:
+              list = topTen;
+              break;
+            default:
+              list = newEpisodes;
+          }
+          Map e = list[this.itemIndex];
+          Navigator.pushNamed(
+            context,
+            '/anime',
+            arguments: Anime(
+              name: e['series_name'],
+              id: int.parse(e['series_id']),
+            ),
+          );
+          break;
+        case KEY_MENU:
+          this._scrollController.animateTo(0, duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
+          FocusScope.of(context).requestFocus(menuBarFocusNodes.first);
+          return true;
+        case KEY_BACK:
+          exit(0);
+          return true;
+      }
+      if(positionChanged){
+        FocusScope.of(context).requestFocus(this.getRowList()[this.itemIndex]);
+        ScrollController controller;
+        switch(this.rowIndex){
+          case 0:
+            controller = this._newEpisodesScrollController;
+            break;
+          case 1:
+            controller = this._newSimulcastsScrollController;
+            break;
+          case 2:
+            controller = this._newCatalogTitlesScrollController;
+            break;
+          case 3:
+            controller = this._topTenScrollController;
+            break;
+        }
+        this._scrollController.animateTo(elementHeight*this.rowIndex, duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
+        controller.animateTo(elementWidth*this.itemIndex, duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
+      }
+    }
+    return true;
+  }
+
+  void generateFocusNodes(){
+    List<FocusNode> list = this.getRowList();
+    list[this.itemIndex] = FocusNode(
+        onKey: handleKeyEvent
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    double elementWidth;
+
     if(MediaQuery.of(context).orientation == Orientation.portrait){
-      elementWidth = MediaQuery.of(context).size.width / 7 * 3;
+      this.elementWidth = MediaQuery.of(context).size.width / 7 * 3;
     }else{
-      elementWidth = MediaQuery.of(context).size.width / 11 * 2;
+      this.elementWidth = MediaQuery.of(context).size.width / 11 * 2;
     }
-    double elementHeight = elementWidth / 16 * 9 + 40;
+    this.elementHeight = elementWidth / 16 * 9 + 40;
+
+    int newEpisodesCount = 0;
+    int newSimulcastsCount = 0;
+    int newCatalogTitlesCount = 0;
+    int topTenCount = 0;
     return Scaffold(
         appBar: AppBar(
           title: Text('Startseite'),
-          /*leading: FlatButton(
-            onPressed: () {
-              FocusScope.of(context).requestFocus(menuBarFocusNode);
-            },
-            child: Icon(
-                Icons.menu,
-                color: Colors.white
-            ),
-          ),*/
         ),
-        bottomNavigationBar: NavigationBar(),
+        bottomNavigationBar: NavigationBarCustom(this.newEpisodesFocusNodes[0]),
         //drawer: DrawerWidget(),
         body: Container(
           padding: EdgeInsets.only(top: 10),
@@ -118,8 +268,8 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               );
                             },
-                            //focusNode: newEpisodesFocusNodes[newEpisodesCount++],
-                            focusNode: FocusNode(),
+                            focusNode: newEpisodesFocusNodes[newEpisodesCount++],
+                            //focusNode: FocusNode(),
                             child: Container(
                                 width: elementWidth,
                                 //margin: EdgeInsets.only(right: 5,left: 5),
@@ -228,8 +378,7 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               );
                             },
-                            //focusNode: newSimulcastsFocusNodes[newSimulcastsCount++],
-                            focusNode: FocusNode(),
+                            focusNode: newSimulcastsFocusNodes[newSimulcastsCount++],
                             child: Container(
                                 width: elementWidth,
                                 //margin: EdgeInsets.only(right: 5,left: 5),
@@ -307,8 +456,7 @@ class _HomePageState extends State<HomePage> {
                           animeName = e['series_name'];
                         }
                         return FlatButton(
-                          //focusNode: newCatalogTitlesFocusNodes[newCatalogTitlesCount++],
-                            focusNode: FocusNode(),
+                            focusNode: newCatalogTitlesFocusNodes[newCatalogTitlesCount++],
                             focusColor: Theme.of(context).accentColor,
                             padding: EdgeInsets.all(3),
                             onPressed: () {
@@ -409,7 +557,7 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               );
                             },
-                            //focusNode: topTenFocusNodes[topTenCount++],
+                            focusNode: topTenFocusNodes[topTenCount++],
                             focusColor: Theme.of(context).accentColor,
                             padding: EdgeInsets.all(3),
                             child: Container(

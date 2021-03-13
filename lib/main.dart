@@ -154,16 +154,12 @@ class LoadingState extends State<BaseWidget>{
               newEpisodes.addAll(
                   List.from(data['newEpisodes'])
               );
-              newEpisodes.forEach((_) => newEpisodesFocusNodes.add(FocusNode()));
             } else if (data.containsKey('newCatalogTitles')) {
               newCatalogTitles.addAll(data['newCatalogTitles']);
-              newCatalogTitles.forEach((_) => newCatalogTitlesFocusNodes.add(FocusNode()));
             } else if (data.containsKey('newSimulcastTitles')) {
               newSimulcastTitles.addAll(data['newSimulcastTitles']);
-              newSimulcastTitles.forEach((_) => newSimulcastsFocusNodes.add(FocusNode()));
             } else if (data.containsKey('topTen')) {
               topTen.addAll(data['topTen']);
-              topTen.forEach((_) => topTenFocusNodes.add(FocusNode()));
             } else {
               print('data contains unknown key');
             }

@@ -69,6 +69,9 @@ class AnimeWidgetState extends State<AnimeWidget>{
               case KEY_CENTER:
                 this.showFullDescription = !this.showFullDescription;
                 break;
+              case KEY_BACK:
+                Navigator.pop(context);
+                return true;
             }
             setState(() {});
           }
@@ -119,9 +122,12 @@ class AnimeWidgetState extends State<AnimeWidget>{
       this.germanFocusNodes.add(
           FocusNode(
               onKey: (FocusNode focusNode,RawKeyEvent keyEvent){
-                if( Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyDownEvent ){
+                if( Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent ){
                   RawKeyEventDataAndroid rawKeyEventData = keyEvent.data;
-                  if(rawKeyEventData.keyCode == KEY_RIGHT) {
+                  if(rawKeyEventData.keyCode == KEY_BACK) {
+                    Navigator.pop(context);
+                    return true;
+                  }else if(rawKeyEventData.keyCode == KEY_RIGHT) {
                     FocusScope.of(context).requestFocus(
                         this.omuFocusNodes[this.episodeIndex]);
                     return true;
@@ -170,7 +176,10 @@ class AnimeWidgetState extends State<AnimeWidget>{
               onKey: (FocusNode focusNode,RawKeyEvent keyEvent){
                 if( Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyDownEvent ){
                   RawKeyEventDataAndroid rawKeyEventData = keyEvent.data;
-                  if(rawKeyEventData.keyCode == KEY_LEFT) {
+                  if(rawKeyEventData.keyCode == KEY_BACK) {
+                    Navigator.pop(context);
+                    return true;
+                  }else if(rawKeyEventData.keyCode == KEY_LEFT) {
                     FocusScope.of(context).requestFocus(
                         this.germanFocusNodes[this.episodeIndex]);
                     setState(() {});

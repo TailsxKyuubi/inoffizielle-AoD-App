@@ -8,3 +8,4 @@ const int KEY_MEDIA_PLAY_PAUSE    = 85;
 const int KEY_MEDIA_SKIP_FORWARD  = 272;
 const int KEY_MEDIA_STEP_FORWARD  = 90;
 const int KEY_MEDIA_STEP_BACKWARD = 89;
+const int KEY_BACK = 4;

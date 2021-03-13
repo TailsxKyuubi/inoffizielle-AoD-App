@@ -141,7 +141,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
               if(eventDataAndroid.keyCode == KEY_MENU){
                 ScaffoldState scaffold = Scaffold.of(context);
                 if( ! scaffold.isDrawerOpen ){
-                  scope.requestFocus(menuBarFocusNode);
+                  scope.requestFocus(menuBarFocusNodes.first);
                 }
               }
               this._scrollController.animateTo(

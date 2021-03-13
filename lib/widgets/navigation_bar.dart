@@ -39,7 +39,7 @@ class _NavigationBarState extends State<NavigationBar> {
   Widget build(BuildContext context) {
     int index = this.getRouteIndex();
     return RawKeyboardListener(
-        focusNode: menuBarFocusNode,
+        focusNode: FocusNode(),
         onKey: (event){
           print('focus is on the menu');
         },
@@ -51,23 +51,19 @@ class _NavigationBarState extends State<NavigationBar> {
             backgroundColor: Theme.of(context).primaryColor,
             onTap: (int i){
               String routeName;
-              FocusScopeNode scopeFocusNode = FocusScope.of(context);
               switch(i){
                 case 0:
                   routeName = '/home';
-                  //scopeFocusNode.requestFocus(homeFocusNode);
                   break;
                 case 1:
                   routeName = '/animes';
                   animeFocusNodesIndex = -1;
-                  //scopeFocusNode.requestFocus(animeFocusNode);
                   break;
                 case 2:
                   routeName = '/settings';
                   break;
                 default:
                   routeName = '/home';
-                  //scopeFocusNode.requestFocus(homeFocusNode);
                   break;
               }
               Navigator.pushReplacementNamed(context, routeName);
