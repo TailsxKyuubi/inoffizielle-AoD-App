@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2020 TailsxKyuubi
+ * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'dart:convert';
@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:unoffical_aod_app/caches/app.dart';
 import 'package:unoffical_aod_app/caches/episode_progress.dart';
-import 'package:unoffical_aod_app/caches/focusnode.dart';
 import 'package:unoffical_aod_app/caches/home.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
@@ -144,26 +143,17 @@ class LoadingState extends State<BaseWidget>{
                           }
                       )
               );
-              animesCache.animes.forEach((_,__)  => animeFocusNodes.add(
-                  FocusNode(
-                    //onKey: (_,__) => false
-                  )
-              ));
               episodeProgressCache = EpisodeProgressCache();
             } else if (data.containsKey('newEpisodes')) {
               newEpisodes.addAll(
                   List.from(data['newEpisodes'])
               );
-              newEpisodes.forEach((_) => newEpisodesFocusNodes.add(FocusNode()));
             } else if (data.containsKey('newCatalogTitles')) {
               newCatalogTitles.addAll(data['newCatalogTitles']);
-              newCatalogTitles.forEach((_) => newCatalogTitlesFocusNodes.add(FocusNode()));
             } else if (data.containsKey('newSimulcastTitles')) {
               newSimulcastTitles.addAll(data['newSimulcastTitles']);
-              newSimulcastTitles.forEach((_) => newSimulcastsFocusNodes.add(FocusNode()));
             } else if (data.containsKey('topTen')) {
               topTen.addAll(data['topTen']);
-              topTen.forEach((_) => topTenFocusNodes.add(FocusNode()));
             } else {
               print('data contains unknown key');
             }

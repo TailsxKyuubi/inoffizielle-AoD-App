@@ -1,8 +1,12 @@
 /*
- * Copyright 2020 TailsxKyuubi
+ * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:unoffical_aod_app/caches/keycodes.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutPage extends StatelessWidget {
@@ -10,6 +14,26 @@ class AboutPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: FlatButton(
+          focusNode: FocusNode(
+            onKey: (FocusNode focusNode,RawKeyEvent event){
+              if(Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent){
+                RawKeyEventDataAndroid eventData = event.data;
+                if(eventData.keyCode == KEY_CENTER){
+                  Navigator.pop(context);
+                }
+              }
+              return true;
+            }
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Icon(
+              Icons.arrow_back,
+              color: Colors.white
+          ),
+        ),
         title: Text('Über die App'),
         backgroundColor: Theme.of(context).primaryColor,
       ),
@@ -86,8 +110,8 @@ class AboutPage extends StatelessWidget {
                   child: Text(
                     'Datenschutz',
                     style: TextStyle(
-                      color: Theme.of(context).accentColor,
-                      fontSize: 20
+                        color: Theme.of(context).accentColor,
+                        fontSize: 20
                     ),
                   ),
                 )

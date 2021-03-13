@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 TailsxKyuubi
+ * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'package:flutter/material.dart';
@@ -13,8 +13,7 @@ class AppSettingsWidget extends StatefulWidget {
 }
 
 class AppSettingsState extends State<AppSettingsWidget> {
-  FocusNode aboutFocusNode = FocusNode();
-  FocusNode logoutFocusNode = FocusNode();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -31,6 +30,7 @@ class AppSettingsState extends State<AppSettingsWidget> {
               ),
             ),
             trailing: Switch(
+              focusNode: appSettingsFocusNodes[0],
               focusColor: Theme.of(context).accentColor,
               onChanged: (bool value) {
                 setState(() {
@@ -42,7 +42,7 @@ class AppSettingsState extends State<AppSettingsWidget> {
           ),
           FlatButton(
             focusColor: Theme.of(context).accentColor,
-            focusNode: this.logoutFocusNode,
+            focusNode: appSettingsFocusNodes[1],
             child: Container(
               width: MediaQuery.of(context).size.width,
               child: Text(
@@ -62,7 +62,7 @@ class AppSettingsState extends State<AppSettingsWidget> {
           ),
           FlatButton(
             focusColor: Theme.of(context).accentColor,
-            focusNode: this.aboutFocusNode,
+            focusNode: appSettingsFocusNodes[2],
             child: Container(
               width: MediaQuery.of(context).size.width,
               child: Text(
@@ -81,7 +81,7 @@ class AppSettingsState extends State<AppSettingsWidget> {
           ),
           FlatButton(
             focusColor: Theme.of(context).accentColor,
-            focusNode: FocusNode(),
+            focusNode: appSettingsFocusNodes[3],
             child: Container(
               width: MediaQuery.of(context).size.width,
               child: Text(

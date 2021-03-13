@@ -1,18 +1,14 @@
+/*
+ * Copyright 2020-2021 TailsxKyuubi
+ * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
+ */
 import 'package:flutter/material.dart';
 
-FocusNode menuBarFocusNode = FocusNode();
+List<FocusNode> menuBarFocusNodes = [];
 
 FocusNode homeFocusNode = FocusNode();
-List<FocusNode> newEpisodesFocusNodes = [];
-List<FocusNode> newSimulcastsFocusNodes = [];
-List<FocusNode> newCatalogTitlesFocusNodes = [];
-List<FocusNode> topTenFocusNodes = [];
-int homeRowIndex = 0;
-int homeRowItemIndex = -1;
 
 FocusNode searchFocusNode = FocusNode();
-List<FocusNode> animeFocusNodes = [];
-int animeFocusNodesIndex = -1;
 FocusNode animeFocusNode = FocusNode();
 
 FocusNode settingsFocusNode = FocusNode();

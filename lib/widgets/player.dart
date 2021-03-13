@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 TailsxKyuubi
+ * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'dart:async';
@@ -26,7 +26,6 @@ import 'package:wakelock/wakelock.dart';
 import 'package:unoffical_aod_app/caches/playercache.dart' as playerCache;
 
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:toast/toast.dart';
 
 class PlayerWidget extends StatefulWidget {
   final ReceivePort receivePort = ReceivePort();
@@ -114,12 +113,12 @@ class PlayerState extends State<PlayerWidget> {
       print('video halted');
       playerCache.updateThread.cancel();
       playerCache.timeTrackThread.cancel();
-      await SystemChrome.setPreferredOrientations(
+      /*await SystemChrome.setPreferredOrientations(
           [
             DeviceOrientation.portraitUp,
             DeviceOrientation.portraitDown
           ]
-      );
+      );*/
       print('switched orientation');
       Navigator.pop(context);
       playerCache.controller = null;
@@ -269,7 +268,7 @@ class PlayerState extends State<PlayerWidget> {
     }
     return Scaffold(
       body: RawKeyboardListener(
-        autofocus: true,
+          autofocus: true,
           focusNode: FocusNode(),
           onKey: (RawKeyEvent event){
             if( Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent ){
@@ -335,26 +334,26 @@ class PlayerState extends State<PlayerWidget> {
                         /*SystemUiOverlay.top,
                         SystemUiOverlay.bottom*/
                         //]);
-                      initDelayedControlsHide();
-                    }else{
-                      //SystemChrome.setEnabledSystemUIOverlays([]);
-                    }
-                    setState(() {});
-                  },
-                  onVerticalDragStart: (DragStartDetails value){
-                    if(value.globalPosition.dx > MediaQuery.of(context).size.width * 0.5) {
-                      this.showVolume = true;
-                      this.showVolumeStart = DateTime.now();
-                    }
-                  },
-                  onVerticalDragUpdate: (DragUpdateDetails update){
-                    if(update.globalPosition.dx > MediaQuery.of(context).size.width * 0.5){
-                      this.showVolume = true;
-                      this.showVolumeStart = DateTime.now();
-                      playerCache.controller.setVolume(
-                          playerCache.controller.value.volume+((update.delta.dy/(MediaQuery.of(context).size.height/100*0.8))/100)*-1
-                      );
+                        initDelayedControlsHide();
+                      }else{
+                        //SystemChrome.setEnabledSystemUIOverlays([]);
+                      }
                       setState(() {});
+                    },
+                    onVerticalDragStart: (DragStartDetails value){
+                      if(value.globalPosition.dx > MediaQuery.of(context).size.width * 0.5) {
+                        this.showVolume = true;
+                        this.showVolumeStart = DateTime.now();
+                      }
+                    },
+                    onVerticalDragUpdate: (DragUpdateDetails update){
+                      if(update.globalPosition.dx > MediaQuery.of(context).size.width * 0.5){
+                        this.showVolume = true;
+                        this.showVolumeStart = DateTime.now();
+                        playerCache.controller.setVolume(
+                            playerCache.controller.value.volume+((update.delta.dy/(MediaQuery.of(context).size.height/100*0.8))/100)*-1
+                        );
+                        setState(() {});
                       }
                     },
                     onVerticalDragEnd: (DragEndDetails value){
@@ -365,6 +364,7 @@ class PlayerState extends State<PlayerWidget> {
                       });
                     },
                     child: Container(
+                        height: MediaQuery.of(context).size.height,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                             color: Colors.black
@@ -387,28 +387,28 @@ class PlayerState extends State<PlayerWidget> {
                         decoration: BoxDecoration(
                           color: Color.fromRGBO(53, 54, 56, 1),
                         ),
-                    )
-                ):Container(),
-                showVolume && playerCache.controller.value != null
-                    ? Positioned(
-                  left: MediaQuery.of(context).size.width * 0.05,
-                  top: MediaQuery.of(context).size.height *0.15,
-                  child: Container(
-                    height: MediaQuery.of(context).size.height *0.7,
-                    width: 30,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                          color: primaryColor,
-                          width: 3
+                      )
+                  ):Container(),
+                  showVolume && playerCache.controller.value != null
+                      ? Positioned(
+                    left: MediaQuery.of(context).size.width * 0.05,
+                    top: MediaQuery.of(context).size.height *0.15,
+                    child: Container(
+                      height: MediaQuery.of(context).size.height *0.7,
+                      width: 30,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                            color: primaryColor,
+                            width: 3
+                        ),
                       ),
-                    ),
-                    child: Column(
-                        children: [
-                          Container(
-                            height: ((MediaQuery.of(context).size.height * 0.7)-6) * (playerCache.controller.value.volume*-1+1),
-                            decoration: BoxDecoration(),
-                          ),
-                          Container(
+                      child: Column(
+                          children: [
+                            Container(
+                              height: ((MediaQuery.of(context).size.height * 0.7)-6) * (playerCache.controller.value.volume*-1+1),
+                              decoration: BoxDecoration(),
+                            ),
+                            Container(
                               height: ((MediaQuery.of(context).size.height * 0.7)-6) * playerCache.controller.value.volume,
                               decoration: BoxDecoration(
                                   color: Theme.of(context).accentColor
