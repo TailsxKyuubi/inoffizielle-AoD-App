@@ -94,7 +94,9 @@ class LoadingState extends State<BaseWidget>{
           connectionError = true;
           showDialog(
               context: context,
-              child: LoadingConnectionErrorDialog(),
+              builder: (BuildContext context){
+                return LoadingConnectionErrorDialog();
+              },
               barrierDismissible: false
           );
           break;
