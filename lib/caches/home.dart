@@ -1,20 +1,20 @@
 /*
- * Copyright 2020 TailsxKyuubi
+ * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
-import 'package:html/dom.dart';
+import 'package:html/dom.dart' as dom;
 
 List<Map> newEpisodes = [];
 List newCatalogTitles = [];
 List newSimulcastTitles = [];
 List topTen = [];
 
-parseHomePage(Document doc){
-  List<Element> carousels = doc.querySelectorAll('.jcarousel-container-new');
+parseHomePage(dom.Document doc){
+  List<dom.Element> carousels = doc.querySelectorAll('.jcarousel-container-new');
   carousels.addAll(doc.querySelectorAll('.jcarousel-container-top10'));
-  List<Element> episodes = carousels[0].querySelectorAll('li');
+  List<dom.Element> episodes = carousels[0].querySelectorAll('li');
   episodes.forEach((element) {
-    List<Element> a = element.querySelectorAll('a');
+    List<dom.Element> a = element.querySelectorAll('a');
     Map tmpObject = {};
     tmpObject['image'] = a[0].children[0].attributes['src'];
     tmpObject['series_name'] = a[1].text;
@@ -22,9 +22,9 @@ parseHomePage(Document doc){
     tmpObject['episode_number'] = element.querySelector('.neweps').text.replaceAll('Episode ', '');
     newEpisodes.add(tmpObject);
   });
-  List<Element> newTitles = carousels[1].querySelectorAll('li');
+  List<dom.Element> newTitles = carousels[1].querySelectorAll('li');
   newTitles.forEach((element) {
-    List<Element> a = element.querySelectorAll('a');
+    List<dom.Element> a = element.querySelectorAll('a');
     Map tmpObject = {};
     tmpObject['image'] = a[0].children[0].attributes['src'];
     tmpObject['series_name'] = a[1].text;
@@ -32,9 +32,9 @@ parseHomePage(Document doc){
     newCatalogTitles.add(tmpObject);
   });
 
-  List<Element> newSimulTitles = carousels[2].querySelectorAll('li');
+  List<dom.Element> newSimulTitles = carousels[2].querySelectorAll('li');
   newSimulTitles.forEach((element) {
-    List<Element> a = element.querySelectorAll('a');
+    List<dom.Element> a = element.querySelectorAll('a');
     Map tmpObject = {};
     tmpObject['image'] = a[0].children[0].attributes['src'];
     tmpObject['series_name'] = a[1].text;
@@ -42,9 +42,9 @@ parseHomePage(Document doc){
     newSimulcastTitles.add(tmpObject);
   });
 
-  List<Element> top10 = carousels[3].querySelectorAll('li');
+  List<dom.Element> top10 = carousels[3].querySelectorAll('li');
   top10.forEach((element) {
-    List<Element> a = element.querySelectorAll('a');
+    List<dom.Element> a = element.querySelectorAll('a');
     Map tmpObject = {};
     tmpObject['image'] = a[0].children[0].attributes['src'];
     tmpObject['series_name'] = a[1].text;

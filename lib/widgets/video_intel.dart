@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 TailsxKyuubi
+ * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'package:flutter/material.dart';
@@ -41,12 +41,6 @@ class VideoIntel extends StatelessWidget {
                   print('video halted');
                   playerCache.updateThread.cancel();
                   playerCache.timeTrackThread.cancel();
-                  await SystemChrome.setPreferredOrientations(
-                      [
-                        DeviceOrientation.portraitUp,
-                        DeviceOrientation.portraitDown
-                      ]
-                  );
                   print('switched orientation');
                   Navigator.pop(context);
                   playerCache.controller = null;

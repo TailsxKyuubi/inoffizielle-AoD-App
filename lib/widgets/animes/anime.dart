@@ -1,20 +1,20 @@
 /*
- * Copyright 2020 TailsxKyuubi
+ * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:unoffical_aod_app/caches/anime.dart';
-import 'package:unoffical_aod_app/caches/animes.dart';
+import 'package:unoffical_aod_app/caches/focusnode.dart';
 
 class AnimeSmallWidget extends StatelessWidget{
   final Anime _anime;
   final double elementWidth;
-  final int i;
   final double elementHeight;
   final Radius radius;
+  final FocusNode _focusNode;
 
-  AnimeSmallWidget(this._anime,this.elementWidth,this.elementHeight,this.radius,this.i);
+  AnimeSmallWidget(this._anime,this.elementWidth,this.elementHeight,this.radius,this._focusNode);
 
   @override
   Widget build(BuildContext context) {
@@ -34,20 +34,22 @@ class AnimeSmallWidget extends StatelessWidget{
     }else{
       animeName = this._anime.name;
     }
-    return GestureDetector(
-        onTap: (){
+    return FlatButton(
+        onPressed: (){
           Navigator.pushNamed(
             context,
             '/anime',
             arguments: this._anime
           );
         },
+        focusNode: _focusNode,
+        focusColor: Theme.of(context).accentColor,
+        padding: EdgeInsets.all(3.5),
         child: Container(
             width: elementWidth,
             margin: EdgeInsets.only(
-              top: 10,
-              right: i % 2 == 1 ? 10 : 0,
-              bottom: animes.length == i?10:0,
+              //right: i % 4 != 0 ? 10 : 0,
+              bottom: 0,
             ),
             decoration: BoxDecoration(
                 boxShadow: [
