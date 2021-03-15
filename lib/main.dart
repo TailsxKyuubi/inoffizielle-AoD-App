@@ -6,6 +6,7 @@
 import 'dart:convert';
 import 'dart:isolate';
 
+import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
@@ -22,6 +23,7 @@ import 'package:unoffical_aod_app/pages/loading.dart';
 import 'package:unoffical_aod_app/pages/login.dart';
 import 'package:unoffical_aod_app/pages/settings.dart';
 import 'package:unoffical_aod_app/pages/updates.dart';
+import 'package:unoffical_aod_app/widgets/fire_os_version_error.dart';
 import 'package:unoffical_aod_app/widgets/loading_connection_error.dart';
 import 'package:unoffical_aod_app/widgets/player.dart';
 import 'caches/anime.dart';
@@ -174,7 +176,18 @@ class LoadingState extends State<BaseWidget>{
     if(bootUpReceivePort == null){
       bootUpReceivePort = ReceivePort();
       bootUpReceivePort.listen((message) => parseMessage(message, context));
-      FlutterIsolate.spawn(appBootUp, bootUpReceivePort.sendPort);
+      DeviceInfoPlugin info = DeviceInfoPlugin();
+      info.androidInfo.then((value) {
+        if( (value.brand == 'Amazon' || value.manufacturer == 'Amazon') && value.version.sdkInt < 28 ) {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) =>
+                  FireOsVersionErrorDialog(value)
+          );
+        }else{
+          FlutterIsolate.spawn(appBootUp, bootUpReceivePort.sendPort);
+        }
+      });
     }
     print('loading widget build');
     if(loginStorageChecked && ! loginSuccess ) {
