@@ -12,7 +12,7 @@ description: A Fanmade app
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.7.1-tvalpha.2+1
+version: 0.7.1-tvbeta.1
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
