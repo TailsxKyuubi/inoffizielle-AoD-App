@@ -31,7 +31,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
   int _animeFocusIndex = 0;
   _AnimesWidgetState(){
     this._controller.addListener(onTextInput);
-    animes.animes.forEach((_, __) => this.animeFocusNodes.add(
+    animes.animes.forEach((_,__) => this.animeFocusNodes.add(
         FocusNode(
             onKey: handleKey
         )
@@ -46,7 +46,9 @@ class _AnimesWidgetState extends State<AnimesWidget> {
         case KEY_DOWN:
           this._animeFocusIndex += 4;
           if(this._animeFocusIndex >= searchResult.length){
-            this._animeFocusIndex = this.animeFocusNodes.length - this._animeFocusIndex;
+            //this._animeFocusIndex = this.animeFocusNodes.length - this._animeFocusIndex;
+            FocusScope.of(context).requestFocus(menuBarFocusNodes.first);
+            return true;
           }
           scope.requestFocus(
               this.animeFocusNodes[this._animeFocusIndex]
@@ -66,7 +68,9 @@ class _AnimesWidgetState extends State<AnimesWidget> {
         case KEY_RIGHT:
           this._animeFocusIndex++;
           if(this._animeFocusIndex >= searchResult.length){
-            this._animeFocusIndex = 0;
+            //this._animeFocusIndex = 0;
+            FocusScope.of(context).requestFocus(menuBarFocusNodes.first);
+            return true;
           }
           scope.requestFocus(
               this.animeFocusNodes[this._animeFocusIndex]

@@ -69,9 +69,10 @@ class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderSt
           break;
         case KEY_DOWN:
           playerSettingsFocusIndex++;
-          print(playerSettingsFocusIndex);
           if(playerSettingsFocusIndex > 2){
             playerSettingsFocusIndex = 0;
+            FocusScope.of(context).requestFocus(menuBarFocusNodes.first);
+            return true;
           }
           break;
         case KEY_RIGHT:
@@ -135,6 +136,8 @@ class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderSt
           appSettingsFocusIndex++;
           if(appSettingsFocusIndex > 3){
             appSettingsFocusIndex = 0;
+            FocusScope.of(context).requestFocus(menuBarFocusNodes.first);
+            return true;
           }
           break;
         case KEY_RIGHT:

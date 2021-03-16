@@ -72,7 +72,7 @@ class PlayerState extends State<PlayerWidget> {
     }catch(exception){
       showDialog(
         context: context,
-        child: PlayerConnectionErrorDialog(args),
+        builder: (_) => PlayerConnectionErrorDialog(args),
         barrierDismissible: false,
       );
     }
@@ -181,7 +181,9 @@ class PlayerState extends State<PlayerWidget> {
     }catch(exception){
       showDialog(
         context: context,
-        child: PlayerLoadingConnectionErrorDialog(args),
+        builder: (BuildContext context){
+          return PlayerLoadingConnectionErrorDialog(args);
+        },
         barrierDismissible: false,
       );
       return;
@@ -223,8 +225,9 @@ class PlayerState extends State<PlayerWidget> {
           if(playerCache.controller.value.hasError){
             showDialog(
               context: context,
-              child: PlayerConnectionErrorDialog(this.args),
-              barrierDismissible: false,
+              barrierDismissible: false, builder: (BuildContext context) {
+                return PlayerConnectionErrorDialog(this.args);
+              },
             );
           }
         });

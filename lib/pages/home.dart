@@ -79,12 +79,17 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void increaseRowIndex(){
+  bool increaseRowIndex(){
     this.rowIndex++;
     this.itemIndex = 0;
     if(this.rowIndex > 3){
       this.rowIndex = 0;
+      setState(() {
+        FocusScope.of(context).requestFocus(menuBarFocusNodes.first);
+      });
+      return false;
     }
+    return true;
   }
 
   void decreaseRowIndex(){
@@ -99,18 +104,17 @@ class _HomePageState extends State<HomePage> {
     if( Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent ){
       RawKeyEventDataAndroid keyEventData = keyEvent.data;
       bool positionChanged = false;
-      print(keyEventData.keyCode);
       switch(keyEventData.keyCode){
         case KEY_DOWN:
-          this.increaseRowIndex();
-          positionChanged = true;
+          positionChanged = this.increaseRowIndex();
           break;
         case KEY_RIGHT:
           this.itemIndex++;
+          positionChanged = true;
           if((this.getRowList().length-1) < this.itemIndex){
             this.increaseRowIndex();
+            positionChanged = this.increaseRowIndex();
           }
-          positionChanged = true;
           break;
         case KEY_UP:
           this.decreaseRowIndex();
