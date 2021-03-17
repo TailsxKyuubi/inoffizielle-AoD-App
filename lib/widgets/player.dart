@@ -70,6 +70,7 @@ class PlayerState extends State<PlayerWidget> {
               ? '720' : settings.playerSettings.defaultQuality.toString()),
           headers: headerHandler.getHeaders());
     }catch(exception){
+      playerCache.controller.pause();
       showDialog(
         context: context,
         builder: (_) => PlayerConnectionErrorDialog(args),
