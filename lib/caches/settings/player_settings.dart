@@ -19,11 +19,17 @@ class PlayerSettings extends AbstractSettings {
     if(this.saveEpisodeProgress == null){
       this.saveEpisodeProgress = true;
     }
+
+    this.volumeControls = preferences.getBool('player.volumeControls');
+    if(this.volumeControls == null){
+      this.volumeControls = true;
+    }
   }
 
   bool alwaysShowProgress;
   int defaultQuality;
   bool saveEpisodeProgress;
+  bool volumeControls;
 
   setAlwaysShowProgress(bool alwaysShowProgress){
     this.alwaysShowProgress = alwaysShowProgress;
@@ -40,10 +46,16 @@ class PlayerSettings extends AbstractSettings {
     this.save();
   }
 
+  setVolumeControls(bool volumeControls){
+    this.volumeControls = volumeControls;
+    this.save();
+  }
+
   @override
   save() {
     this.preferences.setBool('player.alwaysShowProgress',this.alwaysShowProgress);
     this.preferences.setInt('player.defaultQuality', this.defaultQuality);
     this.preferences.setBool('player.saveEpisodeProgress', this.saveEpisodeProgress);
+    this.preferences.setBool('player.volumeControls', this.volumeControls);
   }
 }

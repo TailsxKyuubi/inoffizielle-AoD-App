@@ -344,13 +344,13 @@ class PlayerState extends State<PlayerWidget> {
                       setState(() {});
                     },
                     onVerticalDragStart: (DragStartDetails value){
-                      if(value.globalPosition.dx > MediaQuery.of(context).size.width * 0.5) {
+                      if( settings.playerSettings.volumeControls && value.globalPosition.dx > MediaQuery.of(context).size.width * 0.5) {
                         this.showVolume = true;
                         this.showVolumeStart = DateTime.now();
                       }
                     },
                     onVerticalDragUpdate: (DragUpdateDetails update){
-                      if(update.globalPosition.dx > MediaQuery.of(context).size.width * 0.5){
+                      if(settings.playerSettings.volumeControls && update.globalPosition.dx > MediaQuery.of(context).size.width * 0.5){
                         this.showVolume = true;
                         this.showVolumeStart = DateTime.now();
                         playerCache.controller.setVolume(
@@ -360,8 +360,8 @@ class PlayerState extends State<PlayerWidget> {
                       }
                     },
                     onVerticalDragEnd: (DragEndDetails value){
-                      Timer(Duration(seconds: 5),(){
-                        if(DateTime.now().difference(showVolumeStart).inSeconds >= 5){
+                      Timer(Duration(seconds: 3),(){
+                        if(DateTime.now().difference(showVolumeStart).inSeconds >= 3){
                           showVolume = false;
                         }
                       });
@@ -392,7 +392,7 @@ class PlayerState extends State<PlayerWidget> {
                         ),
                       )
                   ):Container(),
-                  showVolume && playerCache.controller.value != null
+                  settings.playerSettings.volumeControls && showVolume && playerCache.controller.value != null
                       ? Positioned(
                     left: MediaQuery.of(context).size.width * 0.05,
                     top: MediaQuery.of(context).size.height *0.15,

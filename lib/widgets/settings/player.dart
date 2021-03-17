@@ -127,6 +127,23 @@ class _PlayerSettingsState extends State<PlayerSettingsWidget> {
                 value: settings.playerSettings.saveEpisodeProgress,
               ),
             ),
+            ListTile(
+              title: Text(
+                'Eigenen Lautstärkeregler aktivieren ',
+                style: TextStyle(
+                    color: Colors.white
+                ),
+              ),
+              trailing: Switch(
+                focusNode: playerSettingsFocusNodes[2],
+                onChanged: (bool value) {
+                  setState(() {
+                    settings.playerSettings.setVolumeControls(value);
+                  });
+                },
+                value: settings.playerSettings.volumeControls,
+              ),
+            )
           ],
         )
     );
