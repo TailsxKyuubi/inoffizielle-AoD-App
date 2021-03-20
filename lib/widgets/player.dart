@@ -132,10 +132,12 @@ class PlayerState extends State<PlayerWidget> {
     showControls = false;
     setState(() {});
     //playerCache.controller.dispose();
+    VideoPlayerController oldPlayerController = playerCache.controller;
     playerCache.controller = null;
     playerCache.playlistIndex++;
     String m3u8 = playerCache.playlist[playerCache.playlistIndex]['sources'][0]['file'];
     m3u8 = await this.checkVideoQuality(m3u8);
+    oldPlayerController.dispose();
     playerCache.controller = VideoPlayerController.network(m3u8);
     await playerCache.controller.initialize();
     setState(() {
@@ -484,6 +486,7 @@ class PlayerState extends State<PlayerWidget> {
   void dispose() {
     //playerCache.updateThread.kill(priority: 0);
     widget.receivePort.close();
+    playerCache.controller.dispose();
     super.dispose();
   }
 }
