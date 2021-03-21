@@ -151,7 +151,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                   RawKeyEventDataAndroid rawKeyEventData = keyEvent.data;
                   if(rawKeyEventData.keyCode == KEY_BACK) {
                     Navigator.pop(context);
-                    return false;
+                    return true;
                   }else if(rawKeyEventData.keyCode == KEY_RIGHT) {
                     FocusScope.of(context).requestFocus(
                         this.omuFocusNodes[this.episodeIndex]
