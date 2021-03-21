@@ -68,7 +68,8 @@ class PlayerState extends State<PlayerWidget> {
               + '/30/' + playerCache.language + '/'
               + (settings.playerSettings.defaultQuality == 0
               ? '720' : settings.playerSettings.defaultQuality.toString()),
-          headers: headerHandler.getHeaders());
+          headers: headerHandler.getHeaders()
+      );
     }catch(exception){
       playerCache.controller.pause();
       showDialog(
@@ -108,23 +109,28 @@ class PlayerState extends State<PlayerWidget> {
   }
 
   jumpToNextEpisode() async{
+    VideoPlayerController oldPlayerController = playerCache.controller;
     this.saveEpisodeProgress();
     if(playerCache.playlist.length <= (playerCache.playlistIndex+1)){
       await playerCache.controller.pause();
       print('video halted');
       playerCache.updateThread.cancel();
       playerCache.timeTrackThread.cancel();
-      /*await SystemChrome.setPreferredOrientations(
+      await SystemChrome.setPreferredOrientations(
           [
             DeviceOrientation.portraitUp,
-            DeviceOrientation.portraitDown
+            DeviceOrientation.portraitDown,
+            DeviceOrientation.landscapeLeft,
+            DeviceOrientation.landscapeRight
           ]
-      );*/
+      );
       print('switched orientation');
       Navigator.pop(context);
       playerCache.controller = null;
-      playerCache.updateThread = null;
       print('cleared controller');
+      playerCache.updateThread = null;
+      print('killed thread');
+      Timer(Duration(seconds: 1),() => oldPlayerController.dispose());
       return false;
     }
     await playerCache.controller.pause();
@@ -132,12 +138,11 @@ class PlayerState extends State<PlayerWidget> {
     showControls = false;
     setState(() {});
     //playerCache.controller.dispose();
-    VideoPlayerController oldPlayerController = playerCache.controller;
     playerCache.controller = null;
     playerCache.playlistIndex++;
     String m3u8 = playerCache.playlist[playerCache.playlistIndex]['sources'][0]['file'];
     m3u8 = await this.checkVideoQuality(m3u8);
-    oldPlayerController.dispose();
+    Timer(Duration(seconds: 1),() => oldPlayerController.dispose());
     playerCache.controller = VideoPlayerController.network(m3u8);
     await playerCache.controller.initialize();
     setState(() {
@@ -184,9 +189,7 @@ class PlayerState extends State<PlayerWidget> {
     }catch(exception){
       showDialog(
         context: context,
-        builder: (BuildContext context){
-          return PlayerLoadingConnectionErrorDialog(args);
-        },
+        builder: (BuildContext context) => PlayerLoadingConnectionErrorDialog(args),
         barrierDismissible: false,
       );
       return;
@@ -207,7 +210,7 @@ class PlayerState extends State<PlayerWidget> {
       this._playlistLoaded = true;
       playerCache.controller = VideoPlayerController.network(m3u8)
         ..initialize().then((_) {
-          // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+          print('player initialized');
           setState(() {
             if(settings.playerSettings.saveEpisodeProgress){
               Duration episodeTimeCode = episodeProgressCache
@@ -314,6 +317,14 @@ class PlayerState extends State<PlayerWidget> {
               print('closed port');
               await playerCache.controller.pause();
               print('paused video');
+              await SystemChrome.setPreferredOrientations(
+                  [
+                    DeviceOrientation.portraitUp,
+                    DeviceOrientation.portraitDown,
+                    DeviceOrientation.landscapeLeft,
+                    DeviceOrientation.landscapeRight
+                  ]
+              );
               playerCache.updateThread.cancel();
               playerCache.timeTrackThread.cancel();
               if(settings.playerSettings.saveEpisodeProgress){
@@ -323,10 +334,13 @@ class PlayerState extends State<PlayerWidget> {
               print('set orientation');
 
               Navigator.pop(context);
-              playerCache.updateThread = null;
-              print('killed thread');
+              VideoPlayerController oldVideoController = playerCache.controller;
               playerCache.controller = null;
               print('unlinked object');
+              playerCache.updateThread = null;
+              print('killed thread');
+              Timer(Duration(seconds: 1),() => oldVideoController.dispose());
+
               return false;
             },
             child: _playlistLoaded && playerCache.controller != null ? Stack (
@@ -486,7 +500,6 @@ class PlayerState extends State<PlayerWidget> {
   void dispose() {
     //playerCache.updateThread.kill(priority: 0);
     widget.receivePort.close();
-    playerCache.controller.dispose();
     super.dispose();
   }
 }
