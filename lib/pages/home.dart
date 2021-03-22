@@ -157,7 +157,7 @@ class _HomePageState extends State<HomePage> {
           );
           break;
         case KEY_MENU:
-          this._scrollController.animateTo(0, duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
+          this._scrollController.jumpTo(0);
           setState(() {
             FocusScope.of(context).requestFocus(menuBarFocusNodes.first);
           });
@@ -185,8 +185,8 @@ class _HomePageState extends State<HomePage> {
             controller = this._topTenScrollController;
             break;
         }
-        this._scrollController.animateTo(elementHeight*this.rowIndex, duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
-        controller.animateTo(elementWidth*this.itemIndex, duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
+        this._scrollController.jumpTo(elementHeight*this.rowIndex);
+        controller.jumpTo(elementWidth*this.itemIndex);
       }
     }
     return true;

@@ -64,12 +64,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
               case KEY_DOWN:
                 focusScope.requestFocus(this.germanFocusNodes.first);
                 RenderBox box = this.germanFocusNodes.first.context.findRenderObject();
-                this._scrollController.animateTo(
-                    this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5),
-                    duration: Duration(
-                        milliseconds: 500
-                    ),
-                    curve: Curves.easeInOut
+                this._scrollController.jumpTo(
+                    this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
                 );
                 break;
               case KEY_UP:
@@ -97,12 +93,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                 focusScope.requestFocus(this.readMoreFocusNode);
                 setState(() {});
                 RenderBox box = this.readMoreFocusNode.context.findRenderObject();
-                this._scrollController.animateTo(
-                    this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5),
-                    duration: Duration(
-                        milliseconds: 500
-                    ),
-                    curve: Curves.easeInOut
+                this._scrollController.jumpTo(
+                    this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
                 );
                 break;
               case KEY_CENTER:
@@ -129,12 +121,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
         FocusScope.of(context).requestFocus(this.readMoreFocusNode);
         setState(() {});
         RenderBox box = this.readMoreFocusNode.context.findRenderObject();
-        this._scrollController.animateTo(
-            this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5),
-            duration: Duration(
-                milliseconds: 500
-            ),
-            curve: Curves.easeInOut
+        this._scrollController.jumpTo(
+            this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
         );
       }
     }
@@ -165,8 +153,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                           '/player',
                           arguments: PlayerTransfer(
                               episode,
-                              episode.languages.indexOf(
-                                  'Deutsch'),
+                              episode.languages.indexOf('Deutsch'),
                               this._csrf,
                               this._anime,
                               this.episodeIndex,
@@ -185,12 +172,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                   setState(() {});
                   FocusScope.of(context).requestFocus(this.germanFocusNodes[this.episodeIndex]);
                   RenderBox box = this.germanFocusNodes[this.episodeIndex].context.findRenderObject();
-                  this._scrollController.animateTo(
-                      this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5),
-                      duration: Duration(
-                          milliseconds: 500
-                      ),
-                      curve: Curves.easeInOut
+                  this._scrollController.jumpTo(
+                      this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
                   );
                 }
                 return true;
@@ -218,8 +201,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                           '/player',
                           arguments: PlayerTransfer(
                               episode,
-                              episode.languages.indexOf(
-                                  'Japanisch (UT)'),
+                              episode.languages.indexOf('Japanisch (UT)'),
                               this._csrf,
                               this._anime,
                               this.episodeIndex,
@@ -237,12 +219,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                   setState(() {});
                   FocusScope.of(context).requestFocus(this.omuFocusNodes[this.episodeIndex]);
                   RenderBox box = this.omuFocusNodes[this.episodeIndex].context.findRenderObject();
-                  this._scrollController.animateTo(
-                      this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5),
-                      duration: Duration(
-                          milliseconds: 500
-                      ),
-                      curve: Curves.easeInOut
+                  this._scrollController.jumpTo(
+                      this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
                   );
                 }
                 return true;
