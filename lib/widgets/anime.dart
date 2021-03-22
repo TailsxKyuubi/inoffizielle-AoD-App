@@ -527,7 +527,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                       Row(
                                         children: [
                                           Container(
-                                            width: deviceOrientation == Orientation.landscape ? (width-60) * 0.25 : width * 0.5,
+                                            width: deviceOrientation == Orientation.landscape ? (width-60) * 0.25 :(width-30) * 0.5,
                                             child: CachedNetworkImage(
                                               imageUrl: 'https://'+episode.imageUrl.host+episode.imageUrl.path,
                                               fit: BoxFit.fill,
