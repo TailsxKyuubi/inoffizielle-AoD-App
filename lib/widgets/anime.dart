@@ -234,7 +234,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
     print('get anime init');
     http.Response res;
     try {
-      res = await http.get('https://anime-on-demand.de/anime/' + this._anime.id.toString(),headers: headerHandler.getHeaders());
+      res = await http.get(Uri.tryParse('https://anime-on-demand.de/anime/' + this._anime.id.toString()),headers: headerHandler.getHeaders());
     }catch(exception){
       connectionError = true;
       return false;

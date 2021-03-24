@@ -61,13 +61,14 @@ class PlayerState extends State<PlayerWidget> {
   sendAodTrackingRequest([timer]) async{
     try {
       await http.get(
-          'https://anime-on-demand.de/interfaces/startedstream/'
+          Uri.tryParse('https://anime-on-demand.de/interfaces/startedstream/'
               + playerCache.playlist[playerCache.playlistIndex]['mediaid']
               .toString()
               + '/' + playerCache.controller.value.position.inSeconds.toString()
               + '/30/' + playerCache.language + '/'
               + (settings.playerSettings.defaultQuality == 0
-              ? '720' : settings.playerSettings.defaultQuality.toString()),
+              ? '720' : settings.playerSettings.defaultQuality.toString())
+          ),
           headers: headerHandler.getHeaders()
       );
     }catch(exception){
@@ -153,7 +154,7 @@ class PlayerState extends State<PlayerWidget> {
 
   Future<String> checkVideoQuality(String m3u8) async{
     if(settings.playerSettings.defaultQuality != 0){
-      http.Response res = await http.get(m3u8,headers: headerHandler.getHeaders());
+      http.Response res = await http.get(Uri.tryParse(m3u8),headers: headerHandler.getHeaders());
       List<String> lines = res.body.split('\n');
       for(int i = 0;i<lines.length;i++){
         if(lines[i].split(':')[0] == '#EXT-X-STREAM-INF' && lines[i].split('x').last == settings.playerSettings.defaultQuality.toString()){
@@ -185,7 +186,7 @@ class PlayerState extends State<PlayerWidget> {
     playerCache.language = Uri.parse(args.episode.playlistUrl[args.languageIndex]).path.split('/')[3] == 'OmU' ? 'jap' : 'ger';
     http.Response value;
     try{
-      value = await http.get(args.episode.playlistUrl[args.languageIndex], headers: headers);
+      value = await http.get(Uri.tryParse(args.episode.playlistUrl[args.languageIndex]), headers: headers);
     }catch(exception){
       showDialog(
         context: context,
