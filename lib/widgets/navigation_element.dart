@@ -11,9 +11,10 @@ class NavigationElement extends StatelessWidget {
   final String label;
   final FocusNode focusNode;
   final Function onPressed;
+  final bool first;
 
 
-  NavigationElement({this.routeName, this.icon, this.label, this.focusNode, this.onPressed});
+  NavigationElement({this.routeName, this.icon, this.label, this.focusNode, this.onPressed,this.first});
 
   String getRouteName(BuildContext context){
     ModalRoute route = ModalRoute.of(context);
@@ -27,6 +28,9 @@ class NavigationElement extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String routeName = getRouteName(context);
+    if(this.first){
+      routeName = this.routeName;
+    }
     Color textColor;
     if(routeName == this.routeName){
       if(focusNode.hasFocus){
@@ -42,7 +46,6 @@ class NavigationElement extends StatelessWidget {
       }
     }
 
-    MediaQueryData mediaQuery = MediaQuery.of(context);
     double fontSize = 15;
     if(routeName != this.routeName){
       fontSize = 13;
