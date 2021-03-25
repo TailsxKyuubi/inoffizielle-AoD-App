@@ -202,8 +202,10 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
 
-    if(MediaQuery.of(context).orientation == Orientation.portrait){
+    if(MediaQuery.of(context).orientation == Orientation.portrait) {
       this.elementWidth = MediaQuery.of(context).size.width / 7 * 3;
+    }else if( MediaQuery.of(context).size.height < 480 ){
+      this.elementWidth = MediaQuery.of(context).size.width / 8 * 2;
     }else{
       this.elementWidth = MediaQuery.of(context).size.width / 11 * 2;
     }

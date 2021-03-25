@@ -42,6 +42,12 @@ class NavigationElement extends StatelessWidget {
       }
     }
 
+    MediaQueryData mediaQuery = MediaQuery.of(context);
+    double fontSize = 15;
+    if(routeName != this.routeName){
+      fontSize = 13;
+    }
+
     return Flexible(
         flex: 1,
         fit: FlexFit.tight,
@@ -66,7 +72,8 @@ class NavigationElement extends StatelessWidget {
                     Text(
                       label,
                       style: TextStyle(
-                          color: textColor
+                          color: textColor,
+                          fontSize: fontSize
                       ),
                     )
                   ],
