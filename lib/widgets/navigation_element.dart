@@ -28,7 +28,7 @@ class NavigationElement extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String routeName = getRouteName(context);
-    if(this.first){
+    if(this.first && routeName == '/'){
       routeName = this.routeName;
     }
     Color textColor;
