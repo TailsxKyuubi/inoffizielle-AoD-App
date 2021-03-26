@@ -17,6 +17,6 @@ flutter_build_android: #Job name
     - flutter build apk
   artifacts:
     paths:
-      - apk/release/app-release.apk
+      - build/app/outputs/flutter-apk/app-release.apk
   tags:
     - flutter
