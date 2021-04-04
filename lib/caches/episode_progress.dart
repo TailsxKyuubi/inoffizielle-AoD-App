@@ -71,7 +71,13 @@ class EpisodeProgressCache {
   }
 
   _saveMediaList(){
-    _sharedPreferences.setStringList('tracking.mediaIds', _cache.keys.map((e) => e.toString()).toList(growable: false));
+    List<String> mediaIds = [];
+    _cache.keys.forEach((int id) {
+      _cache[id].keys.forEach((String language) {
+        mediaIds.add(id.toString()+'-'+language);
+      });
+    });
+    _sharedPreferences.setStringList('tracking.mediaIds', mediaIds);
   }
 
   Duration _initEpisode(int mediaId, String lang){
