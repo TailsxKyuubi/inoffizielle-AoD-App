@@ -45,11 +45,11 @@ class EpisodeProgressCache {
   addEpisode(int mediaId, Duration timeCode,String lang){
     if( ! this._cache.containsKey(mediaId) ){
       this._cache.addAll( { mediaId: { lang: timeCode } } );
-      this._saveMediaList();
     }else{
       this._cache[mediaId][lang] = timeCode;
     }
     this._saveEpisodeDuration(mediaId, timeCode, lang);
+    this._saveMediaList();
   }
 
   Duration getEpisodeDuration(int mediaId, String lang){

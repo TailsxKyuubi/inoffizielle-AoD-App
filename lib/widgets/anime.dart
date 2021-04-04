@@ -370,7 +370,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                     this._anime,
                     0,
                     this.episodes.length
-                );;
+                );
                 int episodesCounter = 0;
                 this.episodes.forEach((Episode episode) {
                   int langCounter = 0;
