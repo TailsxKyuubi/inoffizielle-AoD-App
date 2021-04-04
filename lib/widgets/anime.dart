@@ -37,7 +37,6 @@ class AnimeWidgetState extends State<AnimeWidget>{
   String _csrf;
   bool movie = false;
   bool showFullDescription = false;
-  PlayerTransfer _nextEpisode;
   bool bootUp = true;
   int episodeIndex = 0;
   List<FocusNode> germanFocusNodes = [];
@@ -295,36 +294,6 @@ class AnimeWidgetState extends State<AnimeWidget>{
     this.episodes = episodes;
     this.generateEpisodesFocusNodes();
 
-    if(settings.playerSettings.saveEpisodeProgress){
-      int episodesCounter = 0;
-      this.episodes.forEach((Episode episode) {
-        int langCounter = 0;
-        episode.languages.forEach((String lang) {
-          if(episodeProgressCache.getEpisodeDuration(episode.mediaId,lang).inSeconds > 0){
-            this._nextEpisode = PlayerTransfer(
-                episode,
-                langCounter,
-                this._csrf,
-                this._anime,
-                episodesCounter,
-                episodes.length
-            );
-            langCounter++;
-          }
-        });
-        episodesCounter++;
-      });
-      if(this._nextEpisode == null){
-        this._nextEpisode = PlayerTransfer(
-            this.episodes[0],
-            0,
-            this._csrf,
-            this._anime,
-            0,
-            this.episodes.length
-        );
-      }
-    }
     print('end anime episodes iterating');
   }
 
@@ -394,7 +363,33 @@ class AnimeWidgetState extends State<AnimeWidget>{
                 ),
               ),
               onPressed: () {
-                Navigator.pushNamed(context, '/player',arguments: this._nextEpisode);
+                PlayerTransfer playerTransfer = PlayerTransfer(
+                    this.episodes[0],
+                    0,
+                    this._csrf,
+                    this._anime,
+                    0,
+                    this.episodes.length
+                );;
+                int episodesCounter = 0;
+                this.episodes.forEach((Episode episode) {
+                  int langCounter = 0;
+                  episode.languages.forEach((String lang) {
+                    if(episodeProgressCache.getEpisodeDuration(episode.mediaId,lang).inSeconds > 0){
+                      playerTransfer = PlayerTransfer(
+                          episode,
+                          langCounter,
+                          this._csrf,
+                          this._anime,
+                          episodesCounter,
+                          episodes.length
+                      );
+                      langCounter++;
+                    }
+                  });
+                  episodesCounter++;
+                });
+                Navigator.pushNamed(context, '/player',arguments: playerTransfer);
               },
             )
                 : Container(),
