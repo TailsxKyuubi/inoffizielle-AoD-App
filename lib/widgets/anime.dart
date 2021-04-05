@@ -73,6 +73,9 @@ class AnimeWidgetState extends State<AnimeWidget>{
               case KEY_CENTER:
                 this.showFullDescription = !this.showFullDescription;
                 break;
+              case KEY_MEDIA_PLAY_PAUSE:
+                this.continueSeries();
+                break;
               case KEY_BACK:
                 Navigator.pop(context);
                 return true;
@@ -95,6 +98,9 @@ class AnimeWidgetState extends State<AnimeWidget>{
                 this._scrollController.jumpTo(
                     this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
                 );
+                break;
+              case KEY_MEDIA_PLAY_PAUSE:
+                this.continueSeries();
                 break;
               case KEY_CENTER:
                 Navigator.pop(context);
@@ -144,9 +150,9 @@ class AnimeWidgetState extends State<AnimeWidget>{
                         this.omuFocusNodes[this.episodeIndex]
                     );
                     return false;
-                  }else if(rawKeyEventData.keyCode == KEY_CENTER){
+                  }else if(rawKeyEventData.keyCode == KEY_CENTER) {
                     Episode episode = this.episodes[episodeIndex];
-                    if(episode.languages.indexOf('Deutsch') != -1) {
+                    if (episode.languages.indexOf('Deutsch') != -1) {
                       Navigator.pushNamed(
                           context,
                           '/player',
@@ -160,6 +166,9 @@ class AnimeWidgetState extends State<AnimeWidget>{
                           )
                       );
                     }
+                    return true;
+                  }else if(rawKeyEventData.keyCode == KEY_MEDIA_PLAY_PAUSE){
+                    this.continueSeries();
                     return true;
                   }else{
                     int oldIndex = this.episodeIndex;
@@ -208,6 +217,9 @@ class AnimeWidgetState extends State<AnimeWidget>{
                           )
                       );
                     }
+                  }else if(rawKeyEventData.keyCode == KEY_MEDIA_PLAY_PAUSE){
+                    this.continueSeries();
+                    return true;
                   }else{
                     int oldIndex = this.episodeIndex;
                     handleKeys(rawKeyEventData.keyCode);
@@ -297,6 +309,36 @@ class AnimeWidgetState extends State<AnimeWidget>{
     print('end anime episodes iterating');
   }
 
+  continueSeries(){
+    PlayerTransfer playerTransfer = PlayerTransfer(
+        this.episodes[0],
+        0,
+        this._csrf,
+        this._anime,
+        0,
+        this.episodes.length
+    );
+    int episodesCounter = 0;
+    this.episodes.forEach((Episode episode) {
+      int langCounter = 0;
+      episode.languages.forEach((String lang) {
+        if(episodeProgressCache.getEpisodeDuration(episode.mediaId,lang).inSeconds > 0){
+          playerTransfer = PlayerTransfer(
+              episode,
+              langCounter,
+              this._csrf,
+              this._anime,
+              episodesCounter,
+              episodes.length
+          );
+          langCounter++;
+        }
+      });
+      episodesCounter++;
+    });
+    Navigator.pushNamed(context, '/player',arguments: playerTransfer);
+  }
+
   AnimeWidgetState(Anime anime) {
     Wakelock.disable();
     this._anime = anime;
@@ -362,35 +404,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                     color: Theme.of(context).primaryColor
                 ),
               ),
-              onPressed: () {
-                PlayerTransfer playerTransfer = PlayerTransfer(
-                    this.episodes[0],
-                    0,
-                    this._csrf,
-                    this._anime,
-                    0,
-                    this.episodes.length
-                );
-                int episodesCounter = 0;
-                this.episodes.forEach((Episode episode) {
-                  int langCounter = 0;
-                  episode.languages.forEach((String lang) {
-                    if(episodeProgressCache.getEpisodeDuration(episode.mediaId,lang).inSeconds > 0){
-                      playerTransfer = PlayerTransfer(
-                          episode,
-                          langCounter,
-                          this._csrf,
-                          this._anime,
-                          episodesCounter,
-                          episodes.length
-                      );
-                      langCounter++;
-                    }
-                  });
-                  episodesCounter++;
-                });
-                Navigator.pushNamed(context, '/player',arguments: playerTransfer);
-              },
+              onPressed: continueSeries,
             )
                 : Container(),
             body: Container(
