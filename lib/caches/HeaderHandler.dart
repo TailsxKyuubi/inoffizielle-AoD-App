@@ -2,9 +2,11 @@
  * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
+import 'package:unoffical_aod_app/caches/version.dart';
+
 class HeaderHandler {
   Map<String,String> _headers = {
-    'User-Agent': 'inoffizielle AoD App/0.8.0-beta.1+1',
+    'User-Agent': 'inoffizielle AoD App/'+ version.minor.toString(),
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
     'Accept-Language': 'de,en-US;q=0.7,en;q=0.3',
     'Accept-Encoding': 'gzip, deflate, br',
