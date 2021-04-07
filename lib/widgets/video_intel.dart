@@ -52,6 +52,10 @@ class VideoIntel extends StatelessWidget {
                         DeviceOrientation.landscapeRight
                       ]
                   );
+                  SystemChrome.setEnabledSystemUIOverlays([
+                    SystemUiOverlay.top,
+                    SystemUiOverlay.bottom
+                  ]);
                   print('switched orientation');
                   Navigator.pop(context);
                   VideoPlayerController oldVideoController = playerCache.controller;

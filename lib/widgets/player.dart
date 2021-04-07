@@ -125,6 +125,10 @@ class PlayerState extends State<PlayerWidget> {
             DeviceOrientation.landscapeRight
           ]
       );
+      SystemChrome.setEnabledSystemUIOverlays([
+        SystemUiOverlay.top,
+        SystemUiOverlay.bottom
+      ]);
       print('switched orientation');
       Navigator.pop(context);
       playerCache.controller = null;
@@ -326,6 +330,10 @@ class PlayerState extends State<PlayerWidget> {
                     DeviceOrientation.landscapeRight
                   ]
               );
+              SystemChrome.setEnabledSystemUIOverlays([
+                SystemUiOverlay.top,
+                SystemUiOverlay.bottom
+              ]);
               playerCache.updateThread.cancel();
               playerCache.timeTrackThread.cancel();
               if(settings.playerSettings.saveEpisodeProgress){
