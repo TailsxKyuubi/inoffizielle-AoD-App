@@ -203,7 +203,7 @@ class PlayerState extends State<PlayerWidget> {
     print('request finished');
     try{
       playerCache.playlist = jsonDecode(value.body)['playlist'];
-
+      // Entfernen der Folgen nach der letzten Episode aus der Playlist
       if(playerCache.playlist.length > 1 && args.countEpisodes != args.positionEpisodes){
         playerCache.playlist.removeRange(((playerCache.playlist.length - args.positionEpisodes)), playerCache.playlist.length);
       }else if(playerCache.playlist.length > 1 && args.countEpisodes == args.positionEpisodes){
@@ -221,9 +221,12 @@ class PlayerState extends State<PlayerWidget> {
               Duration episodeTimeCode = episodeProgressCache
                   .getEpisodeDuration(playerCache.playlist[0]['mediaid'],this.args.episode.languages[this.args.languageIndex]);
               int difference = playerCache.controller.value.duration.inSeconds - episodeTimeCode.inSeconds;
-              if(difference > 120){
+              if (difference > 120) {
                 this.args.startTime = episodeTimeCode;
-              }else{
+              } else if (this.args.continueSeries && difference < 120 && playerCache.playlist.length > 1) {
+                this.jumpToNextEpisode();
+                return;
+              } else {
                 episodeProgressCache.addEpisode(playerCache.playlist[0]['mediaid'], Duration.zero, this.args.episode.languages[this.args.languageIndex]);
               }
               playerCache.episodeTracker = Timer.periodic(Duration(seconds: 10), this.saveEpisodeProgress);

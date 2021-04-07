@@ -162,7 +162,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                               this._csrf,
                               this._anime,
                               this.episodeIndex,
-                              this.episodes.length
+                              this.episodes.length,
+                              false
                           )
                       );
                     }
@@ -213,7 +214,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                               this._csrf,
                               this._anime,
                               this.episodeIndex,
-                              this.episodes.length
+                              this.episodes.length,
+                              false
                           )
                       );
                     }
@@ -316,7 +318,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
         this._csrf,
         this._anime,
         0,
-        this.episodes.length
+        this.episodes.length,
+        true
     );
     int episodesCounter = 0;
     this.episodes.forEach((Episode episode) {
@@ -329,7 +332,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
               this._csrf,
               this._anime,
               episodesCounter,
-              episodes.length
+              episodes.length,
+              true
           );
           langCounter++;
         }
@@ -594,7 +598,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                                               this._csrf,
                                                               this._anime,
                                                               gerIndex,
-                                                              this.episodes.length
+                                                              this.episodes.length,
+                                                              true
                                                           )
                                                       );
                                                     }
@@ -642,7 +647,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                                               this._csrf,
                                                               this._anime,
                                                               japIndex,
-                                                              this.episodes.length
+                                                              this.episodes.length,
+                                                              true
                                                           )
                                                       );
                                                     }
