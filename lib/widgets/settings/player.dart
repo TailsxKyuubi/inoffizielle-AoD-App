@@ -135,7 +135,7 @@ class _PlayerSettingsState extends State<PlayerSettingsWidget> {
                 ),
               ),
               trailing: Switch(
-                focusNode: playerSettingsFocusNodes[2],
+                focusNode: playerSettingsFocusNodes[3],
                 onChanged: (bool value) {
                   setState(() {
                     settings.playerSettings.setVolumeControls(value);

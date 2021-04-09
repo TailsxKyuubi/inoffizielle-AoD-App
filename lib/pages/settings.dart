@@ -69,7 +69,7 @@ class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderSt
           break;
         case KEY_DOWN:
           playerSettingsFocusIndex++;
-          if(playerSettingsFocusIndex > 2){
+          if(playerSettingsFocusIndex > 3){
             playerSettingsFocusIndex = 0;
             FocusScope.of(context).requestFocus(menuBarFocusNodes.first);
             return true;

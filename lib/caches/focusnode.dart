@@ -22,6 +22,7 @@ int appSettingsFocusIndex = -1;
 List<FocusNode> playerSettingsFocusNodes = [
   FocusNode(),
   FocusNode(),
+  FocusNode(),
   FocusNode()
 ];
 int playerSettingsFocusIndex = -1;
