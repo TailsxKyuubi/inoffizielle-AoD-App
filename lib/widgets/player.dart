@@ -45,7 +45,7 @@ class PlayerState extends State<PlayerWidget> {
   DateTime showVolumeStart;
   PlayerTransfer args;
   bool bootUp = true;
-  double basicVolume;
+  double volumeStartPositionY = 0;
 
   initUpdateThread() async {
     playerCache.updateThread = Timer.periodic(Duration(milliseconds: 500), (timer) {
@@ -374,21 +374,29 @@ class PlayerState extends State<PlayerWidget> {
                     },
                     onVerticalDragStart: (DragStartDetails value){
                       if( settings.playerSettings.volumeControls && value.globalPosition.dx > MediaQuery.of(context).size.width * 0.5) {
-                        this.showVolume = true;
                         this.showVolumeStart = DateTime.now();
+                        this.volumeStartPositionY = value.globalPosition.dy;
                       }
                     },
                     onVerticalDragUpdate: (DragUpdateDetails update){
-                      if(settings.playerSettings.volumeControls && update.globalPosition.dx > MediaQuery.of(context).size.width * 0.5){
+                      if(settings.playerSettings.volumeControls && update.delta.direction != 0 && update.globalPosition.dx > MediaQuery.of(context).size.width * 0.5){
                         this.showVolume = true;
                         this.showVolumeStart = DateTime.now();
-                        playerCache.controller.setVolume(
-                            playerCache.controller.value.volume+((update.delta.dy/(MediaQuery.of(context).size.height/100*0.8))/100)*-1
-                        );
-                        setState(() {});
+                        double difference = this.volumeStartPositionY = update.globalPosition.dy;
+                        difference = difference > 0
+                            ? difference
+                            : difference * -1;
+                        if(this.volumeStartPositionY > 30){
+                          this.showVolume = true;
+                          playerCache.controller.setVolume(
+                              playerCache.controller.value.volume+((update.delta.dy/(MediaQuery.of(context).size.height/100*0.8))/100)*-1
+                          );
+                          setState(() {});
+                        }
                       }
                     },
                     onVerticalDragEnd: (DragEndDetails value){
+                      this.volumeStartPositionY = 0;
                       Timer(Duration(seconds: 3),(){
                         if(DateTime.now().difference(showVolumeStart).inSeconds >= 3){
                           showVolume = false;
@@ -424,9 +432,9 @@ class PlayerState extends State<PlayerWidget> {
                   settings.playerSettings.volumeControls && showVolume && playerCache.controller.value != null
                       ? Positioned(
                     left: MediaQuery.of(context).size.width * 0.05,
-                    top: MediaQuery.of(context).size.height *0.15,
+                    top: MediaQuery.of(context).size.height * 0.15,
                     child: Container(
-                      height: MediaQuery.of(context).size.height *0.7,
+                      height: MediaQuery.of(context).size.height * 0.7,
                       width: 30,
                       decoration: BoxDecoration(
                         border: Border.all(
