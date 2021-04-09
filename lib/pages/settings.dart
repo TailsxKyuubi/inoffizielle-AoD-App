@@ -102,6 +102,11 @@ class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderSt
                 settings.playerSettings.setSaveEpisodeProgress(!settings.playerSettings.saveEpisodeProgress);
               });
               return false;
+            case 3:
+              setState(() {
+                settings.playerSettings.setVolumeControls(!settings.playerSettings.volumeControls);
+              });
+              return false;
           }
           break;
         case KEY_BACK:
