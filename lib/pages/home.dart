@@ -263,7 +263,7 @@ class _HomePageState extends State<HomePage> {
                             //String seriesName = e['series_name'].split(':')[0];
                             String animeName;
                             int limiter = 14;
-                            int maxLimiter = 17;
+                            int maxLimiter = 16;
                             if(e['series_name'].length > limiter){
                               int index = e['series_name'].indexOf(' ',limiter);
                               if(index != -1 && index <= maxLimiter) {
@@ -374,7 +374,7 @@ class _HomePageState extends State<HomePage> {
                             //String seriesName = e['series_name'].split(':')[0];
                             String animeName;
                             int limiter = 14;
-                            int maxLimiter = 17;
+                            int maxLimiter = 16;
                             if(e['series_name'].length > limiter){
                               int index = e['series_name'].indexOf(' ',limiter);
                               if(index != -1 && index <= maxLimiter) {
@@ -464,7 +464,7 @@ class _HomePageState extends State<HomePage> {
                             //String seriesName = e['series_name'].split(':')[0];
                             String animeName;
                             int limiter = 14;
-                            int maxLimiter = 17;
+                            int maxLimiter = 16;
                             if(e['series_name'].length > limiter){
                               int index = e['series_name'].indexOf(' ',limiter);
                               if(index != -1 && index <= maxLimiter) {
@@ -555,7 +555,7 @@ class _HomePageState extends State<HomePage> {
                             //String seriesName = e['series_name'].split(':')[0];
                             String animeName;
                             int limiter = 14;
-                            int maxLimiter = 17;
+                            int maxLimiter = 16;
                             if(e['series_name'].length > limiter){
                               int index = e['series_name'].indexOf(' ',limiter);
                               if(index != -1 && index <= maxLimiter) {
