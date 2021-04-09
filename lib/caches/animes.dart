@@ -20,7 +20,7 @@ Future getAllAnimesV2() async{
   http.Response res;
   try {
     res = await http.get(
-        'https://anime-on-demand.de/myanimes',
+        Uri.parse('https://anime-on-demand.de/myanimes'),
         headers: headerHandler.getHeadersForGetRequest()
     );
   }catch(exception){
@@ -37,7 +37,7 @@ Future getAllAnimesV2() async{
     http.Response resAllAnimePage;
     try {
       resAllAnimePage = await http.get(
-          'https://anime-on-demand.de/animes',
+          Uri.parse('https://anime-on-demand.de/animes'),
           headers: headerHandler.getHeadersForGetRequest()
       );
     }catch(exception){

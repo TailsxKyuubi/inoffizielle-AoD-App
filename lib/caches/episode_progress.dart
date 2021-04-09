@@ -45,11 +45,11 @@ class EpisodeProgressCache {
   addEpisode(int mediaId, Duration timeCode,String lang){
     if( ! this._cache.containsKey(mediaId) ){
       this._cache.addAll( { mediaId: { lang: timeCode } } );
-      this._saveMediaList();
     }else{
       this._cache[mediaId][lang] = timeCode;
     }
     this._saveEpisodeDuration(mediaId, timeCode, lang);
+    this._saveMediaList();
   }
 
   Duration getEpisodeDuration(int mediaId, String lang){
@@ -71,7 +71,13 @@ class EpisodeProgressCache {
   }
 
   _saveMediaList(){
-    _sharedPreferences.setStringList('tracking.mediaIds', _cache.keys.map((e) => e.toString()).toList(growable: false));
+    List<String> mediaIds = [];
+    _cache.keys.forEach((int id) {
+      _cache[id].keys.forEach((String language) {
+        mediaIds.add(id.toString()+'-'+language);
+      });
+    });
+    _sharedPreferences.setStringList('tracking.mediaIds', mediaIds);
   }
 
   Duration _initEpisode(int mediaId, String lang){

@@ -41,7 +41,7 @@ Future<bool> validateCredentialsAndSave( String username, String password ) asyn
   print('starting home page request');
   http.Response mainRes;
   try {
-    mainRes = await http.get('https://anime-on-demand.de/', headers: headers);
+    mainRes = await http.get(Uri.parse('https://anime-on-demand.de/'), headers: headers);
     print('finished home page request');
   }catch(exception){
     connectionError = true;
@@ -73,7 +73,7 @@ Future<bool> validateCredentialsAndSave( String username, String password ) asyn
   http.Response res;
   try {
     res = await http.post(
-        'https://anime-on-demand.de/users/sign_in',
+        Uri.parse('https://anime-on-demand.de/users/sign_in'),
         body: parameterString,
         headers: headers
     );

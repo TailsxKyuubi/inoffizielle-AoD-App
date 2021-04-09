@@ -92,7 +92,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
             scope.requestFocus(menuBarFocusNodes.first);
           });
           this._animeFocusIndex = 0;
-          this._scrollController.animateTo(0, duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
+          this._scrollController.jumpTo(0);
           return true;
         case KEY_BACK:
           exit(0);
@@ -104,10 +104,8 @@ class _AnimesWidgetState extends State<AnimesWidget> {
               arguments: animes.animes[this._focusNodeAnimeMapping[this._animeFocusIndex]]
           );
       }
-      this._scrollController.animateTo(
+      this._scrollController.jumpTo(
           (this.animeFocusNodes.indexOf(scope.focusedChild) / 4).floor() * scope.focusedChild.size.height,
-          curve: Curves.easeIn,
-          duration: Duration(milliseconds: 200)
       );
     }
     return true;

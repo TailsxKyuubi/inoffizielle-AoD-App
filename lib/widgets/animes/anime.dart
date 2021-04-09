@@ -20,7 +20,7 @@ class AnimeSmallWidget extends StatelessWidget{
   Widget build(BuildContext context) {
     String animeName;
     int limiter = 14;
-    int maxLimiter = 17;
+    int maxLimiter = 16;
     if(this._anime.name.length > limiter){
       int index = this._anime.name.indexOf(' ',limiter);
       if(index != -1 && index <= maxLimiter) {

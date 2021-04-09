@@ -37,7 +37,6 @@ class AnimeWidgetState extends State<AnimeWidget>{
   String _csrf;
   bool movie = false;
   bool showFullDescription = false;
-  PlayerTransfer _nextEpisode;
   bool bootUp = true;
   int episodeIndex = 0;
   List<FocusNode> germanFocusNodes = [];
@@ -64,12 +63,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
               case KEY_DOWN:
                 focusScope.requestFocus(this.germanFocusNodes.first);
                 RenderBox box = this.germanFocusNodes.first.context.findRenderObject();
-                this._scrollController.animateTo(
-                    this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5),
-                    duration: Duration(
-                        milliseconds: 500
-                    ),
-                    curve: Curves.easeInOut
+                this._scrollController.jumpTo(
+                    this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
                 );
                 break;
               case KEY_UP:
@@ -77,6 +72,9 @@ class AnimeWidgetState extends State<AnimeWidget>{
                 break;
               case KEY_CENTER:
                 this.showFullDescription = !this.showFullDescription;
+                break;
+              case KEY_MEDIA_PLAY_PAUSE:
+                this.continueSeries();
                 break;
               case KEY_BACK:
                 Navigator.pop(context);
@@ -97,13 +95,12 @@ class AnimeWidgetState extends State<AnimeWidget>{
                 focusScope.requestFocus(this.readMoreFocusNode);
                 setState(() {});
                 RenderBox box = this.readMoreFocusNode.context.findRenderObject();
-                this._scrollController.animateTo(
-                    this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5),
-                    duration: Duration(
-                        milliseconds: 500
-                    ),
-                    curve: Curves.easeInOut
+                this._scrollController.jumpTo(
+                    this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
                 );
+                break;
+              case KEY_MEDIA_PLAY_PAUSE:
+                this.continueSeries();
                 break;
               case KEY_CENTER:
                 Navigator.pop(context);
@@ -129,12 +126,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
         FocusScope.of(context).requestFocus(this.readMoreFocusNode);
         setState(() {});
         RenderBox box = this.readMoreFocusNode.context.findRenderObject();
-        this._scrollController.animateTo(
-            this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5),
-            duration: Duration(
-                milliseconds: 500
-            ),
-            curve: Curves.easeInOut
+        this._scrollController.jumpTo(
+            this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
         );
       }
     }
@@ -151,29 +144,32 @@ class AnimeWidgetState extends State<AnimeWidget>{
                   RawKeyEventDataAndroid rawKeyEventData = keyEvent.data;
                   if(rawKeyEventData.keyCode == KEY_BACK) {
                     Navigator.pop(context);
-                    return false;
+                    return true;
                   }else if(rawKeyEventData.keyCode == KEY_RIGHT) {
                     FocusScope.of(context).requestFocus(
                         this.omuFocusNodes[this.episodeIndex]
                     );
                     return false;
-                  }else if(rawKeyEventData.keyCode == KEY_CENTER){
+                  }else if(rawKeyEventData.keyCode == KEY_CENTER) {
                     Episode episode = this.episodes[episodeIndex];
-                    if(episode.languages.indexOf('Deutsch') != -1) {
+                    if (episode.languages.indexOf('Deutsch') != -1) {
                       Navigator.pushNamed(
                           context,
                           '/player',
                           arguments: PlayerTransfer(
                               episode,
-                              episode.languages.indexOf(
-                                  'Deutsch'),
+                              episode.languages.indexOf('Deutsch'),
                               this._csrf,
                               this._anime,
                               this.episodeIndex,
-                              this.episodes.length
+                              this.episodes.length,
+                              false
                           )
                       );
                     }
+                    return true;
+                  }else if(rawKeyEventData.keyCode == KEY_MEDIA_PLAY_PAUSE){
+                    this.continueSeries();
                     return true;
                   }else{
                     int oldIndex = this.episodeIndex;
@@ -185,12 +181,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                   setState(() {});
                   FocusScope.of(context).requestFocus(this.germanFocusNodes[this.episodeIndex]);
                   RenderBox box = this.germanFocusNodes[this.episodeIndex].context.findRenderObject();
-                  this._scrollController.animateTo(
-                      this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5),
-                      duration: Duration(
-                          milliseconds: 500
-                      ),
-                      curve: Curves.easeInOut
+                  this._scrollController.jumpTo(
+                      this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
                   );
                 }
                 return true;
@@ -218,15 +210,18 @@ class AnimeWidgetState extends State<AnimeWidget>{
                           '/player',
                           arguments: PlayerTransfer(
                               episode,
-                              episode.languages.indexOf(
-                                  'Japanisch (UT)'),
+                              episode.languages.indexOf('Japanisch (UT)'),
                               this._csrf,
                               this._anime,
                               this.episodeIndex,
-                              this.episodes.length
+                              this.episodes.length,
+                              false
                           )
                       );
                     }
+                  }else if(rawKeyEventData.keyCode == KEY_MEDIA_PLAY_PAUSE){
+                    this.continueSeries();
+                    return true;
                   }else{
                     int oldIndex = this.episodeIndex;
                     handleKeys(rawKeyEventData.keyCode);
@@ -237,12 +232,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                   setState(() {});
                   FocusScope.of(context).requestFocus(this.omuFocusNodes[this.episodeIndex]);
                   RenderBox box = this.omuFocusNodes[this.episodeIndex].context.findRenderObject();
-                  this._scrollController.animateTo(
-                      this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5),
-                      duration: Duration(
-                          milliseconds: 500
-                      ),
-                      curve: Curves.easeInOut
+                  this._scrollController.jumpTo(
+                      this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
                   );
                 }
                 return true;
@@ -256,7 +247,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
     print('get anime init');
     http.Response res;
     try {
-      res = await http.get('https://anime-on-demand.de/anime/' + this._anime.id.toString(),headers: headerHandler.getHeaders());
+      res = await http.get(Uri.tryParse('https://anime-on-demand.de/anime/' + this._anime.id.toString()),headers: headerHandler.getHeaders());
     }catch(exception){
       connectionError = true;
       return false;
@@ -317,37 +308,39 @@ class AnimeWidgetState extends State<AnimeWidget>{
     this.episodes = episodes;
     this.generateEpisodesFocusNodes();
 
-    if(settings.playerSettings.saveEpisodeProgress){
-      int episodesCounter = 0;
-      this.episodes.forEach((Episode episode) {
-        int langCounter = 0;
-        episode.languages.forEach((String lang) {
-          if(episodeProgressCache.getEpisodeDuration(episode.mediaId,lang).inSeconds > 0){
-            this._nextEpisode = PlayerTransfer(
-                episode,
-                langCounter,
-                this._csrf,
-                this._anime,
-                episodesCounter,
-                episodes.length
-            );
-            langCounter++;
-          }
-        });
-        episodesCounter++;
-      });
-      if(this._nextEpisode == null){
-        this._nextEpisode = PlayerTransfer(
-            this.episodes[0],
-            0,
-            this._csrf,
-            this._anime,
-            0,
-            this.episodes.length
-        );
-      }
-    }
     print('end anime episodes iterating');
+  }
+
+  continueSeries(){
+    PlayerTransfer playerTransfer = PlayerTransfer(
+        this.episodes[0],
+        0,
+        this._csrf,
+        this._anime,
+        0,
+        this.episodes.length,
+        true
+    );
+    int episodesCounter = 0;
+    this.episodes.forEach((Episode episode) {
+      int langCounter = 0;
+      episode.languages.forEach((String lang) {
+        if(episodeProgressCache.getEpisodeDuration(episode.mediaId,lang).inSeconds > 0){
+          playerTransfer = PlayerTransfer(
+              episode,
+              langCounter,
+              this._csrf,
+              this._anime,
+              episodesCounter,
+              episodes.length,
+              true
+          );
+          langCounter++;
+        }
+      });
+      episodesCounter++;
+    });
+    Navigator.pushNamed(context, '/player',arguments: playerTransfer);
   }
 
   AnimeWidgetState(Anime anime) {
@@ -415,9 +408,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                     color: Theme.of(context).primaryColor
                 ),
               ),
-              onPressed: () {
-                Navigator.pushNamed(context, '/player',arguments: this._nextEpisode);
-              },
+              onPressed: continueSeries,
             )
                 : Container(),
             body: Container(
@@ -549,7 +540,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                       Row(
                                         children: [
                                           Container(
-                                            width: deviceOrientation == Orientation.landscape ? (width-60) * 0.25 : width * 0.5,
+                                            width: deviceOrientation == Orientation.landscape ? (width-60) * 0.25 :(width-30) * 0.5,
                                             child: CachedNetworkImage(
                                               imageUrl: 'https://'+episode.imageUrl.host+episode.imageUrl.path,
                                               fit: BoxFit.fill,
@@ -607,7 +598,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                                               this._csrf,
                                                               this._anime,
                                                               gerIndex,
-                                                              this.episodes.length
+                                                              this.episodes.length,
+                                                              true
                                                           )
                                                       );
                                                     }
@@ -655,7 +647,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                                               this._csrf,
                                                               this._anime,
                                                               japIndex,
-                                                              this.episodes.length
+                                                              this.episodes.length,
+                                                              true
                                                           )
                                                       );
                                                     }

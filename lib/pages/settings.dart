@@ -47,7 +47,7 @@ class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderSt
           )
       );
     }
-    for(int i = 0;i < 3;i++){
+    for(int i = 0;i < 4;i++){
       playerSettingsFocusNodes.add(
           FocusNode(
               onKey: handleKeyPlayerSettings
@@ -69,7 +69,7 @@ class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderSt
           break;
         case KEY_DOWN:
           playerSettingsFocusIndex++;
-          if(playerSettingsFocusIndex > 2){
+          if(playerSettingsFocusIndex > 3){
             playerSettingsFocusIndex = 0;
             FocusScope.of(context).requestFocus(menuBarFocusNodes.first);
             return true;
@@ -100,6 +100,11 @@ class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderSt
             case 2:
               setState(() {
                 settings.playerSettings.setSaveEpisodeProgress(!settings.playerSettings.saveEpisodeProgress);
+              });
+              return false;
+            case 3:
+              setState(() {
+                settings.playerSettings.setVolumeControls(!settings.playerSettings.volumeControls);
               });
               return false;
           }

@@ -45,7 +45,7 @@ class PlayerState extends State<PlayerWidget> {
   DateTime showVolumeStart;
   PlayerTransfer args;
   bool bootUp = true;
-  double basicVolume;
+  double volumeStartPositionY = 0;
 
   initUpdateThread() async {
     playerCache.updateThread = Timer.periodic(Duration(milliseconds: 500), (timer) {
@@ -61,15 +61,18 @@ class PlayerState extends State<PlayerWidget> {
   sendAodTrackingRequest([timer]) async{
     try {
       await http.get(
-          'https://anime-on-demand.de/interfaces/startedstream/'
+          Uri.tryParse('https://anime-on-demand.de/interfaces/startedstream/'
               + playerCache.playlist[playerCache.playlistIndex]['mediaid']
-              .toString()
+                  .toString()
               + '/' + playerCache.controller.value.position.inSeconds.toString()
               + '/30/' + playerCache.language + '/'
               + (settings.playerSettings.defaultQuality == 0
-              ? '720' : settings.playerSettings.defaultQuality.toString()),
-          headers: headerHandler.getHeaders());
+                  ? '720' : settings.playerSettings.defaultQuality.toString())
+          ),
+          headers: headerHandler.getHeaders()
+      );
     }catch(exception){
+      playerCache.controller.pause();
       showDialog(
         context: context,
         builder: (_) => PlayerConnectionErrorDialog(args),
@@ -107,23 +110,32 @@ class PlayerState extends State<PlayerWidget> {
   }
 
   jumpToNextEpisode() async{
+    VideoPlayerController oldPlayerController = playerCache.controller;
     this.saveEpisodeProgress();
     if(playerCache.playlist.length <= (playerCache.playlistIndex+1)){
       await playerCache.controller.pause();
       print('video halted');
       playerCache.updateThread.cancel();
       playerCache.timeTrackThread.cancel();
-      /*await SystemChrome.setPreferredOrientations(
+      await SystemChrome.setPreferredOrientations(
           [
             DeviceOrientation.portraitUp,
-            DeviceOrientation.portraitDown
+            DeviceOrientation.portraitDown,
+            DeviceOrientation.landscapeLeft,
+            DeviceOrientation.landscapeRight
           ]
-      );*/
+      );
+      SystemChrome.setEnabledSystemUIOverlays([
+        SystemUiOverlay.top,
+        SystemUiOverlay.bottom
+      ]);
       print('switched orientation');
       Navigator.pop(context);
       playerCache.controller = null;
-      playerCache.updateThread = null;
       print('cleared controller');
+      playerCache.updateThread = null;
+      print('killed thread');
+      Timer(Duration(seconds: 1),() => oldPlayerController.dispose());
       return false;
     }
     await playerCache.controller.pause();
@@ -135,6 +147,7 @@ class PlayerState extends State<PlayerWidget> {
     playerCache.playlistIndex++;
     String m3u8 = playerCache.playlist[playerCache.playlistIndex]['sources'][0]['file'];
     m3u8 = await this.checkVideoQuality(m3u8);
+    Timer(Duration(seconds: 1),() => oldPlayerController.dispose());
     playerCache.controller = VideoPlayerController.network(m3u8);
     await playerCache.controller.initialize();
     setState(() {
@@ -145,7 +158,7 @@ class PlayerState extends State<PlayerWidget> {
 
   Future<String> checkVideoQuality(String m3u8) async{
     if(settings.playerSettings.defaultQuality != 0){
-      http.Response res = await http.get(m3u8,headers: headerHandler.getHeaders());
+      http.Response res = await http.get(Uri.tryParse(m3u8),headers: headerHandler.getHeaders());
       List<String> lines = res.body.split('\n');
       for(int i = 0;i<lines.length;i++){
         if(lines[i].split(':')[0] == '#EXT-X-STREAM-INF' && lines[i].split('x').last == settings.playerSettings.defaultQuality.toString()){
@@ -177,13 +190,11 @@ class PlayerState extends State<PlayerWidget> {
     playerCache.language = Uri.parse(args.episode.playlistUrl[args.languageIndex]).path.split('/')[3] == 'OmU' ? 'jap' : 'ger';
     http.Response value;
     try{
-      value = await http.get(args.episode.playlistUrl[args.languageIndex], headers: headers);
+      value = await http.get(Uri.tryParse(args.episode.playlistUrl[args.languageIndex]), headers: headers);
     }catch(exception){
       showDialog(
         context: context,
-        builder: (BuildContext context){
-          return PlayerLoadingConnectionErrorDialog(args);
-        },
+        builder: (BuildContext context) => PlayerLoadingConnectionErrorDialog(args),
         barrierDismissible: false,
       );
       return;
@@ -192,7 +203,7 @@ class PlayerState extends State<PlayerWidget> {
     print('request finished');
     try{
       playerCache.playlist = jsonDecode(value.body)['playlist'];
-
+      // Entfernen der Folgen nach der letzten Episode aus der Playlist
       if(playerCache.playlist.length > 1 && args.countEpisodes != args.positionEpisodes){
         playerCache.playlist.removeRange(((playerCache.playlist.length - args.positionEpisodes)), playerCache.playlist.length);
       }else if(playerCache.playlist.length > 1 && args.countEpisodes == args.positionEpisodes){
@@ -204,15 +215,18 @@ class PlayerState extends State<PlayerWidget> {
       this._playlistLoaded = true;
       playerCache.controller = VideoPlayerController.network(m3u8)
         ..initialize().then((_) {
-          // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+          print('player initialized');
           setState(() {
             if(settings.playerSettings.saveEpisodeProgress){
               Duration episodeTimeCode = episodeProgressCache
                   .getEpisodeDuration(playerCache.playlist[0]['mediaid'],this.args.episode.languages[this.args.languageIndex]);
               int difference = playerCache.controller.value.duration.inSeconds - episodeTimeCode.inSeconds;
-              if(difference > 120){
+              if (difference > 120) {
                 this.args.startTime = episodeTimeCode;
-              }else{
+              } else if (this.args.continueSeries && difference < 120 && playerCache.playlist.length > 1) {
+                this.jumpToNextEpisode();
+                return;
+              } else {
                 episodeProgressCache.addEpisode(playerCache.playlist[0]['mediaid'], Duration.zero, this.args.episode.languages[this.args.languageIndex]);
               }
               playerCache.episodeTracker = Timer.periodic(Duration(seconds: 10), this.saveEpisodeProgress);
@@ -226,8 +240,8 @@ class PlayerState extends State<PlayerWidget> {
             showDialog(
               context: context,
               barrierDismissible: false, builder: (BuildContext context) {
-                return PlayerConnectionErrorDialog(this.args);
-              },
+              return PlayerConnectionErrorDialog(this.args);
+            },
             );
           }
         });
@@ -272,38 +286,43 @@ class PlayerState extends State<PlayerWidget> {
     return Scaffold(
       body: RawKeyboardListener(
           autofocus: true,
-          focusNode: FocusNode(),
-          onKey: (RawKeyEvent event){
-            if( Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent ){
-              RawKeyEventDataAndroid eventDataAndroid = event.data;
-              switch(eventDataAndroid.keyCode){
-                case KEY_MEDIA_PLAY_PAUSE:
-                  playerCache.controller.value.isPlaying
-                      ? playerCache.controller.pause()
-                      : playerCache.controller.play();
-                  break;
-                case KEY_MEDIA_SKIP_FORWARD:
-                  jumpToNextEpisode();
-                  break;
-                case KEY_MEDIA_STEP_FORWARD:
-                  if(playerCache.controller.value.duration.inSeconds <= playerCache.controller.value.position.inSeconds+30){
-                    this.jumpToNextEpisode();
-                  }else{
-                    playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds+30));
-                    setState(() {
-                      initDelayedControlsHide();
-                    });
+          focusNode: FocusNode(
+              onKey: (_, RawKeyEvent event){
+                if( Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent ){
+                  RawKeyEventDataAndroid eventDataAndroid = event.data;
+                  switch(eventDataAndroid.keyCode){
+                    case KEY_CENTER:
+                    case KEY_MEDIA_PLAY_PAUSE:
+                      playerCache.controller.value.isPlaying
+                          ? playerCache.controller.pause()
+                          : playerCache.controller.play();
+                      break;
+                    case KEY_MEDIA_SKIP_FORWARD:
+                      jumpToNextEpisode();
+                      break;
+                    case KEY_RIGHT:
+                    case KEY_MEDIA_STEP_FORWARD:
+                      if(playerCache.controller.value.duration.inSeconds <= playerCache.controller.value.position.inSeconds+30){
+                        this.jumpToNextEpisode();
+                      }else{
+                        playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds+30));
+                        setState(() {
+                          initDelayedControlsHide();
+                        });
+                      }
+                      break;
+                    case KEY_LEFT:
+                    case KEY_MEDIA_STEP_BACKWARD:
+                      playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds-10));
+                      setState(() {
+                        initDelayedControlsHide();
+                      });
+                      break;
                   }
-                  break;
-                case KEY_MEDIA_STEP_BACKWARD:
-                  playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds-10));
-                  setState(() {
-                    initDelayedControlsHide();
-                  });
-                  break;
+                }
+                return true;
               }
-            }
-          },
+          ),
           child: WillPopScope(
             onWillPop: () async {
               print('exit player');
@@ -311,6 +330,18 @@ class PlayerState extends State<PlayerWidget> {
               print('closed port');
               await playerCache.controller.pause();
               print('paused video');
+              await SystemChrome.setPreferredOrientations(
+                  [
+                    DeviceOrientation.portraitUp,
+                    DeviceOrientation.portraitDown,
+                    DeviceOrientation.landscapeLeft,
+                    DeviceOrientation.landscapeRight
+                  ]
+              );
+              SystemChrome.setEnabledSystemUIOverlays([
+                SystemUiOverlay.top,
+                SystemUiOverlay.bottom
+              ]);
               playerCache.updateThread.cancel();
               playerCache.timeTrackThread.cancel();
               if(settings.playerSettings.saveEpisodeProgress){
@@ -320,10 +351,13 @@ class PlayerState extends State<PlayerWidget> {
               print('set orientation');
 
               Navigator.pop(context);
-              playerCache.updateThread = null;
-              print('killed thread');
+              VideoPlayerController oldVideoController = playerCache.controller;
               playerCache.controller = null;
               print('unlinked object');
+              playerCache.updateThread = null;
+              print('killed thread');
+              Timer(Duration(seconds: 1),() => oldVideoController.dispose());
+
               return false;
             },
             child: _playlistLoaded && playerCache.controller != null ? Stack (
@@ -344,24 +378,32 @@ class PlayerState extends State<PlayerWidget> {
                       setState(() {});
                     },
                     onVerticalDragStart: (DragStartDetails value){
-                      if(value.globalPosition.dx > MediaQuery.of(context).size.width * 0.5) {
-                        this.showVolume = true;
+                      if( settings.playerSettings.volumeControls && value.globalPosition.dx > MediaQuery.of(context).size.width * 0.5) {
                         this.showVolumeStart = DateTime.now();
+                        this.volumeStartPositionY = value.globalPosition.dy;
                       }
                     },
                     onVerticalDragUpdate: (DragUpdateDetails update){
-                      if(update.globalPosition.dx > MediaQuery.of(context).size.width * 0.5){
+                      if(settings.playerSettings.volumeControls && update.delta.direction != 0 && update.globalPosition.dx > MediaQuery.of(context).size.width * 0.5){
                         this.showVolume = true;
                         this.showVolumeStart = DateTime.now();
-                        playerCache.controller.setVolume(
-                            playerCache.controller.value.volume+((update.delta.dy/(MediaQuery.of(context).size.height/100*0.8))/100)*-1
-                        );
-                        setState(() {});
+                        double difference = this.volumeStartPositionY = update.globalPosition.dy;
+                        difference = difference > 0
+                            ? difference
+                            : difference * -1;
+                        if(this.volumeStartPositionY > 30){
+                          this.showVolume = true;
+                          playerCache.controller.setVolume(
+                              playerCache.controller.value.volume+((update.delta.dy/(MediaQuery.of(context).size.height/100*0.8))/100)*-1
+                          );
+                          setState(() {});
+                        }
                       }
                     },
                     onVerticalDragEnd: (DragEndDetails value){
-                      Timer(Duration(seconds: 5),(){
-                        if(DateTime.now().difference(showVolumeStart).inSeconds >= 5){
+                      this.volumeStartPositionY = 0;
+                      Timer(Duration(seconds: 3),(){
+                        if(DateTime.now().difference(showVolumeStart).inSeconds >= 3){
                           showVolume = false;
                         }
                       });
@@ -392,12 +434,12 @@ class PlayerState extends State<PlayerWidget> {
                         ),
                       )
                   ):Container(),
-                  showVolume && playerCache.controller.value != null
+                  settings.playerSettings.volumeControls && showVolume && playerCache.controller.value != null
                       ? Positioned(
                     left: MediaQuery.of(context).size.width * 0.05,
-                    top: MediaQuery.of(context).size.height *0.15,
+                    top: MediaQuery.of(context).size.height * 0.15,
                     child: Container(
-                      height: MediaQuery.of(context).size.height *0.7,
+                      height: MediaQuery.of(context).size.height * 0.7,
                       width: 30,
                       decoration: BoxDecoration(
                         border: Border.all(
