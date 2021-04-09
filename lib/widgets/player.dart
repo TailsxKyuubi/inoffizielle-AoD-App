@@ -63,11 +63,11 @@ class PlayerState extends State<PlayerWidget> {
       await http.get(
           Uri.tryParse('https://anime-on-demand.de/interfaces/startedstream/'
               + playerCache.playlist[playerCache.playlistIndex]['mediaid']
-              .toString()
+                  .toString()
               + '/' + playerCache.controller.value.position.inSeconds.toString()
               + '/30/' + playerCache.language + '/'
               + (settings.playerSettings.defaultQuality == 0
-              ? '720' : settings.playerSettings.defaultQuality.toString())
+                  ? '720' : settings.playerSettings.defaultQuality.toString())
           ),
           headers: headerHandler.getHeaders()
       );
@@ -240,8 +240,8 @@ class PlayerState extends State<PlayerWidget> {
             showDialog(
               context: context,
               barrierDismissible: false, builder: (BuildContext context) {
-                return PlayerConnectionErrorDialog(this.args);
-              },
+              return PlayerConnectionErrorDialog(this.args);
+            },
             );
           }
         });
@@ -286,38 +286,43 @@ class PlayerState extends State<PlayerWidget> {
     return Scaffold(
       body: RawKeyboardListener(
           autofocus: true,
-          focusNode: FocusNode(),
-          onKey: (RawKeyEvent event){
-            if( Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent ){
-              RawKeyEventDataAndroid eventDataAndroid = event.data;
-              switch(eventDataAndroid.keyCode){
-                case KEY_MEDIA_PLAY_PAUSE:
-                  playerCache.controller.value.isPlaying
-                      ? playerCache.controller.pause()
-                      : playerCache.controller.play();
-                  break;
-                case KEY_MEDIA_SKIP_FORWARD:
-                  jumpToNextEpisode();
-                  break;
-                case KEY_MEDIA_STEP_FORWARD:
-                  if(playerCache.controller.value.duration.inSeconds <= playerCache.controller.value.position.inSeconds+30){
-                    this.jumpToNextEpisode();
-                  }else{
-                    playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds+30));
-                    setState(() {
-                      initDelayedControlsHide();
-                    });
+          focusNode: FocusNode(
+              onKey: (_, RawKeyEvent event){
+                if( Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent ){
+                  RawKeyEventDataAndroid eventDataAndroid = event.data;
+                  switch(eventDataAndroid.keyCode){
+                    case KEY_CENTER:
+                    case KEY_MEDIA_PLAY_PAUSE:
+                      playerCache.controller.value.isPlaying
+                          ? playerCache.controller.pause()
+                          : playerCache.controller.play();
+                      break;
+                    case KEY_MEDIA_SKIP_FORWARD:
+                      jumpToNextEpisode();
+                      break;
+                    case KEY_RIGHT:
+                    case KEY_MEDIA_STEP_FORWARD:
+                      if(playerCache.controller.value.duration.inSeconds <= playerCache.controller.value.position.inSeconds+30){
+                        this.jumpToNextEpisode();
+                      }else{
+                        playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds+30));
+                        setState(() {
+                          initDelayedControlsHide();
+                        });
+                      }
+                      break;
+                    case KEY_LEFT:
+                    case KEY_MEDIA_STEP_BACKWARD:
+                      playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds-10));
+                      setState(() {
+                        initDelayedControlsHide();
+                      });
+                      break;
                   }
-                  break;
-                case KEY_MEDIA_STEP_BACKWARD:
-                  playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds-10));
-                  setState(() {
-                    initDelayedControlsHide();
-                  });
-                  break;
+                }
+                return true;
               }
-            }
-          },
+          ),
           child: WillPopScope(
             onWillPop: () async {
               print('exit player');
