@@ -2,13 +2,14 @@
  * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
-import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:unoffical_aod_app/caches/app.dart';
-import 'package:unoffical_aod_app/main.dart';
+import 'package:unoffical_aod_app/transfermodels/player.dart';
+import 'package:unoffical_aod_app/caches/playercache.dart' as playerCache;
+import 'package:unoffical_aod_app/caches/settings/settings.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class FireOsVersionErrorDialog extends StatelessWidget {
+class AppUpdateNotificationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,6 @@ class FireOsVersionErrorDialog extends StatelessWidget {
       ),
       elevation: 0.0,
       backgroundColor: Colors.transparent,
-
       child: Container(
           padding: EdgeInsets.only(
             top: padding*2,
@@ -37,26 +37,21 @@ class FireOsVersionErrorDialog extends StatelessWidget {
                   offset: const Offset(0.0, 10.0),
                 )
               ]),
-          child: Column(
+          child:
+          Column(
               mainAxisSize: MainAxisSize.min, // To make the card compact
               children: <Widget>[
-                Text(
-                  'Fire OS Versionsfehler',
-                  style: TextStyle(
-                    fontSize: 24.0,
-                    fontWeight: FontWeight.w700,
+                Center(
+                  child: Text(
+                    'Neue Version verfügbar',
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 SizedBox(height: 16.0),
-                Text(
-                    'Die verwendete Version von FireOS wird von dieser App nicht offiziell unterstützt',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16.0,
-                    )
-                ),
-                Text(
-                    'Du kannst die App weiterhin benutzen, allerdings können dabei Fehler auftreten. Es wird empfohlen deinen FireTV zu aktualisieren',
+                Text('Für die App ist eine neue Version verfügbar.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16.0,
@@ -65,15 +60,28 @@ class FireOsVersionErrorDialog extends StatelessWidget {
                 SizedBox(height: 24.0),
                 Align(
                     alignment: Alignment.bottomRight,
-                    child: Row(
+                    child: Flex(
+                        direction: Axis.horizontal,
                         children: [
-                          FlatButton(
-                            onPressed: (){
-                              Navigator.pop(context);
-                              appCheckIsolate.resume();
-                            },
-                            child: Text('Hinweis schließen'),
+                          Flexible(
+                            child: FlatButton(
+                              onPressed: (){
+                                launch('https://github.com/TailsxKyuubi/inoffizielle-AoD-App/releases');
+                              },
+                              child: Text('Update herunterladen'),
+                            ),
                           ),
+                          Flexible(
+                            child: FlatButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  appCheckIsolate.resume();
+                                },
+                                child: Center(
+                                    child: Text('Hinweis schließen')
+                                )
+                            ),
+                          )
                         ]
                     )
                 ),

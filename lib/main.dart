@@ -15,6 +15,7 @@ import 'package:unoffical_aod_app/caches/episode_progress.dart';
 import 'package:unoffical_aod_app/caches/home.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
+import 'package:unoffical_aod_app/caches/version.dart';
 import 'package:unoffical_aod_app/pages/about.dart';
 import 'package:unoffical_aod_app/pages/anime.dart';
 import 'package:unoffical_aod_app/pages/animes.dart';
@@ -23,9 +24,11 @@ import 'package:unoffical_aod_app/pages/loading.dart';
 import 'package:unoffical_aod_app/pages/login.dart';
 import 'package:unoffical_aod_app/pages/settings.dart';
 import 'package:unoffical_aod_app/pages/updates.dart';
+import 'package:unoffical_aod_app/widgets/app_update_notification.dart';
 import 'package:unoffical_aod_app/widgets/fire_os_version_error.dart';
 import 'package:unoffical_aod_app/widgets/loading_connection_error.dart';
 import 'package:unoffical_aod_app/widgets/player.dart';
+import 'package:version/version.dart';
 import 'caches/anime.dart';
 import 'caches/animes.dart' as animesCache;
 
@@ -57,10 +60,10 @@ class AodApp extends StatelessWidget {
             '/updates': (BuildContext context) => UpdatesPage()
           },
           theme: ThemeData(
-              primaryColor: Color.fromRGBO(53, 54, 56, 1),
-              accentColor: Color.fromRGBO(171, 191, 57, 1),
-              focusColor: Color.fromRGBO(171, 191, 57, 0.4),
-              hoverColor: Color.fromRGBO(171, 191, 57, 0.4),
+            primaryColor: Color.fromRGBO(53, 54, 56, 1),
+            accentColor: Color.fromRGBO(171, 191, 57, 1),
+            focusColor: Color.fromRGBO(171, 191, 57, 0.4),
+            hoverColor: Color.fromRGBO(171, 191, 57, 0.4),
           ),
           home: BaseWidget(),
         )
@@ -75,9 +78,7 @@ class BaseWidget extends StatefulWidget {
 
 class LoadingState extends State<BaseWidget>{
 
-  triggerStateUpdate(){
-    setState(() {});
-  }
+  List<String> dialogList = [];
 
   Widget startScreensScaffold(Widget content){
     return Scaffold(
@@ -89,7 +90,6 @@ class LoadingState extends State<BaseWidget>{
   }
 
   parseMessage(message, BuildContext context){
-
     if (message is String) {
       switch(message){
         case 'connection error':
@@ -170,24 +170,49 @@ class LoadingState extends State<BaseWidget>{
     setState(() {});
   }
 
+  void executeCheckActions(String message){
+    if(message.indexOf('new version available: ') != -1){
+      latestVersion = Version.parse(
+          message.replaceAll('new version available: ','')
+      );
+      this.dialogList.add('app version outdated');
+    } else if (message == 'fire os outdated'){
+      this.dialogList.add('fire os outdated');
+    }else if(message == 'checks completed'){
+      appCheckReceivePort.close();
+      showProblemDialogs();
+    }
+  }
+
+  void showProblemDialogs() async{
+    if(this.dialogList.contains('fire os outdated')){
+      await showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (BuildContext context) => FireOsVersionErrorDialog()
+      );
+    }
+    if(this.dialogList.contains('app version outdated')){
+      await showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (BuildContext context) => AppUpdateNotificationDialog()
+      );
+    }
+    FlutterIsolate.spawn(appBootUp, bootUpReceivePort.sendPort);
+  }
+
   @override
   Widget build(BuildContext context) {
     //SystemChrome.setEnabledSystemUIOverlays([]);
     if(bootUpReceivePort == null){
       bootUpReceivePort = ReceivePort();
       bootUpReceivePort.listen((message) => parseMessage(message, context));
-      DeviceInfoPlugin info = DeviceInfoPlugin();
-      info.androidInfo.then((value) {
-        if( (value.brand == 'Amazon' || value.manufacturer == 'Amazon') && value.version.sdkInt < 28 ) {
-          showDialog(
-              context: context,
-              builder: (BuildContext context) =>
-                  FireOsVersionErrorDialog(value)
-          );
-        }else{
-          FlutterIsolate.spawn(appBootUp, bootUpReceivePort.sendPort);
-        }
-      });
+      appCheckReceivePort = ReceivePort();
+      appCheckReceivePort.listen((message) => executeCheckActions(message));
+      FlutterIsolate
+          .spawn(appChecks, appCheckReceivePort.sendPort)
+          .then((value) => appCheckIsolate = value);
     }
     print('loading widget build');
     if(loginStorageChecked && ! loginSuccess ) {
@@ -200,6 +225,19 @@ class LoadingState extends State<BaseWidget>{
       return startScreensScaffold(LoadingPage());
     }
   }
+}
+
+appChecks(SendPort sendPort) async{
+  DeviceInfoPlugin info = DeviceInfoPlugin();
+  AndroidDeviceInfo androidInfo = await info.androidInfo;
+  if( (androidInfo.brand == 'Amazon' || androidInfo.manufacturer == 'Amazon') && androidInfo.version.sdkInt < 28 ) {
+    sendPort.send('fire os outdated');
+  }
+  bool newVersionAvailable = await checkVersion();
+  if(newVersionAvailable){
+    sendPort.send('new version available: ' + latestVersion.toString());
+  }
+  sendPort.send('checks completed');
 }
 
 appBootUp(SendPort sendPort) async {

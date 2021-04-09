@@ -1,0 +1,22 @@
+stages:
+  #- test # All jobs related for testing such as Unit Test
+  - build # All jobs related for building app for iOS and Android
+flutter_build_android: #Job name
+  stage: build # kind of job
+  before_script:
+    - flutter packages get
+    - flutter clean
+    - flutter pub get
+    - flutter pub run flutter_launcher_icons:main
+  script:
+    - touch android/key.properties
+    - echo "storePassword=$STORE_PASSWORD" > android/key.properties
+    - echo "keyPassword=$KEY_PASSWORD" >> android/key.properties
+    - echo "keyAlias=$KEY_ALIAS" >> android/key.properties
+    - echo "storeFile=$KEY_PATH" >> android/key.properties
+    - flutter build apk
+  artifacts:
+    paths:
+      - build/app/outputs/flutter-apk/app-release.apk
+  tags:
+    - flutter

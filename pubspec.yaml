@@ -12,7 +12,7 @@ description: A Fanmade app
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.7.1-tvbeta.1
+version: 0.8.0
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
@@ -30,6 +30,8 @@ dependencies:
   shared_preferences: ^0.5.12+2
   url_launcher: ^5.7.10
   device_info: ^1.0.0
+  version: ^1.3.0
+  xml: ^4.5.1
   flutter:
     sdk: flutter
 

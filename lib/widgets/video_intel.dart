@@ -2,12 +2,15 @@
  * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:unoffical_aod_app/caches/playercache.dart' as playerCache;
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
 import 'package:unoffical_aod_app/caches/episode_progress.dart';
 import 'package:unoffical_aod_app/widgets/player.dart';
+import 'package:video_player/video_player.dart';
 
 class VideoIntel extends StatelessWidget {
 
@@ -41,10 +44,24 @@ class VideoIntel extends StatelessWidget {
                   print('video halted');
                   playerCache.updateThread.cancel();
                   playerCache.timeTrackThread.cancel();
+                  await SystemChrome.setPreferredOrientations(
+                      [
+                        DeviceOrientation.portraitUp,
+                        DeviceOrientation.portraitDown,
+                        DeviceOrientation.landscapeLeft,
+                        DeviceOrientation.landscapeRight
+                      ]
+                  );
+                  SystemChrome.setEnabledSystemUIOverlays([
+                    SystemUiOverlay.top,
+                    SystemUiOverlay.bottom
+                  ]);
                   print('switched orientation');
                   Navigator.pop(context);
+                  VideoPlayerController oldVideoController = playerCache.controller;
                   playerCache.controller = null;
                   playerCache.updateThread = null;
+                  Timer(Duration(seconds: 1),() => oldVideoController.dispose());
                   print('cleared controller');
                 },
                 child: Container(

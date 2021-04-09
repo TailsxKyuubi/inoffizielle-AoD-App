@@ -157,7 +157,7 @@ class _HomePageState extends State<HomePage> {
           );
           break;
         case KEY_MENU:
-          this._scrollController.animateTo(0, duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
+          this._scrollController.jumpTo(0);
           setState(() {
             FocusScope.of(context).requestFocus(menuBarFocusNodes.first);
           });
@@ -185,8 +185,8 @@ class _HomePageState extends State<HomePage> {
             controller = this._topTenScrollController;
             break;
         }
-        this._scrollController.animateTo(elementHeight*this.rowIndex, duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
-        controller.animateTo(elementWidth*this.itemIndex, duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
+        this._scrollController.jumpTo(elementHeight*this.rowIndex);
+        controller.jumpTo(elementWidth*this.itemIndex);
       }
     }
     return true;
@@ -202,8 +202,10 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
 
-    if(MediaQuery.of(context).orientation == Orientation.portrait){
+    if(MediaQuery.of(context).orientation == Orientation.portrait) {
       this.elementWidth = MediaQuery.of(context).size.width / 7 * 3;
+    }else if( MediaQuery.of(context).size.height < 480 ){
+      this.elementWidth = MediaQuery.of(context).size.width / 8 * 2;
     }else{
       this.elementWidth = MediaQuery.of(context).size.width / 11 * 2;
     }
@@ -261,7 +263,7 @@ class _HomePageState extends State<HomePage> {
                             //String seriesName = e['series_name'].split(':')[0];
                             String animeName;
                             int limiter = 14;
-                            int maxLimiter = 17;
+                            int maxLimiter = 16;
                             if(e['series_name'].length > limiter){
                               int index = e['series_name'].indexOf(' ',limiter);
                               if(index != -1 && index <= maxLimiter) {
@@ -372,7 +374,7 @@ class _HomePageState extends State<HomePage> {
                             //String seriesName = e['series_name'].split(':')[0];
                             String animeName;
                             int limiter = 14;
-                            int maxLimiter = 17;
+                            int maxLimiter = 16;
                             if(e['series_name'].length > limiter){
                               int index = e['series_name'].indexOf(' ',limiter);
                               if(index != -1 && index <= maxLimiter) {
@@ -462,7 +464,7 @@ class _HomePageState extends State<HomePage> {
                             //String seriesName = e['series_name'].split(':')[0];
                             String animeName;
                             int limiter = 14;
-                            int maxLimiter = 17;
+                            int maxLimiter = 16;
                             if(e['series_name'].length > limiter){
                               int index = e['series_name'].indexOf(' ',limiter);
                               if(index != -1 && index <= maxLimiter) {
@@ -553,7 +555,7 @@ class _HomePageState extends State<HomePage> {
                             //String seriesName = e['series_name'].split(':')[0];
                             String animeName;
                             int limiter = 14;
-                            int maxLimiter = 17;
+                            int maxLimiter = 16;
                             if(e['series_name'].length > limiter){
                               int index = e['series_name'].indexOf(' ',limiter);
                               if(index != -1 && index <= maxLimiter) {

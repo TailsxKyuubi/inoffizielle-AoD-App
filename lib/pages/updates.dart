@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:unoffical_aod_app/caches/keycodes.dart';
+import 'package:unoffical_aod_app/caches/version.dart' as versionCache;
 
 class UpdatesPage extends StatelessWidget {
   @override
@@ -52,7 +53,7 @@ class UpdatesPage extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(5),
               child: Text(
-                'Du verwendest die Version 0.7.1-tvbeta.1 der App',
+                'Du verwendest die Version '+versionCache.version.toString() +' der App',
                 style: TextStyle(
                     color: Colors.white
                 ),

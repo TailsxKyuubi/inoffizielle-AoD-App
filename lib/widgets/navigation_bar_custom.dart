@@ -102,6 +102,7 @@ class _NavigationBarCustomState extends State<NavigationBarCustom> {
               routeName: '/home',
               focusNode: menuBarFocusNodes[0],
               onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
+              first: true
             ),
             NavigationElement(
               icon: Icons.video_library,
@@ -109,6 +110,7 @@ class _NavigationBarCustomState extends State<NavigationBarCustom> {
               focusNode: menuBarFocusNodes[1],
               routeName: '/animes',
               onPressed: () => Navigator.pushReplacementNamed(context, '/animes'),
+              first: false,
             ),
             NavigationElement(
               icon: Icons.settings,
@@ -116,6 +118,7 @@ class _NavigationBarCustomState extends State<NavigationBarCustom> {
               routeName: '/settings',
               focusNode: menuBarFocusNodes[2],
               onPressed: () => Navigator.pushReplacementNamed(context, '/settings'),
+              first: false,
             ),
           ],
         )
