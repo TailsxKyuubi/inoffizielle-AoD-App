@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:version/version.dart';
 import 'package:xml/xml.dart';
 
-final Version version = Version.parse('0.8.0-beta.2');
+final Version version = Version.parse('0.8.0');
 
 Version latestVersion = version;
 
