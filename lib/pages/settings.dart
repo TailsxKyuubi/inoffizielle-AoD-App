@@ -47,7 +47,7 @@ class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderSt
           )
       );
     }
-    for(int i = 0;i < 3;i++){
+    for(int i = 0;i < 4;i++){
       playerSettingsFocusNodes.add(
           FocusNode(
               onKey: handleKeyPlayerSettings
