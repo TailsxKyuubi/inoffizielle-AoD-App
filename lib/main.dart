@@ -43,6 +43,9 @@ class AodApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(statusBarIconBrightness: Brightness.light)
+    );
     return Shortcuts(
         shortcuts: {
           LogicalKeySet(LogicalKeyboardKey.select): ActivateIntent(),
@@ -85,7 +88,7 @@ class LoadingState extends State<BaseWidget>{
         body: WillPopScope(
           onWillPop: () async => false,
           child: content,
-        )
+        ),
     );
   }
 

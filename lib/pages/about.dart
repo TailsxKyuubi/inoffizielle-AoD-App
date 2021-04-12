@@ -14,6 +14,7 @@ class AboutPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        brightness: Brightness.dark,
         leading: FlatButton(
           focusNode: FocusNode(
             onKey: (FocusNode focusNode,RawKeyEvent event){

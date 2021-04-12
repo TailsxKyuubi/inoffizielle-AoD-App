@@ -385,6 +385,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
           child: Scaffold(
             appBar: AppBar(
               title: Text(this._anime.name),
+              brightness: Brightness.dark,
               backgroundColor: Theme.of(context).primaryColor,
               leading: FlatButton(
                 onPressed: () {

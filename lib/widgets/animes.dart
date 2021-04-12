@@ -169,6 +169,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
             appBar: AppBar(
               backgroundColor: Theme.of(context).primaryColor,
               title: Text('Meine Anime'),
+              brightness: Brightness.dark,
             ),
             bottomNavigationBar: NavigationBarCustom(this.animeFocusNodes.first),
             body: Container(

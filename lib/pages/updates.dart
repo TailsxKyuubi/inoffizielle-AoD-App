@@ -15,6 +15,7 @@ class UpdatesPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        brightness: Brightness.dark,
         leading: FlatButton(
           focusNode: FocusNode(
               onKey: (FocusNode focusNode,RawKeyEvent event){

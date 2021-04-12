@@ -201,7 +201,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     if(MediaQuery.of(context).orientation == Orientation.portrait) {
       this.elementWidth = MediaQuery.of(context).size.width / 7 * 3;
     }else if( MediaQuery.of(context).size.height < 480 ){
@@ -229,6 +228,7 @@ class _HomePageState extends State<HomePage> {
         child: Scaffold(
             appBar: AppBar(
               title: Text('Startseite'),
+              brightness: Brightness.dark,
             ),
             bottomNavigationBar: NavigationBarCustom(this._newEpisodesFocusNodes.first),
             //drawer: DrawerWidget(),

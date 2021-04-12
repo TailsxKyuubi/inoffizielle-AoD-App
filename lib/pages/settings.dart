@@ -198,6 +198,7 @@ class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderSt
       ),
       appBar: AppBar(
         title: Text('Einstellungen'),
+        brightness: Brightness.dark,
         bottom: TabBar(
           controller: this._controller,
           unselectedLabelColor: Colors.white,
