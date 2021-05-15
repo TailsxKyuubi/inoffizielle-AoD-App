@@ -10,7 +10,10 @@ import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:unoffical_aod_app/caches/app.dart';
+import 'package:unoffical_aod_app/caches/database.dart';
 import 'package:unoffical_aod_app/caches/episode_progress.dart';
 import 'package:unoffical_aod_app/caches/home.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
@@ -33,7 +36,7 @@ import 'caches/anime.dart';
 import 'caches/animes.dart' as animesCache;
 
 
-void main() async {
+void main(){
   WidgetsFlutterBinding.ensureInitialized();
   runApp(AodApp());
 }
@@ -141,12 +144,14 @@ class LoadingState extends State<BaseWidget>{
               headerHandler.writeCookiesInHeader();
             } else if (data.containsKey('animes')) {
               data['animes'].forEach(
-                      (String title,anime) =>
+                      (String id,anime) =>
                       animesCache.animes.addAll(
                           {
-                            title: Anime.fromMap(
+                            int.parse(id): Anime.fromMap(
                                 anime.map<String, String>((key, value) =>
-                                    MapEntry(key.toString(), value.toString())))
+                                    MapEntry(key.toString(), value.toString())
+                                )
+                            )
                           }
                       )
               );
@@ -166,7 +171,7 @@ class LoadingState extends State<BaseWidget>{
             }
           }
       }
-    } else if (message is Map<String,Anime>) {
+    } else if (message is Map<int,Anime>) {
       connectionError = false;
       animesCache.animes = message;
     }
@@ -179,11 +184,12 @@ class LoadingState extends State<BaseWidget>{
           message.replaceAll('new version available: ','')
       );
       this.dialogList.add('app version outdated');
-    } else if (message == 'fire os outdated'){
+    } else if (message == 'fire os outdated') {
       this.dialogList.add('fire os outdated');
     }else if(message == 'checks completed'){
       appCheckReceivePort.close();
       showProblemDialogs();
+      setState(() {});
     }
   }
 
@@ -202,16 +208,28 @@ class LoadingState extends State<BaseWidget>{
           builder: (BuildContext context) => AppUpdateNotificationDialog()
       );
     }
-    FlutterIsolate.spawn(appBootUp, bootUpReceivePort.sendPort);
+    bootUpPreparationsReceivePort.listen(this.processBootUpPreparations);
+    FlutterIsolate.spawn(appBootUpPreparations, bootUpPreparationsReceivePort.sendPort);
+  }
+
+  void processBootUpPreparations(object) async{
+    switch(object){
+      case 'sharedPreferences':
+        await SharedPreferences.getInstance();
+        Database db = await openDatabase('iaoda.db');
+        databaseHelper = DatabaseHelper(db);
+        break;
+      case 'continue':
+        FlutterIsolate.spawn(appBootUp, bootUpReceivePort.sendPort);
+        break;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     //SystemChrome.setEnabledSystemUIOverlays([]);
-    if(bootUpReceivePort == null){
-      bootUpReceivePort = ReceivePort();
+    if(appCheckIsolate == null){
       bootUpReceivePort.listen((message) => parseMessage(message, context));
-      appCheckReceivePort = ReceivePort();
       appCheckReceivePort.listen((message) => executeCheckActions(message));
       FlutterIsolate
           .spawn(appChecks, appCheckReceivePort.sendPort)
@@ -230,7 +248,8 @@ class LoadingState extends State<BaseWidget>{
   }
 }
 
-appChecks(SendPort sendPort) async{
+appChecks(SendPort sendPort) async {
+  print('starting app checks');
   DeviceInfoPlugin info = DeviceInfoPlugin();
   AndroidDeviceInfo androidInfo = await info.androidInfo;
   if( (androidInfo.brand == 'Amazon' || androidInfo.manufacturer == 'Amazon') && androidInfo.version.sdkInt < 28 ) {
@@ -241,6 +260,14 @@ appChecks(SendPort sendPort) async{
     sendPort.send('new version available: ' + latestVersion.toString());
   }
   sendPort.send('checks completed');
+  print('checks completed');
+}
+
+appBootUpPreparations(SendPort sendPort) async{
+  print('preparations started');
+  sendPort.send('sharedPreferences');
+  sendPort.send('continue');
+  print('preparations finished');
 }
 
 appBootUp(SendPort sendPort) async {
@@ -265,15 +292,9 @@ appBootUp(SendPort sendPort) async {
     if(connectionError){
       sendPort.send('connection error');
     }else{
-      Map<String,dynamic> animes = Map<String,dynamic>();
-      animes.addEntries(
-          [
-            MapEntry(
-                'animes',
-                animesCache.animes.map((title, Anime anime) => MapEntry(title, anime.toMap()) )
-            )
-          ]
-      );
+      Map animes = {
+        'animes': animesCache.animes.map((id, Anime anime) => MapEntry(id.toString(), anime.toMap()))
+      };
       sendPort.send(jsonEncode(animes));
     }
     if(aboActive){

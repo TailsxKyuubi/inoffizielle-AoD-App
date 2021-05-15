@@ -2,6 +2,8 @@
  * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:unoffical_aod_app/caches/anime.dart';
@@ -71,8 +73,8 @@ class AnimeSmallWidget extends StatelessWidget{
                   child: Container(
                     width: double.maxFinite,
                     height: elementHeight,
-                    child: CachedNetworkImage(
-                      imageUrl: this._anime.imageUrl,
+                    child: Image.memory(
+                      this._anime.image,
                       fit: BoxFit.fill,
                     ),
                   ),

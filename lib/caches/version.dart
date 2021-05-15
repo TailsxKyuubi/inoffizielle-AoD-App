@@ -1,3 +1,7 @@
+/*
+ * Copyright 2020-2021 TailsxKyuubi
+ * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
+ */
 import 'dart:convert';
 import 'dart:io';
 
@@ -15,7 +19,7 @@ Future<bool> checkVersion() async{
   String releasesXmlString = await res.transform(utf8.decoder).join();
   XmlDocument releasesXml = XmlDocument.parse(releasesXmlString);
   List<XmlElement> entries = releasesXml.findAllElements('entry').toList();
-  for(int i=0; i<entries.length;i++){
+  for(int i=0; i<entries.length; i++){
     Version tmpVersion = Version.parse(
         entries[i].getElement('id').innerText.split('/').last
     );

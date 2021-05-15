@@ -21,10 +21,10 @@ class AnimesWidget extends StatefulWidget {
 
 class _AnimesWidgetState extends State<AnimesWidget> {
   TextEditingController _controller = TextEditingController();
-  Map<String,Anime> searchResult = animes.animes;
+  Map<int,Anime> searchResult = animes.animesLocalCache.getAll();
   ScrollController _scrollController = ScrollController();
   List<FocusNode> animeFocusNodes = [];
-  List<String> _focusNodeAnimeMapping = [];
+  List<int> _focusNodeAnimeMapping = [];
 
   FocusNode mainFocusNode;
 
@@ -142,8 +142,8 @@ class _AnimesWidgetState extends State<AnimesWidget> {
     Radius radius = Radius.circular(2);
     List<Widget> animeList = [];
     this.searchResult.forEach(
-            (String title,Anime anime) {
-          this._focusNodeAnimeMapping.add(title);
+            (int id,Anime anime) {
+          this._focusNodeAnimeMapping.add(id);
           animeList.add(
               AnimeSmallWidget(
                   anime,

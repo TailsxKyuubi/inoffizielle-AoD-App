@@ -3,6 +3,7 @@
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
@@ -260,7 +261,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
       movie = true;
       episodesRaw = doc.querySelectorAll('.two-column-container');
     }
-    this._anime.imageUrl = doc.querySelector('img.fullwidth-image.anime-top-image').attributes['src'];
+    //this._anime.image = doc.querySelector('img.fullwidth-image.anime-top-image').attributes['src'];
     this._anime.description = parse(doc.querySelector('div[itemprop=description] > p').innerHtml).documentElement.text.replaceAll('\n', '');
     print('init anime episodes iterating');
     List<Episode> episodes = [];
@@ -425,10 +426,9 @@ class AnimeWidgetState extends State<AnimeWidget>{
                           image: DecorationImage(
                               fit: BoxFit.fitWidth,
                               repeat: ImageRepeat.noRepeat,
-                              image: CachedNetworkImageProvider(
-                                  this._anime.imageUrl,
-                                  scale: 0.1
-                              )
+                              image: MemoryImage(
+                                  this._anime.image
+                              ),
                           ),
                         ),
                         child: BackdropFilter(
@@ -439,8 +439,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                 bottom: 15
                             ),
                             color: Colors.black.withOpacity(0.1),
-                            child: CachedNetworkImage(
-                                imageUrl: this._anime.imageUrl
+                            child: Image.memory(
+                              this._anime.image
                             ),
                           ),
                         ),

@@ -5,9 +5,14 @@
 import 'dart:isolate';
 
 import 'package:flutter_isolate/flutter_isolate.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-ReceivePort bootUpReceivePort;
+ReceivePort bootUpReceivePort = ReceivePort();
 FlutterIsolate bootUpIsolate;
 
-ReceivePort appCheckReceivePort;
+ReceivePort appCheckReceivePort = ReceivePort();
 FlutterIsolate appCheckIsolate;
+
+ReceivePort bootUpPreparationsReceivePort = ReceivePort();
+
+SharedPreferences sharedPreferences;
