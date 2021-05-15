@@ -161,11 +161,18 @@ class PlayerState extends State<PlayerWidget> {
       http.Response res = await http.get(Uri.tryParse(m3u8),headers: headerHandler.getHeaders());
       List<String> lines = res.body.split('\n');
       for(int i = 0;i<lines.length;i++){
-        if(lines[i].split(':')[0] == '#EXT-X-STREAM-INF' && lines[i].split('x').last == settings.playerSettings.defaultQuality.toString()){
-          List<String> oldLinkArray = m3u8.split('/');
-          oldLinkArray.removeLast();
-          oldLinkArray.add(lines[i+1].trim());
-          m3u8 = oldLinkArray.join('/');
+        if(lines[i].split(':')[0] == '#EXT-X-STREAM-INF') {
+          List<String> fields = lines[i].split(',');
+          for (int h = 0;h < fields.length;h++) {
+            if(fields[h].split('=')[0].trim() == 'RESOLUTION'
+                && fields[h].split('x').last == settings.playerSettings.defaultQuality.toString()){
+                List<String> oldLinkArray = m3u8.split('/');
+                oldLinkArray.removeLast();
+                oldLinkArray.add(lines[i + 1].trim());
+                m3u8 = oldLinkArray.join('/');
+              break;
+            }
+          }
         }
       }
     }
