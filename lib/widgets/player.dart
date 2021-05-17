@@ -161,11 +161,18 @@ class PlayerState extends State<PlayerWidget> {
       http.Response res = await http.get(Uri.tryParse(m3u8),headers: headerHandler.getHeaders());
       List<String> lines = res.body.split('\n');
       for(int i = 0;i<lines.length;i++){
-        if(lines[i].split(':')[0] == '#EXT-X-STREAM-INF' && lines[i].split('x').last == settings.playerSettings.defaultQuality.toString()){
-          List<String> oldLinkArray = m3u8.split('/');
-          oldLinkArray.removeLast();
-          oldLinkArray.add(lines[i+1].trim());
-          m3u8 = oldLinkArray.join('/');
+        if(lines[i].split(':')[0] == '#EXT-X-STREAM-INF') {
+          List<String> fields = lines[i].split(',');
+          for (int h = 0;h < fields.length;h++) {
+            if(fields[h].split('=')[0].trim() == 'RESOLUTION'
+                && fields[h].split('x').last == settings.playerSettings.defaultQuality.toString()){
+              List<String> oldLinkArray = m3u8.split('/');
+              oldLinkArray.removeLast();
+              oldLinkArray.add(lines[i + 1].trim());
+              m3u8 = oldLinkArray.join('/');
+              break;
+            }
+          }
         }
       }
     }
@@ -287,42 +294,51 @@ class PlayerState extends State<PlayerWidget> {
       body: RawKeyboardListener(
           autofocus: true,
           focusNode: FocusNode(
-              onKey: (_, RawKeyEvent event){
-                if( Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent ){
-                  RawKeyEventDataAndroid eventDataAndroid = event.data;
-                  switch(eventDataAndroid.keyCode){
-                    case KEY_CENTER:
-                    case KEY_MEDIA_PLAY_PAUSE:
-                      playerCache.controller.value.isPlaying
-                          ? playerCache.controller.pause()
-                          : playerCache.controller.play();
-                      break;
-                    case KEY_MEDIA_SKIP_FORWARD:
-                      jumpToNextEpisode();
-                      break;
-                    case KEY_RIGHT:
-                    case KEY_MEDIA_STEP_FORWARD:
-                      if(playerCache.controller.value.duration.inSeconds <= playerCache.controller.value.position.inSeconds+30){
-                        this.jumpToNextEpisode();
-                      }else{
-                        playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds+30));
-                        setState(() {
-                          initDelayedControlsHide();
-                        });
-                      }
-                      break;
-                    case KEY_LEFT:
-                    case KEY_MEDIA_STEP_BACKWARD:
-                      playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds-10));
-                      setState(() {
-                        initDelayedControlsHide();
-                      });
-                      break;
-                  }
-                }
+              descendantsAreFocusable: false,
+              onKey: (focusNode, RawKeyEvent event){
+                print('Tastendruck');
+
                 return true;
               }
           ),
+          onKey: (RawKeyEvent event){
+            print('Tastendruck Listener');
+            if( Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent ){
+              if( Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent ){
+                RawKeyEventDataAndroid eventDataAndroid = event.data;
+                print('Tastencode:'+ eventDataAndroid.keyCode.toString());
+                switch(eventDataAndroid.keyCode){
+                  case KEY_CENTER:
+                  case KEY_MEDIA_PLAY_PAUSE:
+                    playerCache.controller.value.isPlaying
+                        ? playerCache.controller.pause()
+                        : playerCache.controller.play();
+                    break;
+                  case KEY_MEDIA_SKIP_FORWARD:
+                    jumpToNextEpisode();
+                    break;
+                  case KEY_RIGHT:
+                  case KEY_MEDIA_STEP_FORWARD:
+                    if(playerCache.controller.value.duration.inSeconds <= playerCache.controller.value.position.inSeconds+30){
+                      this.jumpToNextEpisode();
+                    }else{
+                      playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds+30));
+                      setState(() {
+                        initDelayedControlsHide();
+                      });
+                    }
+                    break;
+                  case KEY_LEFT:
+                  case KEY_MEDIA_STEP_BACKWARD:
+                    playerCache.controller.seekTo(Duration(seconds: playerCache.controller.value.position.inSeconds-10));
+                    setState(() {
+                      initDelayedControlsHide();
+                    });
+                    break;
+                }
+              }
+            }
+          },
           child: WillPopScope(
             onWillPop: () async {
               print('exit player');
