@@ -14,7 +14,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:unoffical_aod_app/caches/app.dart';
 import 'package:unoffical_aod_app/caches/database.dart';
-import 'package:unoffical_aod_app/caches/episode_progress.dart';
 import 'package:unoffical_aod_app/caches/home.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
@@ -35,15 +34,12 @@ import 'package:version/version.dart';
 import 'caches/anime.dart';
 import 'caches/animes.dart' as animesCache;
 
-
 void main(){
   WidgetsFlutterBinding.ensureInitialized();
   runApp(AodApp());
 }
 
 class AodApp extends StatelessWidget {
-  final ReceivePort receivePort = ReceivePort();
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
@@ -88,10 +84,10 @@ class LoadingState extends State<BaseWidget>{
 
   Widget startScreensScaffold(Widget content){
     return Scaffold(
-        body: WillPopScope(
-          onWillPop: () async => false,
-          child: content,
-        ),
+      body: WillPopScope(
+        onWillPop: () async => false,
+        child: content,
+      ),
     );
   }
 
@@ -142,20 +138,6 @@ class LoadingState extends State<BaseWidget>{
                   data['cookies'].map<String, String>((String key, value) =>
                       MapEntry(key, value.toString()));
               headerHandler.writeCookiesInHeader();
-            } else if (data.containsKey('animes')) {
-              data['animes'].forEach(
-                      (String id,anime) =>
-                      animesCache.animes.addAll(
-                          {
-                            int.parse(id): Anime.fromMap(
-                                anime.map<String, String>((key, value) =>
-                                    MapEntry(key.toString(), value.toString())
-                                )
-                            )
-                          }
-                      )
-              );
-              episodeProgressCache = EpisodeProgressCache();
             } else if (data.containsKey('newEpisodes')) {
               newEpisodes.addAll(
                   List.from(data['newEpisodes'])
@@ -171,9 +153,6 @@ class LoadingState extends State<BaseWidget>{
             }
           }
       }
-    } else if (message is Map<int,Anime>) {
-      connectionError = false;
-      animesCache.animes = message;
     }
     setState(() {});
   }
@@ -215,9 +194,8 @@ class LoadingState extends State<BaseWidget>{
   void processBootUpPreparations(object) async{
     switch(object){
       case 'sharedPreferences':
-        await SharedPreferences.getInstance();
-        Database db = await openDatabase('iaoda.db');
-        databaseHelper = DatabaseHelper(db);
+        sharedPreferences = await SharedPreferences.getInstance();
+        await initDb();
         break;
       case 'continue':
         FlutterIsolate.spawn(appBootUp, bootUpReceivePort.sendPort);
@@ -227,7 +205,6 @@ class LoadingState extends State<BaseWidget>{
 
   @override
   Widget build(BuildContext context) {
-    //SystemChrome.setEnabledSystemUIOverlays([]);
     if(appCheckIsolate == null){
       bootUpReceivePort.listen((message) => parseMessage(message, context));
       appCheckReceivePort.listen((message) => executeCheckActions(message));
@@ -236,11 +213,12 @@ class LoadingState extends State<BaseWidget>{
           .then((value) => appCheckIsolate = value);
     }
     print('loading widget build');
+    List<Anime> animes = animesCache.animesLocalCache.getAll();
     if(loginStorageChecked && ! loginSuccess ) {
       return startScreensScaffold(LoginPage());
-    }else if(loginSuccess && animesCache.animes == null){
+    }else if(loginSuccess && animes.isEmpty){
       return startScreensScaffold(LoadingPage());
-    }else if(loginSuccess && animesCache.animes != null && animesCache.animes.isNotEmpty){
+    }else if(loginSuccess && animes.isNotEmpty){
       return HomePage();
     }else{
       return startScreensScaffold(LoadingPage());
@@ -261,6 +239,15 @@ appChecks(SendPort sendPort) async {
   }
   sendPort.send('checks completed');
   print('checks completed');
+}
+Future<void> initDb() async {
+  Database db = await openDatabase(
+      'iaoda.db',
+      version: 1,
+      onCreate: DatabaseHelper.create,
+      onOpen: DatabaseHelper.init
+  );
+  databaseHelper = await DatabaseHelper.init(db);
 }
 
 appBootUpPreparations(SendPort sendPort) async{
@@ -288,21 +275,22 @@ appBootUp(SendPort sendPort) async {
     sendPort.send(jsonEncode({'newCatalogTitles':newCatalogTitles}));
     sendPort.send(jsonEncode({'newSimulcastTitles':newSimulcastTitles}));
     sendPort.send(jsonEncode({'topTen':topTen}));
-    await animesCache.getAllAnimesV2();
-    if(connectionError){
-      sendPort.send('connection error');
-    }else{
-      Map animes = {
-        'animes': animesCache.animes.map((id, Anime anime) => MapEntry(id.toString(), anime.toMap()))
-      };
-      sendPort.send(jsonEncode(animes));
-    }
+
     if(aboActive){
       sendPort.send('active abo');
       sendPort.send('remaining abo days:'+aboDaysLeft.toString());
     }else{
       sendPort.send('inactive abo');
     }
+  }
+}
+
+void updateAnimeEntries(SendPort sendPort) async {
+  await animesCache.animesLocalCache.updateAnimes();
+  if(connectionError){
+    sendPort.send('connection error');
+  }else{
+    sendPort.send('animes updated');
   }
 }
 

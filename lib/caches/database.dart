@@ -1,4 +1,6 @@
 import 'package:sqflite/sqflite.dart';
+import 'package:unoffical_aod_app/caches/animes.dart';
+import 'package:unoffical_aod_app/caches/episode_progress.dart';
 
 DatabaseHelper databaseHelper;
 
@@ -6,33 +8,34 @@ class DatabaseHelper {
   final Database _db;
   DatabaseHelper(this._db);
 
-  static Future<DatabaseHelper> init(Database db) async {
-    DatabaseHelper dbh = DatabaseHelper(db);
-    bool check = await dbh._dbCheck();
-    if(!check){
-      await dbh._create();
-    }
-    return dbh;
-  }
-
-  Future<bool> _dbCheck() async {
-    List<Map<String,dynamic>> animeListCheck = await _db.rawQuery('SELECT * FROM animes LIMIT 1;');
-    if (animeListCheck.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
+  String formatTime(Duration timestamp) {
+    int durationSeconds = timestamp.inSeconds;
+    return (durationSeconds/3600).floor().toString().padLeft(2,'0')+':'+
+        ((durationSeconds%3600)/60).floor().toString().padLeft(2,'0')+':'+
+        (durationSeconds%60).toString().padLeft(2,'0');
   }
 
   Future<List<Map<String,dynamic>>> query(String sql) async => await this._db.rawQuery(sql);
 
-  _create() async {
-    await _db.execute('CREATE TABLE animes ('
-        'id int NOT NULL PRIMARY KEY,'
-        'name varchar(255) NOT NULL'
-        'description text,'
-        'image blob);');
-    await _db.execute('CREATE TABLE watchlist (anime_id int NOT NULL PRIMARY KEY);');
-    //_db.execute('history');
+  static create(Database _db, int version) async {
+    print('Datenbank tabellen werden erstellt');
+    switch(version){
+      case 1:
+        await _db.execute('CREATE TABLE IF NOT EXISTS animes (' +
+            'anime_id int NOT NULL,' +
+            'name varchar(255) NOT NULL,' +
+            'description text,' +
+            'image blob);');
+        await _db.execute('CREATE TABLE IF NOT EXISTS watchlist (anime_id int NOT NULL PRIMARY KEY, created_at timestamp DEFAULT CURRENT_TIMESTAMP);');
+        await _db.execute('CREATE TABLE IF NOT EXISTS history (media_id int NOT NULL, language varchar(3) NOT NULL, progress time NOT NULL, created_at timestamp DEFAULT CURRENT_TIMESTAMP);');
+        await _db.execute('CREATE TABLE IF NOT EXISTS episodes (media_id int NOT NULL PRIMARY KEY, anime_id int NOT NULL, title varchar(255) NOT NULL,image blob NOT NULL, duration time DEFAULT \'99:99:99\');');
+        break;
+    }
+  }
+
+  static init(Database _db) async {
+    databaseHelper = DatabaseHelper(_db);
+    episodeProgressCache = await EpisodeProgressCache.init();
+    animesLocalCache = await AnimesLocalCache.init();
   }
 }

@@ -3,53 +3,87 @@
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:unoffical_aod_app/caches/database.dart';
+import 'package:unoffical_aod_app/caches/episode_history.dart';
 
 EpisodeProgressCache episodeProgressCache;
 class EpisodeProgressCache {
 
-  SharedPreferences _sharedPreferences;
+  final SharedPreferences _sharedPreferences;
   bool isReady;
   Map<int,Map<String,Duration>> _cache = {};
+  List<EpisodeHistory> _history = [];
 
-  EpisodeProgressCache(){
-    SharedPreferences.getInstance().then((value){
-      _sharedPreferences = value;
-      _bootUp();
-      isReady = true;
-    });
-  }
+  EpisodeProgressCache(this._sharedPreferences);
 
+  @Deprecated('Will be removed in 0.10')
   _bootUp(){
     List<String> ids = _sharedPreferences.getStringList('tracking.mediaIds');
-    if(ids != null){
+    if(ids != null) {
       ids.forEach((String element) {
         List<String> idArray = element.split('-');
         int mediaId = int.parse(idArray[0]);
         String lang;
-        if(idArray.length == 1){
+        if (idArray.length == 1) {
           return;
-        }else{
+        } else {
           lang = idArray[1];
         }
         this._cache.addAll({
           mediaId: {
-            lang: this._initEpisode( mediaId, lang )
+            lang: this._initEpisode(mediaId, lang)
           }
         });
       });
-    }else{
-      _saveMediaList();
+      this._convertHistory();
+      this._sharedPreferences.remove('tracking.mediaIds');
     }
   }
 
-  addEpisode(int mediaId, Duration timeCode,String lang){
-    if( ! this._cache.containsKey(mediaId) ){
-      this._cache.addAll( { mediaId: { lang: timeCode } } );
-    }else{
-      this._cache[mediaId][lang] = timeCode;
-    }
-    this._saveEpisodeDuration(mediaId, timeCode, lang);
-    this._saveMediaList();
+  static init() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    EpisodeProgressCache episodeProgressCache = EpisodeProgressCache(sharedPreferences);
+    print('Daten aus Datenbank werden geladen');
+    episodeProgressCache._bootUp();
+    List<Map<String,dynamic>> result = await databaseHelper.query('SELECT * FROM history ORDER BY rowid ASC');
+    result.forEach((Map<String,dynamic> row) {
+      List<String> progressValues = row['progress'].split(':');
+      episodeProgressCache._history.add(
+          EpisodeHistory(
+              row['rowid'],
+              row['media_id'],
+              row['language'],
+              position: Duration(
+                hours: int.parse(progressValues[0]),
+                minutes: int.parse(progressValues[1]),
+                seconds: int.parse(progressValues[2]),
+              )
+          )
+      );
+    });
+  }
+
+  void _convertHistory() {
+    this._cache.forEach((int mediaId, Map<String,Duration> language) {
+      language.forEach((languageCode, timeCode) {
+        this.addEpisode(mediaId, timeCode, languageCode);
+        this._sharedPreferences.remove('tracking.' +  mediaId.toString() + '-' + languageCode);
+      });
+      this._cache.remove(mediaId);
+    });
+  }
+
+  void addEpisode(int mediaId, Duration timeCode,String lang) async {
+    await databaseHelper.query('INSERT INTO history (media_id, language, progress) VALUES (' + mediaId.toString() + ', \''+lang+'\', \'' + databaseHelper.formatTime(timeCode) + '\');');
+    List<Map<String,dynamic>> idQuery = await databaseHelper.query('SELECT rowid FROM history WHERE media_id = ' + mediaId.toString() + ' AND language = \''+lang+'\' AND progress = \'' + databaseHelper.formatTime(timeCode) + '\' ORDER BY rowid DESC LIMIT 1;');
+    this._history.add(
+        EpisodeHistory(
+            idQuery.first['rowid'],
+            mediaId,
+            lang,
+            position: timeCode
+        )
+    );
   }
 
   Duration getEpisodeDuration(int mediaId, String lang){
@@ -59,35 +93,15 @@ class EpisodeProgressCache {
     return Duration(hours: 0,minutes: 0, seconds: 0);
   }
 
-  _saveEpisodeDuration(int mediaId, Duration timeCode, String lang){
-    this._sharedPreferences.remove('tracking.'+mediaId.toString());
-    this._sharedPreferences.setString('tracking.'+mediaId.toString()+'-'+lang, _durationToString(timeCode) );
-  }
-
-  String _durationToString(Duration timeCode){
-    return (timeCode.inSeconds / 3600).floor().toString() + ':'
-        + ((timeCode.inSeconds % 3600)/60).floor().toString()+ ':'
-        + (timeCode.inSeconds % 60).toString();
-  }
-
-  _saveMediaList(){
-    List<String> mediaIds = [];
-    _cache.keys.forEach((int id) {
-      _cache[id].keys.forEach((String language) {
-        mediaIds.add(id.toString()+'-'+language);
-      });
-    });
-    _sharedPreferences.setStringList('tracking.mediaIds', mediaIds);
-  }
-
+  @Deprecated('will be removed in 0.10')
   Duration _initEpisode(int mediaId, String lang){
     List<String> durationList = _sharedPreferences
         .getString('tracking.'+mediaId.toString()+'-'+lang)
         .split(':');
     return Duration(
-      hours: int.parse(durationList[0]),
-      minutes: int.parse(durationList[1]),
-      seconds: int.parse(durationList[2])
+        hours: int.parse(durationList[0]),
+        minutes: int.parse(durationList[1]),
+        seconds: int.parse(durationList[2])
     );
   }
 }

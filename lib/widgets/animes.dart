@@ -21,7 +21,7 @@ class AnimesWidget extends StatefulWidget {
 
 class _AnimesWidgetState extends State<AnimesWidget> {
   TextEditingController _controller = TextEditingController();
-  Map<int,Anime> searchResult = animes.animesLocalCache.getAll();
+  List<Anime> searchResult = animes.animesLocalCache.getAll();
   ScrollController _scrollController = ScrollController();
   List<FocusNode> animeFocusNodes = [];
   List<int> _focusNodeAnimeMapping = [];
@@ -31,7 +31,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
   int _animeFocusIndex = 0;
   _AnimesWidgetState(){
     this._controller.addListener(onTextInput);
-    animes.animes.forEach((_,__) => this.animeFocusNodes.add(
+    animes.animesLocalCache.getAll().forEach((_) => this.animeFocusNodes.add(
         FocusNode(
             onKey: handleKey
         )
@@ -101,7 +101,12 @@ class _AnimesWidgetState extends State<AnimesWidget> {
           Navigator.pushNamed(
               context,
               '/anime',
-              arguments: animes.animes[this._focusNodeAnimeMapping[this._animeFocusIndex]]
+              arguments: animes
+                  .animesLocalCache
+                  .getAll()
+                  .singleWhere(
+                      (element) => element.id == this._focusNodeAnimeMapping[this._animeFocusIndex]
+              )
           );
       }
       this._scrollController.jumpTo(
@@ -116,7 +121,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
       if(this._controller.text.length >= 1){
         this.searchResult = animes.filterAnimes(this._controller.text);
       }else if(this._controller.text.isEmpty){
-        this.searchResult = animes.animes;
+        this.searchResult = animes.animesLocalCache.getAll();
       }
     });
   }
@@ -142,8 +147,8 @@ class _AnimesWidgetState extends State<AnimesWidget> {
     Radius radius = Radius.circular(2);
     List<Widget> animeList = [];
     this.searchResult.forEach(
-            (int id,Anime anime) {
-          this._focusNodeAnimeMapping.add(id);
+            (Anime anime) {
+          this._focusNodeAnimeMapping.add(anime.id);
           animeList.add(
               AnimeSmallWidget(
                   anime,
