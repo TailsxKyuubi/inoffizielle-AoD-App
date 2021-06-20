@@ -243,9 +243,9 @@ appChecks(SendPort sendPort) async {
   print('checks completed');
 }
 Future<void> initDb() async {
-  //await deleteDatabase('iaoda2.db');
+  await deleteDatabase('iaoda.db');
   Database db = await openDatabase(
-      'iaoda2.db',
+      'iaoda.db',
       version: 1,
       onCreate: DatabaseHelper.create,
       onOpen: DatabaseHelper.init
@@ -278,14 +278,6 @@ appBootUp(SendPort sendPort) async {
     sendPort.send(jsonEncode({'newCatalogTitles':newCatalogTitles}));
     sendPort.send(jsonEncode({'newSimulcastTitles':newSimulcastTitles}));
     sendPort.send(jsonEncode({'topTen':topTen}));
-
-    /*if(aboActive){
-      sendPort.send('active abo');
-      sendPort.send('remaining abo days:'+aboDaysLeft.toString());
-    }else{
-      sendPort.send('inactive abo');
-    }
-     */
   }
 }
 

@@ -2,6 +2,7 @@
  * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -30,7 +31,10 @@ class AnimesLocalCache {
     }
     if (localCache._elements.length == 0) {
       await localCache.updateAnimes();
+    } else {
+      Timer.run(localCache.updateAnimes);
     }
+    Timer.periodic(Duration(hours: 1), (_) => localCache.updateAnimes());
     return localCache;
   }
 
@@ -83,12 +87,12 @@ class AnimesLocalCache {
     print('löse unterschiede auf in anime datenbank auf');
     animeToAdd.forEach((element) {
       databaseHelper.insert(
-        'animes',
-         {
+          'animes',
+          {
             'anime_id': element.id,
             'name': element.name,
             'image': element.image
-         }
+          }
       );
       //databaseHelper.query('INSERT INTO animes (anime_id,name,image) VALUES ('+element.id.toString()+',\'' + element.name + '\',\'' + element.image.toString() + '\');');
       print('Bild für ID ' + element.id.toString() + ': ' + element.image.toString());
