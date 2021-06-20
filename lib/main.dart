@@ -78,11 +78,11 @@ class BaseWidget extends StatefulWidget {
   State<StatefulWidget> createState() => LoadingState();
 }
 
-class LoadingState extends State<BaseWidget>{
+class LoadingState extends State<BaseWidget> {
 
   List<String> dialogList = [];
 
-  Widget startScreensScaffold(Widget content){
+  Widget startScreensScaffold(Widget content) {
     return Scaffold(
       body: WillPopScope(
         onWillPop: () async => false,
@@ -91,14 +91,14 @@ class LoadingState extends State<BaseWidget>{
     );
   }
 
-  parseMessage(message, BuildContext context){
+  parseMessage(message, BuildContext context) async {
     if (message is String) {
-      switch(message){
+      switch (message) {
         case 'connection error':
           connectionError = true;
           showDialog(
               context: context,
-              builder: (BuildContext context){
+              builder: (BuildContext context) {
                 return LoadingConnectionErrorDialog();
               },
               barrierDismissible: false
@@ -114,6 +114,7 @@ class LoadingState extends State<BaseWidget>{
           break;
         case 'login success':
           loginSuccess = true;
+          await initDb();
           break;
         case 'active abo':
           aboActive = true;
@@ -122,7 +123,7 @@ class LoadingState extends State<BaseWidget>{
           aboActive = false;
           break;
         default:
-          if(message.startsWith('remaining abo days:')){
+          if (message.startsWith('remaining abo days:')) {
             aboDaysLeft = int.parse(message.split(':')[1]);
           } else {
             Map<String, dynamic> data;
@@ -157,30 +158,30 @@ class LoadingState extends State<BaseWidget>{
     setState(() {});
   }
 
-  void executeCheckActions(String message){
-    if(message.indexOf('new version available: ') != -1){
+  void executeCheckActions(String message) {
+    if (message.indexOf('new version available: ') != -1) {
       latestVersion = Version.parse(
-          message.replaceAll('new version available: ','')
+          message.replaceAll('new version available: ', '')
       );
       this.dialogList.add('app version outdated');
     } else if (message == 'fire os outdated') {
       this.dialogList.add('fire os outdated');
-    }else if(message == 'checks completed'){
+    } else if (message == 'checks completed') {
       appCheckReceivePort.close();
       showProblemDialogs();
       setState(() {});
     }
   }
 
-  void showProblemDialogs() async{
-    if(this.dialogList.contains('fire os outdated')){
+  void showProblemDialogs() async {
+    if (this.dialogList.contains('fire os outdated')) {
       await showDialog(
           barrierDismissible: false,
           context: context,
           builder: (BuildContext context) => FireOsVersionErrorDialog()
       );
     }
-    if(this.dialogList.contains('app version outdated')){
+    if (this.dialogList.contains('app version outdated')) {
       await showDialog(
           barrierDismissible: false,
           context: context,
@@ -188,14 +189,14 @@ class LoadingState extends State<BaseWidget>{
       );
     }
     bootUpPreparationsReceivePort.listen(this.processBootUpPreparations);
-    FlutterIsolate.spawn(appBootUpPreparations, bootUpPreparationsReceivePort.sendPort);
+    FlutterIsolate.spawn(
+        appBootUpPreparations, bootUpPreparationsReceivePort.sendPort);
   }
 
-  void processBootUpPreparations(object) async{
-    switch(object){
+  void processBootUpPreparations(object) async {
+    switch (object) {
       case 'sharedPreferences':
         sharedPreferences = await SharedPreferences.getInstance();
-        await initDb();
         break;
       case 'continue':
         FlutterIsolate.spawn(appBootUp, bootUpReceivePort.sendPort);
@@ -205,7 +206,7 @@ class LoadingState extends State<BaseWidget>{
 
   @override
   Widget build(BuildContext context) {
-    if(appCheckIsolate == null){
+    if (appCheckIsolate == null) {
       bootUpReceivePort.listen((message) => parseMessage(message, context));
       appCheckReceivePort.listen((message) => executeCheckActions(message));
       FlutterIsolate
@@ -213,16 +214,17 @@ class LoadingState extends State<BaseWidget>{
           .then((value) => appCheckIsolate = value);
     }
     print('loading widget build');
-    List<Anime> animes = animesCache.animesLocalCache.getAll();
-    if(loginStorageChecked && ! loginSuccess ) {
-      return startScreensScaffold(LoginPage());
-    }else if(loginSuccess && animes.isEmpty){
-      return startScreensScaffold(LoadingPage());
-    }else if(loginSuccess && animes.isNotEmpty){
-      return HomePage();
-    }else{
-      return startScreensScaffold(LoadingPage());
+    if (animesCache.animesLocalCache != null) {
+      List<Anime> animes = animesCache.animesLocalCache.getAll();
+      if (loginStorageChecked && !loginSuccess) {
+        return startScreensScaffold(LoginPage());
+      } else if (loginSuccess && animes.isEmpty) {
+        return startScreensScaffold(LoadingPage());
+      } else if (loginSuccess && animes.isNotEmpty) {
+        return HomePage();
+      }
     }
+    return startScreensScaffold(LoadingPage());
   }
 }
 
@@ -241,8 +243,9 @@ appChecks(SendPort sendPort) async {
   print('checks completed');
 }
 Future<void> initDb() async {
+  //await deleteDatabase('iaoda2.db');
   Database db = await openDatabase(
-      'iaoda.db',
+      'iaoda2.db',
       version: 1,
       onCreate: DatabaseHelper.create,
       onOpen: DatabaseHelper.init
@@ -276,12 +279,13 @@ appBootUp(SendPort sendPort) async {
     sendPort.send(jsonEncode({'newSimulcastTitles':newSimulcastTitles}));
     sendPort.send(jsonEncode({'topTen':topTen}));
 
-    if(aboActive){
+    /*if(aboActive){
       sendPort.send('active abo');
       sendPort.send('remaining abo days:'+aboDaysLeft.toString());
     }else{
       sendPort.send('inactive abo');
     }
+     */
   }
 }
 

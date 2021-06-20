@@ -13,7 +13,7 @@ class Anime {
   static Anime fromMap(Map<String,dynamic> animeMap){
 
     return Anime(
-        id: int.parse(animeMap['id']),
+        id: animeMap['anime_id'],
         name: animeMap['name'],
         description: animeMap['description'],
         image: animeMap['image']

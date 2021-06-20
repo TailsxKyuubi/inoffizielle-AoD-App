@@ -32,6 +32,7 @@ class DatabaseHelper {
         break;
     }
   }
+  insert(String table, Map<String, dynamic> values) => _db.insert(table, values);
 
   static init(Database _db) async {
     databaseHelper = DatabaseHelper(_db);

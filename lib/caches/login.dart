@@ -97,7 +97,7 @@ Future<bool> validateCredentialsAndSave( String username, String password ) asyn
   }
 }
 
-void validateAbo(Document myAnimesPage){
+void validateAbo(Document myAnimesPage) {
   Element aboText = myAnimesPage.querySelector('.poolnote');
   if(aboText != null){
     int daysLeft = int.parse(aboText.querySelectorAll('.green')[1].text);

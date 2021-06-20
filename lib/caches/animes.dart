@@ -19,14 +19,18 @@ AnimesLocalCache animesLocalCache;
 class AnimesLocalCache {
   List<Anime> _elements = [];
 
-  AnimesLocalCache();
   static Future<AnimesLocalCache> init() async{
     AnimesLocalCache localCache = AnimesLocalCache();
     List<Map<String,dynamic>> animeMap = await databaseHelper.query('SELECT * FROM animes');
-    animeMap.forEach((Map element) {
-      Anime tmpAnime = Anime.fromMap(element);
-      localCache._elements.add(tmpAnime);
-    });
+    if (animeMap.length > 0) {
+      animeMap.forEach((Map element) {
+        Anime tmpAnime = Anime.fromMap(element);
+        localCache._elements.add(tmpAnime);
+      });
+    }
+    if (localCache._elements.length == 0) {
+      await localCache.updateAnimes();
+    }
     return localCache;
   }
 
@@ -47,13 +51,16 @@ class AnimesLocalCache {
     return animePageDoc;
   }
 
-  Future updateAnimes() async {
+  Future<void> updateAnimes() async {
     dom.Document animePageDoc = await this._getAnimePage();
 
     print('begin processing the data');
 
     List<Anime> animes = await parseAnimePage(animePageDoc);
     validateAbo(animePageDoc);
+    print(aboDaysLeft);
+    print(loginSuccess);
+    print(loginDataChecked);
     if( ! aboActive ){
       print('inactive abo detected');
       http.Response resAllAnimePage;
@@ -67,15 +74,23 @@ class AnimesLocalCache {
         return false;
       }
       dom.Document docAllAnimePage = parse(resAllAnimePage.body);
-      parseAnimePage(docAllAnimePage);
+      await parseAnimePage(docAllAnimePage);
     }
     print('starting sorting anime');
 
-    List<Anime> animeToDelete = this._elements.where((existingAnime) => animes.indexWhere((element) => existingAnime.id == element.id) == -1);
-    List<Anime> animeToAdd = animes.where((newAnime) => this._elements.indexWhere((element) => newAnime.id == element.id) == -1);
-
+    List<Anime> animeToDelete = this._elements.where((existingAnime) => animes.indexWhere((element) => existingAnime.id == element.id) == -1).toList();
+    List<Anime> animeToAdd = animes.where((newAnime) => this._elements.indexWhere((element) => newAnime.id == element.id) == -1).toList();
+    print('löse unterschiede auf in anime datenbank auf');
     animeToAdd.forEach((element) {
-      databaseHelper.query('INSERT INTO animes (anime_id,name,image) VALUES ('+element.id.toString()+',\'' + element.name + '\',\'' + element.image.toString() + '\');');
+      databaseHelper.insert(
+        'animes',
+         {
+            'anime_id': element.id,
+            'name': element.name,
+            'image': element.image
+         }
+      );
+      //databaseHelper.query('INSERT INTO animes (anime_id,name,image) VALUES ('+element.id.toString()+',\'' + element.name + '\',\'' + element.image.toString() + '\');');
       print('Bild für ID ' + element.id.toString() + ': ' + element.image.toString());
     });
 
@@ -84,25 +99,28 @@ class AnimesLocalCache {
     });
     this._elements = animes;
 
+    print('sortiere animes');
     this._elements.sort((firstAnime, secondAnime) => firstAnime.name.compareTo(secondAnime.name));
 
     print('finished anime parsing');
     return true;
   }
 
-  Future<List<Anime>> parseAnimePage(dom.Document animePageDoc) async{
+  Future<List<Anime>> parseAnimePage(dom.Document animePageDoc) async {
     HtmlUnescape unescape = HtmlUnescape();
     dom.Element rootElement = animePageDoc.querySelector('.three-box-container');
     print('filtered elements');
     if(rootElement != null){
       List<dom.Element> animeElements = rootElement.querySelectorAll('.animebox');
       List<Anime> animes = [];
-      animeElements.forEach((dom.Element element) async {
+      for ( int a = 0; a < animeElements.length; a++)  {
+        dom.Element element = animeElements[a];
         print('begin processing anime element');
         int id = int.parse(element.querySelector('.animebox-link a').attributes['href'].split('/').last);
         String title = element
             .querySelector('h3.animebox-title')
-            .innerHtml;
+            .innerHtml
+            .trim();
         String imageUrl = element
             .querySelector('.animebox-image img')
             .attributes['src'];
@@ -121,7 +139,7 @@ class AnimesLocalCache {
 
         animes.add(tmpAnime);
         print('finished processing anime element');
-      });
+      }
       return animes;
     }
     return [];
