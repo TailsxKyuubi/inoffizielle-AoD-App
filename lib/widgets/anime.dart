@@ -3,7 +3,6 @@
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
