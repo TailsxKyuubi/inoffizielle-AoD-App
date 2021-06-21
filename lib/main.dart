@@ -243,7 +243,6 @@ appChecks(SendPort sendPort) async {
   print('checks completed');
 }
 Future<void> initDb() async {
-  await deleteDatabase('iaoda.db');
   Database db = await openDatabase(
       'iaoda.db',
       version: 1,
