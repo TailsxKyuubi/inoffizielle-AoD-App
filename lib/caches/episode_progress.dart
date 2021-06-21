@@ -61,6 +61,7 @@ class EpisodeProgressCache {
           )
       );
     });
+    return episodeProgressCache;
   }
 
   void _convertHistory() {
