@@ -192,7 +192,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
       this.omuFocusNodes.add(
           FocusNode(
               onKey: (FocusNode focusNode,RawKeyEvent keyEvent){
-                if( Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent ){
+                if( Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent ) {
                   RawKeyEventDataAndroid rawKeyEventData = keyEvent.data;
                   if(rawKeyEventData.keyCode == KEY_BACK) {
                     Navigator.pop(context);
@@ -264,7 +264,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
     this._anime.description = parse(doc.querySelector('div[itemprop=description] > p').innerHtml).documentElement.text.replaceAll('\n', '');
     print('init anime episodes iterating');
     List<Episode> episodes = [];
-    episodesRaw.forEach((element) {
+    for(int i = 0; episodesRaw.length > i; i++) {
+      dom.Element element = episodesRaw[i];
       List<dom.Element> playButtons = element.querySelectorAll('input.highlight.streamstarter_html5');
       print('start anime episodes play button count');
 
@@ -286,10 +287,14 @@ class AnimeWidgetState extends State<AnimeWidget>{
         tmpEpisode.imageUrl = Uri.parse(doc.querySelector('img.anime-top-image').attributes['src']);
       } else {
         dom.Element content = element.querySelector('.three-box-content');
-        if(content.children.last.className.isEmpty){
+        if (content.children.last.className.isEmpty) {
           tmpEpisode.noteText = content.children.last.text;
         }
         tmpEpisode.imageUrl = Uri.parse(element.querySelector('.episodebox-image').children[0].attributes['src']);
+
+        http.Response imageRes = await http.get(tmpEpisode.imageUrl);
+        tmpEpisode.image = imageRes.bodyBytes;
+
         tmpNameString = element
             .querySelector('h3.episodebox-title')
             .innerHtml
@@ -304,7 +309,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
       }
       print('end anime episodes play button parsing');
       episodes.add(tmpEpisode);
-    });
+    }
+
     this.episodes = episodes;
     this.generateEpisodesFocusNodes();
 

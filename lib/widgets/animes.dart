@@ -190,7 +190,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
                         margin: EdgeInsets.only(top: 10),
                         child: ClipRRect(
                           borderRadius: BorderRadius.all(
-                              Radius.circular(5)
+                              Radius.circular(3)
                           ),
 
                           child: Container(
@@ -221,7 +221,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
                                   FocusScope.of(context).requestFocus(animeFocusNodes.first);
                                 });
                               },
-                              onSubmitted: (_){
+                              onSubmitted: (_) {
                                 setState(() {
                                   print('search submitted');
                                   this._animeFocusIndex = 0;
