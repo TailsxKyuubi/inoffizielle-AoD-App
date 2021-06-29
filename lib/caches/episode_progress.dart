@@ -2,6 +2,7 @@
  * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unoffical_aod_app/caches/database.dart';
 import 'package:unoffical_aod_app/caches/episode_history.dart';
@@ -10,7 +11,6 @@ EpisodeProgressCache episodeProgressCache;
 class EpisodeProgressCache {
 
   final SharedPreferences _sharedPreferences;
-  bool isReady;
   Map<int,Map<String,Duration>> _cache = {};
   List<EpisodeHistory> _history = [];
 
@@ -46,13 +46,18 @@ class EpisodeProgressCache {
     print('Daten aus Datenbank werden geladen');
     episodeProgressCache._bootUp();
     List<Map<String,dynamic>> result = await databaseHelper.query('SELECT * FROM history ORDER BY rowid ASC');
-    result.forEach((Map<String,dynamic> row) {
+    for (int i=0;i < result.length;i++) {
+      Map<String, dynamic> row = result[i];
+      List<Map<String, dynamic>> episodeCache = await databaseHelper.query(
+          'SELECT image from episodes WHERE media_id = ' +
+              row['mediaId'].toString());
       List<String> progressValues = row['progress'].split(':');
       episodeProgressCache._history.add(
           EpisodeHistory(
               row['rowid'],
               row['media_id'],
               row['language'],
+              episodeCache[0]['image'],
               position: Duration(
                 hours: int.parse(progressValues[0]),
                 minutes: int.parse(progressValues[1]),
@@ -60,9 +65,11 @@ class EpisodeProgressCache {
               )
           )
       );
-    });
+    }
     return episodeProgressCache;
   }
+
+  List<EpisodeHistory> getAll() => this._history;
 
   void _convertHistory() {
     this._cache.forEach((int mediaId, Map<String,Duration> language) {
@@ -76,12 +83,14 @@ class EpisodeProgressCache {
 
   void addEpisode(int mediaId, Duration timeCode,String lang) async {
     await databaseHelper.query('INSERT INTO history (media_id, language, progress) VALUES (' + mediaId.toString() + ', \''+lang+'\', \'' + databaseHelper.formatTime(timeCode) + '\');');
+    List<Map<String,dynamic>> episodeCache = await databaseHelper.query('SELECT image from episodes WHERE media_id = ' + mediaId.toString());
     List<Map<String,dynamic>> idQuery = await databaseHelper.query('SELECT rowid FROM history WHERE media_id = ' + mediaId.toString() + ' AND language = \''+lang+'\' AND progress = \'' + databaseHelper.formatTime(timeCode) + '\' ORDER BY rowid DESC LIMIT 1;');
     this._history.add(
         EpisodeHistory(
             idQuery.first['rowid'],
             mediaId,
             lang,
+            episodeCache[0]['image'],
             position: timeCode
         )
     );
