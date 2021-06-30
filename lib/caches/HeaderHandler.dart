@@ -6,7 +6,7 @@ import 'package:unoffical_aod_app/caches/version.dart';
 
 class HeaderHandler {
   Map<String,String> _headers = {
-    'User-Agent': 'inoffizielle AoD App/'+ version.minor.toString(),
+    'User-Agent': 'inoffizielle AoD App/'+ version.toString(),
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
     'Accept-Language': 'de,en-US;q=0.7,en;q=0.3',
     'Accept-Encoding': 'gzip, deflate, br',
