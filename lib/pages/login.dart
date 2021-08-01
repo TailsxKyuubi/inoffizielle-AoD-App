@@ -4,7 +4,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:unoffical_aod_app/caches/app.dart';
-import 'package:unoffical_aod_app/caches/login.dart';
+import 'package:unoffical_aod_app/caches/login.dart' as loginCache;
 
 class LoginPage extends StatefulWidget {
   @override
@@ -25,10 +25,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void login(){
-    saveCredentials(this._usernameController.text, this._passwordController.text);
-    loginStorageChecked = false;
-    loginDataChecked = false;
-    loginSuccess = false;
+    loginCache.saveCredentials(this._usernameController.text, this._passwordController.text);
+    loginCache.loginStorageChecked = false;
+    loginCache.loginDataChecked = false;
+    loginCache.loginSuccess = false;
     bootUpReceivePort = null;
     bootUpIsolate = null;
     Navigator.pushReplacementNamed(context, '/base');
@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
                     color: Theme.of(context).accentColor
                 ),
               ),
-              loginDataChecked && ! loginSuccess
+              loginCache.loginDataChecked && ! loginCache.loginSuccess
                   ? Container(
                   margin: EdgeInsets.only(top: 20),
                   child: Text(

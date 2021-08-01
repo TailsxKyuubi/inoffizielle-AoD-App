@@ -78,7 +78,7 @@ class AnimesLocalCache {
         return false;
       }
       dom.Document docAllAnimePage = parse(resAllAnimePage.body);
-      await parseAnimePage(docAllAnimePage);
+      animes = await parseAnimePage(docAllAnimePage);
     }
     print('starting sorting anime');
 

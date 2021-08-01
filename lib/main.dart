@@ -82,6 +82,8 @@ class LoadingState extends State<BaseWidget> {
 
   List<String> dialogList = [];
 
+  bool _appCheckStarted = false;
+
   Widget startScreensScaffold(Widget content) {
     return Scaffold(
       body: WillPopScope(
@@ -126,7 +128,7 @@ class LoadingState extends State<BaseWidget> {
           if (message.startsWith('remaining abo days:')) {
             aboDaysLeft = int.parse(message.split(':')[1]);
           } else {
-            Map<String, dynamic> data;
+            Map<String, dynamic> data = {};
             try {
               data = jsonDecode(message);
             } catch (e) {
@@ -188,6 +190,7 @@ class LoadingState extends State<BaseWidget> {
           builder: (BuildContext context) => AppUpdateNotificationDialog()
       );
     }
+    bootUpPreparationsReceivePort = ReceivePort();
     bootUpPreparationsReceivePort.listen(this.processBootUpPreparations);
     FlutterIsolate.spawn(
         appBootUpPreparations, bootUpPreparationsReceivePort.sendPort);
@@ -206,23 +209,28 @@ class LoadingState extends State<BaseWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (appCheckIsolate == null) {
+    if (!this._appCheckStarted) {
+      bootUpReceivePort = ReceivePort();
+      appCheckReceivePort = ReceivePort();
       bootUpReceivePort.listen((message) => parseMessage(message, context));
       appCheckReceivePort.listen((message) => executeCheckActions(message));
       FlutterIsolate
-          .spawn(appChecks, appCheckReceivePort.sendPort)
-          .then((value) => appCheckIsolate = value);
+          .spawn(appChecks, appCheckReceivePort.sendPort);
+      this._appCheckStarted = true;
     }
     print('loading widget build');
-    if (animesCache.animesLocalCache != null) {
-      List<Anime> animes = animesCache.animesLocalCache.getAll();
-      if (loginStorageChecked && !loginSuccess) {
-        return startScreensScaffold(LoginPage());
-      } else if (loginSuccess && animes.isEmpty) {
-        return startScreensScaffold(LoadingPage());
-      } else if (loginSuccess && animes.isNotEmpty) {
-        return HomePage();
+    if (loginSuccess) {
+      if(animesCache.animesLocalCache != null) {
+        List<Anime> animes = animesCache.animesLocalCache.getAll();
+        if (loginSuccess && animes.isEmpty) {
+          return startScreensScaffold(LoadingPage());
+        } else if (loginSuccess && animes.isNotEmpty) {
+          return HomePage();
+        }
       }
+    }
+    if (loginStorageChecked && !loginSuccess) {
+      return startScreensScaffold(LoginPage());
     }
     return startScreensScaffold(LoadingPage());
   }
