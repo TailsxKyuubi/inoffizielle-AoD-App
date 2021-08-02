@@ -260,7 +260,13 @@ class AnimeWidgetState extends State<AnimeWidget>{
       movie = true;
       episodesRaw = doc.querySelectorAll('.two-column-container');
     }
-    //this._anime.image = doc.querySelector('img.fullwidth-image.anime-top-image').attributes['src'];
+    if(this._anime.image == null) {
+      String imageUrl = doc
+          .querySelector('img.fullwidth-image.anime-top-image')
+          .attributes['src'];
+      http.Response imgRes = await http.get(Uri.parse(imageUrl));
+      this._anime.image = imgRes.bodyBytes;
+    }
     this._anime.description = parse(doc.querySelector('div[itemprop=description] > p').innerHtml).documentElement.text.replaceAll('\n', '');
     print('init anime episodes iterating');
     List<Episode> episodes = [];
