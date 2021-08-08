@@ -254,7 +254,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Container(
-                        height: elementHeight+10,
+                        height: elementHeight+14,
                         child: ListView(
                           controller: _newEpisodesScrollController,
                           scrollDirection: Axis.horizontal,
@@ -365,7 +365,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Container(
-                        height: elementHeight-12,
+                        height: elementHeight-8,
                         child: ListView(
                           controller: _newSimulcastsScrollController,
                           scrollDirection: Axis.horizontal,
@@ -455,7 +455,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Container(
-                        height: elementHeight-12,
+                        height: elementHeight-10,
                         child: ListView(
                           controller: _newCatalogTitlesScrollController,
                           scrollDirection: Axis.horizontal,
@@ -545,7 +545,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Container(
-                        height: elementHeight-12,
+                        height: elementHeight-10,
                         margin: EdgeInsets.only(bottom: 10),
                         child: ListView(
                           controller: _topTenScrollController,

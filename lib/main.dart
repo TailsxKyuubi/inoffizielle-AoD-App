@@ -21,11 +21,15 @@ import 'package:unoffical_aod_app/caches/version.dart';
 import 'package:unoffical_aod_app/pages/about.dart';
 import 'package:unoffical_aod_app/pages/anime.dart';
 import 'package:unoffical_aod_app/pages/animes.dart';
+import 'package:unoffical_aod_app/pages/favorites.dart';
+import 'package:unoffical_aod_app/pages/history.dart';
 import 'package:unoffical_aod_app/pages/home.dart';
+import 'package:unoffical_aod_app/pages/list.dart';
 import 'package:unoffical_aod_app/pages/loading.dart';
 import 'package:unoffical_aod_app/pages/login.dart';
 import 'package:unoffical_aod_app/pages/settings.dart';
 import 'package:unoffical_aod_app/pages/updates.dart';
+import 'package:unoffical_aod_app/pages/watchlist.dart';
 import 'package:unoffical_aod_app/widgets/app_update_notification.dart';
 import 'package:unoffical_aod_app/widgets/fire_os_version_error.dart';
 import 'package:unoffical_aod_app/widgets/loading_connection_error.dart';
@@ -59,7 +63,11 @@ class AodApp extends StatelessWidget {
             '/animes': (BuildContext context) => AnimesPage(),
             '/settings': (BuildContext context) => SettingsPage(),
             '/about': (BuildContext context) => AboutPage(),
-            '/updates': (BuildContext context) => UpdatesPage()
+            '/updates': (BuildContext context) => UpdatesPage(),
+            '/lists': (BuildContext context) => ListPage(),
+            '/history': (BuildContext context) => HistoryPage(),
+            '/watchlist': (BuildContext context) => WatchlistPage(),
+            '/favorites': (BuildContext context) => FavoritesPage()
           },
           theme: ThemeData(
             primaryColor: Color.fromRGBO(53, 54, 56, 1),
@@ -190,8 +198,6 @@ class LoadingState extends State<BaseWidget> {
           builder: (BuildContext context) => AppUpdateNotificationDialog()
       );
     }
-    bootUpPreparationsReceivePort = ReceivePort();
-    bootUpPreparationsReceivePort.listen(this.processBootUpPreparations);
     FlutterIsolate.spawn(
         appBootUpPreparations, bootUpPreparationsReceivePort.sendPort);
   }
@@ -213,6 +219,8 @@ class LoadingState extends State<BaseWidget> {
       bootUpReceivePort = ReceivePort();
       appCheckReceivePort = ReceivePort();
       bootUpReceivePort.listen((message) => parseMessage(message, context));
+      bootUpPreparationsReceivePort = ReceivePort();
+      bootUpPreparationsReceivePort.listen(this.processBootUpPreparations);
       appCheckReceivePort.listen((message) => executeCheckActions(message));
       FlutterIsolate
           .spawn(appChecks, appCheckReceivePort.sendPort);
@@ -251,13 +259,12 @@ appChecks(SendPort sendPort) async {
   print('checks completed');
 }
 Future<void> initDb() async {
-  Database db = await openDatabase(
+  await openDatabase(
       'iaoda.db',
       version: 1,
       onCreate: DatabaseHelper.create,
       onOpen: DatabaseHelper.init
   );
-  databaseHelper = await DatabaseHelper.init(db);
 }
 
 appBootUpPreparations(SendPort sendPort) async{

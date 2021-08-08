@@ -4,7 +4,6 @@
  */
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:unoffical_aod_app/caches/anime.dart';
@@ -38,7 +37,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
     ));
   }
 
-  bool handleKey(FocusNode focusNode, RawKeyEvent event){
+  bool handleKey(FocusNode focusNode, RawKeyEvent event) {
     if( Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent ){
       RawKeyEventDataAndroid eventDataAndroid = event.data;
       FocusScopeNode scope = FocusScope.of(context);
@@ -133,7 +132,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
       DeviceOrientation.portraitDown
     ]);*/
     int i = 0;
-    double elementWidth;
+    double elementWidth = 0;
     MediaQueryData mediaQuery = MediaQuery.of(context);
     if(mediaQuery.orientation == Orientation.landscape){
       elementWidth = (mediaQuery.size.width-40)*0.25-7.5;

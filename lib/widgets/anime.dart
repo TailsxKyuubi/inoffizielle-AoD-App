@@ -11,6 +11,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:unoffical_aod_app/caches/anime.dart';
+import 'package:unoffical_aod_app/caches/animes.dart';
 import 'package:unoffical_aod_app/caches/episode.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
@@ -19,6 +20,7 @@ import 'package:unoffical_aod_app/caches/episode_progress.dart';
 import 'package:unoffical_aod_app/caches/keycodes.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
+import 'package:unoffical_aod_app/caches/watchlist.dart';
 import 'package:unoffical_aod_app/transfermodels/player.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:html_unescape/html_unescape.dart';
@@ -267,7 +269,10 @@ class AnimeWidgetState extends State<AnimeWidget>{
       http.Response imgRes = await http.get(Uri.parse(imageUrl));
       this._anime.image = imgRes.bodyBytes;
     }
-    this._anime.description = parse(doc.querySelector('div[itemprop=description] > p').innerHtml).documentElement.text.replaceAll('\n', '');
+    if (this._anime.description == null) {
+      this._anime.description = parse(doc.querySelector('div[itemprop=description] > p').innerHtml).documentElement.text.replaceAll('\n', '');
+      animesLocalCache.saveAnime(this._anime);
+    }
     print('init anime episodes iterating');
     List<Episode> episodes = [];
     for(int i = 0; episodesRaw.length > i; i++) {
@@ -369,6 +374,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
     Orientation deviceOrientation = mediaQuery.orientation;
     double width = mediaQuery.size.width;
     double padding = 0;
+    print(width);
     if(mediaQuery.orientation == Orientation.landscape){
       padding = width * 0.25;
     }
@@ -434,12 +440,13 @@ class AnimeWidgetState extends State<AnimeWidget>{
                       Container(
                         height: deviceOrientation == Orientation.landscape ? mediaQuery.size.height * 0.4 : width / 16 * 9,
                         decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(3)),
                           image: DecorationImage(
-                              fit: BoxFit.fitWidth,
-                              repeat: ImageRepeat.noRepeat,
-                              image: MemoryImage(
-                                  this._anime.image
-                              ),
+                            fit: BoxFit.fitWidth,
+                            repeat: ImageRepeat.noRepeat,
+                            image: MemoryImage(
+                                this._anime.image
+                            ),
                           ),
                         ),
                         child: BackdropFilter(
@@ -451,9 +458,109 @@ class AnimeWidgetState extends State<AnimeWidget>{
                             ),
                             color: Colors.black.withOpacity(0.1),
                             child: Image.memory(
-                              this._anime.image
+                                this._anime.image
                             ),
                           ),
+                        ),
+                      ),
+                      Container (
+                        margin: EdgeInsets.only(top: 25),
+                        width: width - 40,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Container(
+                              child: FlatButton(
+                                onPressed: () {
+                                  if (!aboActive) {
+                                    return;
+                                  }
+                                },
+                                child: Container(
+                                  margin: EdgeInsets.only(
+                                      top: 2.5,
+                                      bottom: 2.5
+                                  ),
+                                  padding: EdgeInsets.only(
+                                    top: 5,
+                                    bottom: 5,
+                                    left: 5,
+                                    right: 12.5
+                                  ),
+                                  decoration: BoxDecoration(
+                                      color: aboActive ? Theme.of(context).accentColor : Colors.grey
+                                  ),
+                                  child: Row(
+                                      children: [
+                                        Icon(
+                                            Icons.play_arrow
+                                        ),
+                                        Text(
+                                          'Weiterschauen',
+                                          textAlign: TextAlign.center,
+                                        )
+                                      ]
+                                  ),
+                                ),
+                              )
+                            ),
+                            Container(
+                                margin: EdgeInsets.only(left: (width - 270)),
+                                padding: EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor,
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: Colors.black87,
+                                          offset: Offset(0.3, 0.3),
+                                          blurRadius: 1
+                                      )
+                                    ]
+                                ),
+                                child: GestureDetector(
+                                    onTap: (){
+
+                                    },
+                                    child: Icon(
+                                      Icons.star,
+                                      color: Colors.white70,
+                                      size: 30,
+                                    )
+                                )
+                            ),
+                            Container(
+                                padding: EdgeInsets.all(5),
+                                margin: EdgeInsets.only(right: 3,left: 5),
+                                decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor,
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: Colors.black87,
+                                          offset: Offset(0.3, 0.3),
+                                          blurRadius: 1
+                                      )
+                                    ]
+                                ),
+                                child: GestureDetector(
+                                    onTap: (){
+                                      setState(() {
+                                        if (watchListCache.getAll().indexOf(this._anime) == -1) {
+                                          watchListCache.add(this._anime);
+                                        } else {
+                                          watchListCache.delete(this._anime);
+                                        }
+                                      });
+                                    },
+                                    child: Icon(
+                                      Icons.bookmark,
+                                      color: watchListCache.searchByAnimeId(this._anime.id) == null
+                                          ? Colors.white70
+                                          : Theme.of(context).accentColor,
+                                      size: 30,
+                                    )
+                                )
+                            )
+                          ],
                         ),
                       ),
                       Container(
@@ -462,8 +569,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
                         ),
                         child: Text(
                           showFullDescription || this._anime.description.length <= 150
-                              ?this._anime.description
-                              :this._anime.description.substring(0,this._anime.description.indexOf(' ',150)) + ' ...',
+                              ? this._anime.description
+                              : this._anime.description.substring(0,this._anime.description.indexOf(' ',150)) + ' ...',
                           style: TextStyle(
                             color: Colors.white,
                           ),

@@ -14,7 +14,7 @@ class WatchListCache {
 
   static Future<WatchListCache> init() async {
     WatchListCache watchListCache = WatchListCache();
-    List<Map> watchListIds = await databaseHelper.query('SELECT * FROM watchlist');
+    List<Map> watchListIds = await databaseHelper.query('SELECT * FROM favorites');
     watchListIds.forEach((Map element) {
       watchListCache._elements.add(animesLocalCache.getSingle(element['anime_id']));
     });
@@ -26,7 +26,7 @@ class WatchListCache {
   bool add(Anime anime) {
     if(this._elements.indexOf(anime) == -1){
       this._elements.add(anime);
-      databaseHelper.query('INSERT INTO watchlist (anime_id) VALUES ('+anime.id.toString()+')');
+      databaseHelper.query('INSERT INTO favorites (anime_id) VALUES ('+anime.id.toString()+')');
       return true;
     }
     return false;
@@ -43,7 +43,7 @@ class WatchListCache {
   bool delete(Anime anime){
     if(this._elements.indexOf(anime) != -1){
       this._elements.remove(anime);
-      databaseHelper.query('DELETE FROM watchlist WHERE anime_id = '+anime.id.toString()+'');
+      databaseHelper.query('DELETE FROM favorites WHERE anime_id = '+anime.id.toString()+'');
       return true;
     }
     return false;

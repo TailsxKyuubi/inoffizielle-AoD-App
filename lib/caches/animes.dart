@@ -38,6 +38,14 @@ class AnimesLocalCache {
     return localCache;
   }
 
+  void saveAnime(Anime anime) {
+    databaseHelper.update('animes', {
+      'description': anime.description,
+      'name': anime.name,
+      'image': anime.image
+    },'anime_id = ' + anime.id.toString());
+  }
+
   Future<dom.Document> _getAnimePage() async {
     print('starting animes request');
     http.Response res;
@@ -94,8 +102,6 @@ class AnimesLocalCache {
             'image': element.image
           }
       );
-      //databaseHelper.query('INSERT INTO animes (anime_id,name,image) VALUES ('+element.id.toString()+',\'' + element.name + '\',\'' + element.image.toString() + '\');');
-      print('Bild für ID ' + element.id.toString() + ': ' + element.image.toString());
     });
 
     animeToDelete.forEach((element) {
@@ -154,7 +160,7 @@ class AnimesLocalCache {
   Anime getSingle(int id) {
     int searchedAnimeIndex = this._elements.indexWhere((element) => element.id == id);
     if(searchedAnimeIndex >= 0){
-      return this._elements[id];
+      return this._elements[searchedAnimeIndex];
     }
     return null;
   }
