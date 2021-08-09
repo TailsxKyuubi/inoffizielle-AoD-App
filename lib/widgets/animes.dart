@@ -31,6 +31,8 @@ class _AnimesWidgetState extends State<AnimesWidget> {
 
   int _countDisplayedElements = 30;
 
+  bool _scrollFinished = false;
+
   double _elementHeight = 0;
 
   int _animeFocusIndex = 0;
@@ -51,7 +53,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
 
   _onScroll() {
     double reloadHeight = this._scrollController.position.maxScrollExtent - this._elementHeight;
-    if (reloadHeight < this._scrollController.position.pixels) {
+    if (reloadHeight < this._scrollController.position.pixels && !this._scrollFinished) {
       setState(() {
         this._countDisplayedElements += 30;
       });
@@ -136,11 +138,18 @@ class _AnimesWidgetState extends State<AnimesWidget> {
     return true;
   }
 
+  void _resetScrolling() {
+    this._scrollFinished = false;
+    this._countDisplayedElements = 30;
+  }
+
   onTextInput(){
     setState(() {
       if(this._controller.text.length >= 1){
+        this._resetScrolling();
         this.searchResult = animes.filterAnimes(this._controller.text);
       }else if(this._controller.text.isEmpty){
+        this._resetScrolling();
         this.searchResult = animes.animesLocalCache.getAll();
       }
     });
@@ -148,10 +157,6 @@ class _AnimesWidgetState extends State<AnimesWidget> {
 
   @override
   Widget build(BuildContext context) {
-    /*SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown
-    ]);*/
     int i = 0;
     double elementWidth = 0;
     MediaQueryData mediaQuery = MediaQuery.of(context);
@@ -169,6 +174,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
     int index = 0;
     this.searchResult.forEach((Anime anime) {
           this._focusNodeAnimeMapping.add(anime.id);
+
           if (index < this._countDisplayedElements) {
             index++;
             animeList.add(
@@ -180,6 +186,9 @@ class _AnimesWidgetState extends State<AnimesWidget> {
                     this.animeFocusNodes[i++]
                 )
             );
+          }
+          if (index >= this.searchResult.length) {
+            this._scrollFinished = true;
           }
         }
     );

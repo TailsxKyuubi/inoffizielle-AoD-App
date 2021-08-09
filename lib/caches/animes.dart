@@ -127,20 +127,24 @@ class AnimesLocalCache {
         dom.Element element = animeElements[a];
         print('begin processing anime element');
         int id = int.parse(element.querySelector('.animebox-link a').attributes['href'].split('/').last);
-        String title = element
-            .querySelector('h3.animebox-title')
-            .innerHtml
-            .trim();
+        Anime tmpAnime = animesLocalCache.getSingle(id);
+
         String imageUrl = element
             .querySelector('.animebox-image img')
             .attributes['src'];
 
         Uri imageUri = Uri.parse(imageUrl);
 
-        Anime tmpAnime = Anime(
-            id: id,
-            name: unescape.convert(title).replaceAll('(Sub)', '')
-        );
+        if(tmpAnime == null) {
+          String title = element
+              .querySelector('h3.animebox-title')
+              .innerHtml
+              .trim();
+          tmpAnime = Anime(
+              id: id,
+              name: unescape.convert(title).replaceAll('(Sub)', '')
+          );
+        }
 
         tmpAnime.imageLink = imageUri;
 
@@ -153,11 +157,16 @@ class AnimesLocalCache {
   }
 
   void getMissingImages() async {
-    List<Map<String,dynamic>> animes = await databaseHelper.query("SELECT anime_id FROM animes WHERE image is NULL");
+    List<Map<String,dynamic>> animes = await databaseHelper.query("SELECT anime_id FROM animes WHERE image IS NULL");
+    print('found ' + animes.length.toString() + ' anime images to download');
     for(int i = 0; i < animes.length; i++){
+      print('search anime with id ' + animes[i]['anime_id'].toString());
       Anime anime = this._elements.firstWhere((Anime anime) => animes[i]['anime_id'] == anime.id);
+      print('download image for anime with id ' + anime.id.toString());
       http.Response imgRes = await http.get(anime.imageLink);
       anime.image = imgRes.bodyBytes;
+      print('image downloaded for anime with id ' + anime.id.toString());
+      print('saving anime image to db');
       await this.saveAnime(anime);
     }
   }
