@@ -5,7 +5,6 @@
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unoffical_aod_app/caches/database.dart';
-import 'package:unoffical_aod_app/caches/episode.dart';
 import 'package:unoffical_aod_app/caches/episode_history.dart';
 
 EpisodeProgressCache episodeProgressCache;
@@ -46,27 +45,6 @@ class EpisodeProgressCache {
     EpisodeProgressCache episodeProgressCache = EpisodeProgressCache(sharedPreferences);
     print('Daten aus Datenbank werden geladen');
     episodeProgressCache._bootUp();
-    /*List<Map<String,dynamic>> result = await databaseHelper.query('SELECT * FROM history ORDER BY rowid ASC');
-    for (int i=0;i < result.length;i++) {
-      Map<String, dynamic> row = result[i];
-      List<Map<String, dynamic>> episodeCache = await databaseHelper.query(
-          'SELECT image from episodes WHERE media_id = ' +
-              row['mediaId'].toString());
-      List<String> progressValues = row['progress'].split(':');
-      episodeProgressCache._history.add(
-          EpisodeHistory(
-              row['rowid'],
-              row['media_id'],
-              row['language'],
-              episodeCache[0]['image'],
-              position: Duration(
-                hours: int.parse(progressValues[0]),
-                minutes: int.parse(progressValues[1]),
-                seconds: int.parse(progressValues[2]),
-              )
-          )
-      );
-    }*/
     return episodeProgressCache;
   }
 

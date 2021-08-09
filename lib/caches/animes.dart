@@ -127,7 +127,7 @@ class AnimesLocalCache {
         dom.Element element = animeElements[a];
         print('begin processing anime element');
         int id = int.parse(element.querySelector('.animebox-link a').attributes['href'].split('/').last);
-        Anime tmpAnime = animesLocalCache.getSingle(id);
+        Anime tmpAnime = this.getSingle(id);
 
         String imageUrl = element
             .querySelector('.animebox-image img')
