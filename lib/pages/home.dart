@@ -8,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:unoffical_aod_app/caches/anime.dart';
+import 'package:unoffical_aod_app/caches/animes.dart';
 import 'package:unoffical_aod_app/caches/focusnode.dart';
 import 'package:unoffical_aod_app/caches/home.dart';
 import 'package:unoffical_aod_app/caches/keycodes.dart';
@@ -330,8 +331,7 @@ class _HomePageState extends State<HomePage> {
                                                 decoration: BoxDecoration(
                                                   color: Color.fromRGBO(66,69,68,1),
                                                 ),
-                                                child: Text
-                                                  (
+                                                child: Text(
                                                   'Folge ' + e['episode_number']
                                                       .replaceAll('GRATIS','')
                                                       .replaceAll('(Dub-Upgrade)',''),
@@ -384,6 +384,8 @@ class _HomePageState extends State<HomePage> {
                             }else{
                               animeName = e['series_name'];
                             }
+                            int id = int.parse(e['series_id']);
+                            Anime anime = animesLocalCache.getSingle(id);
                             return FlatButton(
                                 focusColor: Theme.of(context).accentColor,
                                 padding: EdgeInsets.all(3),
@@ -393,7 +395,7 @@ class _HomePageState extends State<HomePage> {
                                     '/anime',
                                     arguments: Anime(
                                       name: e['series_name'],
-                                      id: int.parse(e['series_id']),
+                                      id: id,
                                     ),
                                   );
                                 },
@@ -407,8 +409,12 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                         child: Column(
                                           children: [
-                                            CachedNetworkImage(
+                                            anime.image == null ? CachedNetworkImage(
                                               imageUrl: 'https://'+url.host+url.path,
+                                              width: elementWidth,
+                                              height: elementHeight-40,
+                                            ) : Image.memory(
+                                              anime.image,
                                               width: elementWidth,
                                               height: elementHeight-40,
                                             ),
@@ -474,6 +480,8 @@ class _HomePageState extends State<HomePage> {
                             }else{
                               animeName = e['series_name'];
                             }
+                            int id = int.parse(e['series_id']);
+                            Anime anime = animesLocalCache.getSingle(id);
                             return FlatButton(
                                 focusNode: _newCatalogTitlesFocusNodes[newCatalogTitlesCount++],
                                 focusColor: Theme.of(context).accentColor,
@@ -484,7 +492,7 @@ class _HomePageState extends State<HomePage> {
                                     '/anime',
                                     arguments: Anime(
                                       name: e['series_name'],
-                                      id: int.parse(e['series_id']),
+                                      id: id,
                                     ),
                                   );
                                 },
@@ -497,8 +505,12 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                         child: Column(
                                           children: [
-                                            CachedNetworkImage(
+                                            anime.image == null ? CachedNetworkImage(
                                               imageUrl: 'https://'+url.host+url.path,
+                                              width: elementWidth,
+                                              height: elementHeight-40,
+                                            ) : Image.memory(
+                                              anime.image,
                                               width: elementWidth,
                                               height: elementHeight-40,
                                             ),
@@ -565,6 +577,8 @@ class _HomePageState extends State<HomePage> {
                             }else{
                               animeName = e['series_name'];
                             }
+                            int id = int.parse(e['series_id']);
+                            Anime anime = animesLocalCache.getSingle(id);
                             return FlatButton(
                                 onPressed: (){
                                   Navigator.pushNamed(
@@ -587,8 +601,12 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                         child: Column(
                                           children: [
-                                            CachedNetworkImage(
+                                            anime.image == null ? CachedNetworkImage(
                                               imageUrl: 'https://'+url.host+url.path,
+                                              width: elementWidth,
+                                              height: elementHeight-40,
+                                            ) : Image.memory(
+                                              anime.image,
                                               width: elementWidth,
                                               height: elementHeight-40,
                                             ),
