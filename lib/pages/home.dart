@@ -226,10 +226,6 @@ class _HomePageState extends State<HomePage> {
           }
         },
         child: Scaffold(
-            appBar: AppBar(
-              title: Text('Startseite'),
-              brightness: Brightness.dark,
-            ),
             bottomNavigationBar: NavigationBarCustom(this._newEpisodesFocusNodes.first),
             //drawer: DrawerWidget(),
             body: Container(

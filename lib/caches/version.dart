@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:version/version.dart';
 import 'package:xml/xml.dart';
 
-final Version version = Version.parse('0.9.0-alpha.1');
+final Version version = Version.parse('0.9.0-alpha.2');
 
 Version latestVersion = version;
 

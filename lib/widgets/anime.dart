@@ -17,6 +17,7 @@ import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
 import 'package:html/dom.dart' as dom;
 import 'package:unoffical_aod_app/caches/episode_progress.dart';
+import 'package:unoffical_aod_app/caches/favorites.dart';
 import 'package:unoffical_aod_app/caches/keycodes.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
@@ -428,8 +429,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                 ),
               ),
               onPressed: continueSeries,
-            )
-                : Container(),
+            ) : Container(),
             body: Container(
                 decoration: BoxDecoration(
                     color: Theme.of(context).primaryColor
@@ -519,11 +519,19 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                 ),
                                 child: GestureDetector(
                                     onTap: (){
-
+                                      setState(() {
+                                        if (favoritesCache.getAll().indexOf(this._anime) == -1) {
+                                          favoritesCache.add(this._anime);
+                                        } else {
+                                          favoritesCache.delete(this._anime);
+                                        }
+                                      });
                                     },
                                     child: Icon(
                                       Icons.star,
-                                      color: Colors.white70,
+                                      color: favoritesCache.searchByAnimeId(this._anime.id) == null
+                                          ? Colors.white70
+                                          : Theme.of(context).accentColor,
                                       size: 30,
                                     )
                                 )

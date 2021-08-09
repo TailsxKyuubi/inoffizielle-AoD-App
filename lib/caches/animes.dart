@@ -4,7 +4,6 @@
  */
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
@@ -38,12 +37,12 @@ class AnimesLocalCache {
     return localCache;
   }
 
-  void saveAnime(Anime anime) {
-    databaseHelper.update('animes', {
+  Future<void> saveAnime(Anime anime) async {
+    await databaseHelper.update('animes', {
       'description': anime.description,
       'name': anime.name,
       'image': anime.image
-    },'anime_id = ' + anime.id.toString());
+    }, 'anime_id = ' + anime.id.toString());
   }
 
   Future<dom.Document> _getAnimePage() async {
@@ -71,8 +70,6 @@ class AnimesLocalCache {
     List<Anime> animes = await parseAnimePage(animePageDoc);
     validateAbo(animePageDoc);
     print(aboDaysLeft);
-    print(loginSuccess);
-    print(loginDataChecked);
     if( ! aboActive ){
       print('inactive abo detected');
       http.Response resAllAnimePage;
@@ -93,24 +90,27 @@ class AnimesLocalCache {
     List<Anime> animeToDelete = this._elements.where((existingAnime) => animes.indexWhere((element) => existingAnime.id == element.id) == -1).toList();
     List<Anime> animeToAdd = animes.where((newAnime) => this._elements.indexWhere((element) => newAnime.id == element.id) == -1).toList();
     print('löse unterschiede auf in anime datenbank auf');
-    animeToAdd.forEach((element) {
-      databaseHelper.insert(
+    for(int i = 0;i < animeToAdd.length; i++){
+      await databaseHelper.insert(
           'animes',
           {
-            'anime_id': element.id,
-            'name': element.name,
-            'image': element.image
+            'anime_id': animeToAdd[i].id,
+            'name': animeToAdd[i].name,
+            'image': animeToAdd[i].image
           }
       );
-    });
+    }
+    for(int i = 0;i < animeToDelete.length; i++){
+      await databaseHelper.query('DELETE FROM animes WHERE anime_id = ' + animeToDelete[i].id.toString() + ';');
+    }
 
-    animeToDelete.forEach((element) {
-      databaseHelper.query('DELETE FROM animes WHERE anime_id = ' + element.id.toString() + ';');
-    });
     this._elements = animes;
 
     print('sortiere animes');
     this._elements.sort((firstAnime, secondAnime) => firstAnime.name.compareTo(secondAnime.name));
+
+    print('download images');
+    Timer.run(this.getMissingImages);
 
     print('finished anime parsing');
     return true;
@@ -136,16 +136,13 @@ class AnimesLocalCache {
             .attributes['src'];
 
         Uri imageUri = Uri.parse(imageUrl);
-        http.Response imgRes = await http.get(
-            imageUri,
-            headers: headerHandler.getHeadersForGetRequest()
-        );
-        Uint8List existingImage = imgRes.bodyBytes;
+
         Anime tmpAnime = Anime(
             id: id,
-            name: unescape.convert(title).replaceAll('(Sub)', ''),
-            image: existingImage
+            name: unescape.convert(title).replaceAll('(Sub)', '')
         );
+
+        tmpAnime.imageLink = imageUri;
 
         animes.add(tmpAnime);
         print('finished processing anime element');
@@ -153,6 +150,16 @@ class AnimesLocalCache {
       return animes;
     }
     return [];
+  }
+
+  void getMissingImages() async {
+    List<Map<String,dynamic>> animes = await databaseHelper.query("SELECT anime_id FROM animes WHERE image is NULL");
+    for(int i = 0; i < animes.length; i++){
+      Anime anime = this._elements.firstWhere((Anime anime) => animes[i]['anime_id'] == anime.id);
+      http.Response imgRes = await http.get(anime.imageLink);
+      anime.image = imgRes.bodyBytes;
+      await this.saveAnime(anime);
+    }
   }
 
   List<Anime> getAll() => _elements;

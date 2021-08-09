@@ -7,6 +7,7 @@ import 'dart:typed_data';
 class Anime {
   final String name;
   Uint8List image;
+  Uri imageLink;
   String description;
   final int id;
   Anime({this.name,this.image,this.description,this.id});

@@ -7,18 +7,18 @@ import 'package:unoffical_aod_app/caches/anime.dart';
 import 'package:unoffical_aod_app/caches/animes.dart';
 import 'package:unoffical_aod_app/caches/database.dart';
 
-WatchListCache watchListCache;
+FavoritesCache favoritesCache;
 
-class WatchListCache {
+class FavoritesCache {
   List<Anime> _elements = [];
 
-  static Future<WatchListCache> init() async {
-    WatchListCache watchListCache = WatchListCache();
-    List<Map> watchListIds = await databaseHelper.query('SELECT * FROM favorites');
-    watchListIds.forEach((Map element) {
-      watchListCache._elements.add(animesLocalCache.getSingle(element['anime_id']));
+  static Future<FavoritesCache> init() async {
+    FavoritesCache favoritesCache = FavoritesCache();
+    List<Map> favoritesIds = await databaseHelper.query('SELECT * FROM favorites');
+    favoritesIds.forEach((Map element) {
+      favoritesCache._elements.add(animesLocalCache.getSingle(element['anime_id']));
     });
-    return watchListCache;
+    return favoritesCache;
   }
 
   List<Anime> getAll() => _elements;

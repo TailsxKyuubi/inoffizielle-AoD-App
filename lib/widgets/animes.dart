@@ -27,6 +27,12 @@ class _AnimesWidgetState extends State<AnimesWidget> {
 
   FocusNode mainFocusNode;
 
+  GlobalKey _listViewKey = GlobalKey();
+
+  int _countDisplayedElements = 30;
+
+  double _elementHeight = 0;
+
   int _animeFocusIndex = 0;
   _AnimesWidgetState(){
     this._controller.addListener(onTextInput);
@@ -35,6 +41,21 @@ class _AnimesWidgetState extends State<AnimesWidget> {
             onKey: handleKey
         )
     ));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    this._scrollController.addListener(_onScroll);
+  }
+
+  _onScroll() {
+    double reloadHeight = this._scrollController.position.maxScrollExtent - this._elementHeight;
+    if (reloadHeight < this._scrollController.position.pixels) {
+      setState(() {
+        this._countDisplayedElements += 30;
+      });
+    }
   }
 
   bool handleKey(FocusNode focusNode, RawKeyEvent event) {
@@ -109,7 +130,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
           );
       }
       this._scrollController.jumpTo(
-          (this.animeFocusNodes.indexOf(scope.focusedChild) / 4).floor() * scope.focusedChild.size.height,
+        (this.animeFocusNodes.indexOf(scope.focusedChild) / 4).floor() * scope.focusedChild.size.height,
       );
     }
     return true;
@@ -142,21 +163,24 @@ class _AnimesWidgetState extends State<AnimesWidget> {
 
     this._focusNodeAnimeMapping.clear();
 
-    double elementHeight = elementWidth / 16 * 9;
+    this._elementHeight = elementWidth / 16 * 9;
     Radius radius = Radius.circular(2);
     List<Widget> animeList = [];
-    this.searchResult.forEach(
-            (Anime anime) {
+    int index = 0;
+    this.searchResult.forEach((Anime anime) {
           this._focusNodeAnimeMapping.add(anime.id);
-          animeList.add(
-              AnimeSmallWidget(
-                  anime,
-                  elementWidth,
-                  elementHeight,
-                  radius,
-                  this.animeFocusNodes[i++]
-              )
-          );
+          if (index < this._countDisplayedElements) {
+            index++;
+            animeList.add(
+                AnimeSmallWidget(
+                    anime,
+                    elementWidth,
+                    this._elementHeight,
+                    radius,
+                    this.animeFocusNodes[i++]
+                )
+            );
+          }
         }
     );
 
@@ -170,11 +194,6 @@ class _AnimesWidgetState extends State<AnimesWidget> {
           }
         },
         child: Scaffold(
-            appBar: AppBar(
-              backgroundColor: Theme.of(context).primaryColor,
-              title: Text('Meine Anime'),
-              brightness: Brightness.dark,
-            ),
             bottomNavigationBar: NavigationBarCustom(this.animeFocusNodes.first),
             body: Container(
                 decoration: BoxDecoration(
@@ -183,6 +202,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
                 height: MediaQuery.of(context).size.height,
                 padding: EdgeInsets.only(left: 20, right: 20),
                 child: ListView(
+                    key: _listViewKey,
                     controller: _scrollController,
                     children: [
                       Container(

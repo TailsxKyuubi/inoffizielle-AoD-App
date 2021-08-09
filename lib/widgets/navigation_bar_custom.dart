@@ -96,16 +96,20 @@ class _NavigationBarCustomState extends State<NavigationBarCustom> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 50,
+        height: 60,
+        padding: EdgeInsets.only(top:5,bottom: 5),
+        decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor
+        ),
         child: Row(
           children: [
             NavigationElement(
-              icon: Icons.home,
-              label: 'Startseite',
-              routeName: '/home',
-              focusNode: menuBarFocusNodes[0],
-              onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
-              first: true
+                icon: Icons.home,
+                label: 'Startseite',
+                routeName: '/home',
+                focusNode: menuBarFocusNodes[0],
+                onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
+                first: true
             ),
             NavigationElement(
               icon: Icons.video_library,

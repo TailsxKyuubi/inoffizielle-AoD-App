@@ -5,6 +5,7 @@
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unoffical_aod_app/caches/database.dart';
+import 'package:unoffical_aod_app/caches/episode.dart';
 import 'package:unoffical_aod_app/caches/episode_history.dart';
 
 EpisodeProgressCache episodeProgressCache;
@@ -45,7 +46,7 @@ class EpisodeProgressCache {
     EpisodeProgressCache episodeProgressCache = EpisodeProgressCache(sharedPreferences);
     print('Daten aus Datenbank werden geladen');
     episodeProgressCache._bootUp();
-    List<Map<String,dynamic>> result = await databaseHelper.query('SELECT * FROM history ORDER BY rowid ASC');
+    /*List<Map<String,dynamic>> result = await databaseHelper.query('SELECT * FROM history ORDER BY rowid ASC');
     for (int i=0;i < result.length;i++) {
       Map<String, dynamic> row = result[i];
       List<Map<String, dynamic>> episodeCache = await databaseHelper.query(
@@ -65,7 +66,7 @@ class EpisodeProgressCache {
               )
           )
       );
-    }
+    }*/
     return episodeProgressCache;
   }
 
@@ -83,17 +84,6 @@ class EpisodeProgressCache {
 
   void addEpisode(int mediaId, Duration timeCode,String lang) async {
     await databaseHelper.query('INSERT INTO history (media_id, language, progress) VALUES (' + mediaId.toString() + ', \''+lang+'\', \'' + databaseHelper.formatTime(timeCode) + '\');');
-    List<Map<String,dynamic>> episodeCache = await databaseHelper.query('SELECT image from episodes WHERE media_id = ' + mediaId.toString());
-    List<Map<String,dynamic>> idQuery = await databaseHelper.query('SELECT rowid FROM history WHERE media_id = ' + mediaId.toString() + ' AND language = \''+lang+'\' AND progress = \'' + databaseHelper.formatTime(timeCode) + '\' ORDER BY rowid DESC LIMIT 1;');
-    this._history.add(
-        EpisodeHistory(
-            idQuery.first['rowid'],
-            mediaId,
-            lang,
-            episodeCache[0]['image'],
-            position: timeCode
-        )
-    );
   }
 
   Duration getEpisodeDuration(int mediaId, String lang){
