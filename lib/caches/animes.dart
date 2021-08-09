@@ -183,11 +183,8 @@ class AnimesLocalCache {
 }
 
 List<Anime> filterAnimes(String searchQuery){
-  List<Anime> filteredResults = [];
   HtmlEscape escape = HtmlEscape();
   List<String> words = searchQuery.toLowerCase().split(' ').map((String e) => escape.convert(e)).toList();
   String query = '(?=.*'+ words.join(')(?=.*') + ')';
-
-  animesLocalCache.getAll().where((element) => element.name.toLowerCase().indexOf( RegExp( query )) == -1);
-  return filteredResults;
+  return animesLocalCache.getAll().where((element) => element.name.toLowerCase().contains(RegExp( query ))).toList();
 }
