@@ -156,20 +156,28 @@ class PlayerState extends State<PlayerWidget> {
     });
   }
 
-  Future<String> checkVideoQuality(String m3u8) async{
+  Future<String> checkVideoQuality(String oldM3u8) async {
+    String m3u8 = oldM3u8;
     if(settings.playerSettings.defaultQuality != 0){
-      http.Response res = await http.get(Uri.tryParse(m3u8),headers: headerHandler.getHeaders());
+      http.Response res = await http.get(Uri.tryParse(oldM3u8),headers: headerHandler.getHeaders());
       List<String> lines = res.body.split('\n');
+      bool edited = false;
       for(int i = 0;i<lines.length;i++){
         if(lines[i].split(':')[0] == '#EXT-X-STREAM-INF') {
           List<String> fields = lines[i].split(',');
           for (int h = 0;h < fields.length;h++) {
+            String resolution = fields[h].split('x').last;
             if(fields[h].split('=')[0].trim() == 'RESOLUTION'
-                && fields[h].split('x').last == settings.playerSettings.defaultQuality.toString()){
-              List<String> oldLinkArray = m3u8.split('/');
+                && (resolution == settings.playerSettings.defaultQuality.toString()
+                || resolution == (settings.playerSettings.defaultQuality-1).toString())) {
+              if (resolution != settings.playerSettings.defaultQuality.toString() && edited) {
+                break;
+              }
+              List<String> oldLinkArray = oldM3u8.split('/');
               oldLinkArray.removeLast();
               oldLinkArray.add(lines[i + 1].trim());
               m3u8 = oldLinkArray.join('/');
+              edited = true;
               break;
             }
           }
