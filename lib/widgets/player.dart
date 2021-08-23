@@ -195,9 +195,10 @@ class PlayerState extends State<PlayerWidget> {
     Timer(Duration(seconds: 1),() => oldPlayerController.dispose());
   }
 
-  Future<String> checkVideoQuality(String m3u8) async{
+  Future<String> checkVideoQuality(String oldM3u8) async{
+    String m3u8 = '';
     if(settings.playerSettings.defaultQuality != 0){
-      http.Response res = await http.get(Uri.tryParse(m3u8)!,headers: headerHandler.getHeaders());
+      http.Response res = await http.get(Uri.tryParse(oldM3u8)!,headers: headerHandler.getHeaders());
       List<String> lines = res.body.split('\n');
       bool edited = false;
       for(int i = 0;i<lines.length;i++){
