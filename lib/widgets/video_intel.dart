@@ -6,11 +6,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:unoffical_aod_app/caches/playercache.dart' as playerCache;
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
 import 'package:unoffical_aod_app/caches/episode_progress.dart';
 import 'package:unoffical_aod_app/widgets/player.dart';
+import 'package:video_player/video_player.dart';
 
 class VideoIntel extends StatelessWidget {
 
@@ -62,7 +62,7 @@ class VideoIntel extends StatelessWidget {
                   ]);
                   print('switched orientation');
                   Navigator.pop(context);
-                  VlcPlayerController oldVideoController = playerCache.controller!;
+                  VideoPlayerController oldVideoController = playerCache.controller!;
                   playerCache.controller = null;
                   playerCache.updateThread = null;
                   Timer(Duration(seconds: 1),() => oldVideoController.dispose());
