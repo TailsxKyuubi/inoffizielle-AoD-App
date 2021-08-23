@@ -9,6 +9,7 @@ import 'dart:isolate';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:unoffical_aod_app/caches/episode_progress.dart';
 import 'package:unoffical_aod_app/caches/keycodes.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
@@ -21,7 +22,6 @@ import 'package:unoffical_aod_app/widgets/video_intel.dart';
 import 'package:unoffical_aod_app/widgets/video_progress.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:video_player/video_player.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:unoffical_aod_app/caches/playercache.dart' as playerCache;
 
@@ -124,7 +124,7 @@ class PlayerState extends State<PlayerWidget> {
   }
 
   jumpToNextEpisode() async{
-    VideoPlayerController oldPlayerController = playerCache.controller!;
+    VlcPlayerController oldPlayerController = playerCache.controller!;
     this.saveEpisodeProgress();
     if(playerCache.playlist.length <= (playerCache.playlistIndex+1)){
       await playerCache.controller!.pause();
@@ -162,7 +162,7 @@ class PlayerState extends State<PlayerWidget> {
     String m3u8 = playerCache.playlist[playerCache.playlistIndex]['sources'][0]['file'];
     m3u8 = await this.checkVideoQuality(m3u8);
     Timer(Duration(seconds: 1),() => oldPlayerController.dispose());
-    playerCache.controller = VideoPlayerController.network(m3u8);
+    playerCache.controller = VlcPlayerController.network(m3u8);
     await playerCache.controller!.initialize();
     setState(() {
       _playlistLoaded = true;
@@ -238,7 +238,7 @@ class PlayerState extends State<PlayerWidget> {
       String m3u8 = playerCache.playlist[0]['sources'][0]['file'];
       m3u8 = await this.checkVideoQuality(m3u8);
       this._playlistLoaded = true;
-      playerCache.controller = VideoPlayerController.network(m3u8)
+      playerCache.controller = VlcPlayerController.network(m3u8)
       ..initialize().then((_) {
           print('player initialized');
           setState(() {
@@ -386,7 +386,7 @@ class PlayerState extends State<PlayerWidget> {
               print('set orientation');
 
               Navigator.pop(context);
-              VideoPlayerController oldVideoController = playerCache.controller!;
+              VlcPlayerController oldVideoController = playerCache.controller!;
               playerCache.controller = null;
               print('unlinked object');
               playerCache.updateThread = null;
@@ -445,7 +445,11 @@ class PlayerState extends State<PlayerWidget> {
                               color: Colors.black
                           ),
                           child: _playlistLoaded && playerCache.controller != null
-                              ? VideoPlayer(playerCache.controller!) : Container()
+                              ? VlcPlayer(
+                                controller: playerCache.controller!,
+                                aspectRatio: 16 / 9,
+                                placeholder: Center(child: CircularProgressIndicator()),
+                          ) : Container()
                       )
                   ),
                   settings.playerSettings.alwaysShowProgress && !showControls ? Positioned(

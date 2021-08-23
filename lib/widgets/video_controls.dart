@@ -49,9 +49,7 @@ class _VideoControlsState extends State<VideoControls> {
     }
     double baseWidth = (MediaQuery.of(context).size.width-142)/100;
     double positionWidth = (positionSeconds / (durationSeconds/100))*baseWidth;
-    double bufferedWidth = playerCache.controller!.value.buffered.isNotEmpty && playerCache.controller!.value.buffered.last.end.inSeconds > positionSeconds
-        ? ((playerCache.controller!.value.buffered.last.end.inSeconds-positionSeconds) / (durationSeconds/100))*baseWidth
-        : 0;
+    double bufferedWidth = playerCache.controller!.value.bufferPercent*baseWidth;
     double placeholderWidth = baseWidth*100-positionWidth-bufferedWidth;
     //placeholderWidth -= ((MediaQuery.of(context).size.width-142)-placeholderWidth-positionWidth-bufferedWidth);
     Color accentColor = Theme.of(context).accentColor;
