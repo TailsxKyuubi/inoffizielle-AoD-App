@@ -3,7 +3,6 @@
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'package:flutter/material.dart';
-import 'package:unoffical_aod_app/caches/app.dart';
 import 'package:unoffical_aod_app/caches/login.dart' as loginCache;
 
 class LoginPage extends StatefulWidget {
@@ -14,8 +13,8 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  FocusNode username;
-  FocusNode password;
+  FocusNode username = FocusNode();
+  FocusNode password = FocusNode();
 
   @override
   void initState(){
@@ -29,8 +28,6 @@ class _LoginPageState extends State<LoginPage> {
     loginCache.loginStorageChecked = false;
     loginCache.loginDataChecked = false;
     loginCache.loginSuccess = false;
-    bootUpReceivePort = null;
-    bootUpIsolate = null;
     Navigator.pushReplacementNamed(context, '/base');
   }
 
@@ -94,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 keyboardType: TextInputType.text,
                 validator: (value) {
-                  if (value.isEmpty) {
+                  if (value!.isEmpty) {
                     return 'Gib deinen Benutzernamen ein';
                   }
                   return null;
@@ -137,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                 obscureText: true,
                 textInputAction: TextInputAction.done,
                 validator: (value) {
-                  if (value.isEmpty) {
+                  if (value!.isEmpty) {
                     return 'Gib deine Passwort ein';
                   }
                   return null;

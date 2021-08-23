@@ -22,7 +22,7 @@ class _ListWidgetState extends State<ListPage> with SingleTickerProviderStateMix
     '/favorites'
   ];
 
-  TabController _controller;
+  late TabController _controller;
   @override
   void initState(){
     super.initState();
@@ -41,7 +41,7 @@ class _ListWidgetState extends State<ListPage> with SingleTickerProviderStateMix
 
   bool handleKey(FocusNode focusNode, RawKeyEvent event) {
     if( Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent ){
-      RawKeyEventDataAndroid eventDataAndroid = event.data;
+      RawKeyEventDataAndroid eventDataAndroid = event.data as RawKeyEventDataAndroid;
       FocusScopeNode scope = FocusScope.of(context);
       switch(eventDataAndroid.keyCode){
         case KEY_DOWN:
@@ -96,7 +96,6 @@ class _ListWidgetState extends State<ListPage> with SingleTickerProviderStateMix
           return true;
         case KEY_BACK:
           exit(0);
-          return true;
         case KEY_CENTER:
           Navigator.pushNamed(
             context,

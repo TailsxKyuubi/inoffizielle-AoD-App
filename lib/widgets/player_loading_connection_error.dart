@@ -3,6 +3,7 @@
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
 import 'package:flutter/material.dart';
+import 'package:unoffical_aod_app/caches/focusnode.dart';
 import 'package:unoffical_aod_app/transfermodels/player.dart';
 import 'package:unoffical_aod_app/caches/playercache.dart' as playerCache;
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
@@ -10,16 +11,14 @@ import 'package:unoffical_aod_app/caches/settings/settings.dart';
 class PlayerLoadingConnectionErrorDialog extends StatelessWidget {
   final PlayerTransfer args;
   PlayerLoadingConnectionErrorDialog(this.args){
-    if(settings.playerSettings.saveEpisodeProgress && playerCache.episodeTracker != null && playerCache.episodeTracker.isActive){
-      playerCache.episodeTracker.cancel();
-      playerCache.episodeTracker = null;
+    if(settings.playerSettings.saveEpisodeProgress && playerCache.episodeTracker != null && playerCache.episodeTracker!.isActive){
+      playerCache.episodeTracker!.cancel();
     }
-    if(playerCache.updateThread.isActive){
-      playerCache.updateThread.cancel();
+    if(playerCache.updateThread!.isActive){
+      playerCache.updateThread!.cancel();
       playerCache.updateThread = null;
     }
-    playerCache.timeTrackThread.cancel();
-    playerCache.timeTrackThread = null;
+    playerCache.timeTrackThread!.cancel();
   }
 
   @override
@@ -27,7 +26,7 @@ class PlayerLoadingConnectionErrorDialog extends StatelessWidget {
     const double padding = 16.0;
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(3),
       ),
       elevation: 0.0,
       backgroundColor: Colors.transparent,
@@ -71,17 +70,18 @@ class PlayerLoadingConnectionErrorDialog extends StatelessWidget {
                     alignment: Alignment.bottomRight,
                     child: Row(
                         children: [
-                          FlatButton(
+                          TextButton(
                             onPressed: (){
                               Navigator.pop(context);
                               Navigator.pop(context);
                             },
                             child: Text('Stream beenden'),
                           ),
-                          FlatButton(
+                          TextButton(
                             onPressed: () {
                               Navigator.pop(context);
-                              Navigator.pushReplacementNamed(
+                              Navigator.pop(context);
+                              Navigator.pushNamed(
                                   context,
                                   '/player',
                                   arguments: this.args

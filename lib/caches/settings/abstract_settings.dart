@@ -8,6 +8,6 @@ abstract class AbstractSettings {
    AbstractSettings(this.preferences);
    String prefix = 'app';
    SharedPreferences preferences;
-   Map fields;
+   Map fields = {};
    save();
 }

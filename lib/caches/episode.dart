@@ -7,12 +7,12 @@ import 'dart:typed_data';
 import 'package:unoffical_aod_app/caches/database.dart';
 
 class Episode {
-  String name;
+  String name = '';
   String number = '';
-  Uri imageUrl;
-  Uint8List image;
-  int mediaId;
-  Duration duration;
+  Uri imageUrl = Uri();
+  Uint8List image = Uint8List(0);
+  int mediaId = 0;
+  Duration duration = Duration();
   List<String> playlistUrl = [];
   List<String> languages = [];
   String noteText = '';

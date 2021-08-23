@@ -4,7 +4,7 @@ import 'package:unoffical_aod_app/caches/episode_progress.dart';
 import 'package:unoffical_aod_app/caches/favorites.dart';
 import 'package:unoffical_aod_app/caches/watchlist.dart';
 
-DatabaseHelper databaseHelper;
+late DatabaseHelper databaseHelper;
 
 class DatabaseHelper {
   final Database _db;
@@ -19,7 +19,7 @@ class DatabaseHelper {
 
   Future<List<Map<String,dynamic>>> query(String sql) async => await this._db.rawQuery(sql);
 
-  Future<int> update(String table, Map<String, dynamic> values,[String where]) async
+  Future<int> update(String table, Map<String, dynamic> values,[String? where]) async
     => await this._db.update(table, values, where: where);
 
   static create(Database _db, int version) async {
@@ -39,7 +39,6 @@ class DatabaseHelper {
     }
   }
   insert(String table, Map<String, dynamic> values) => _db.insert(table, values);
-
   static init(Database _db) async {
     databaseHelper = DatabaseHelper(_db);
     episodeProgressCache = await EpisodeProgressCache.init();

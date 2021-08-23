@@ -35,18 +35,18 @@ class AnimeWidget extends StatefulWidget {
 
 
 class AnimeWidgetState extends State<AnimeWidget>{
-  Anime _anime;
+  late Anime _anime;
   List<Episode> episodes = [];
-  String _csrf;
+  String _csrf = '';
   bool movie = false;
   bool showFullDescription = false;
   bool bootUp = true;
   int episodeIndex = 0;
   List<FocusNode> germanFocusNodes = [];
   List<FocusNode> omuFocusNodes = [];
-  FocusNode readMoreFocusNode;
-  FocusNode backFocusNode;
-  FocusNode mainFocusNode;
+  FocusNode readMoreFocusNode = FocusNode();
+  FocusNode backFocusNode = FocusNode();
+  FocusNode mainFocusNode = FocusNode();
 
   final ScrollController _scrollController = ScrollController();
 
@@ -60,12 +60,12 @@ class AnimeWidgetState extends State<AnimeWidget>{
     this.readMoreFocusNode = FocusNode(
         onKey: (FocusNode focusNode,RawKeyEvent keyEvent){
           if(Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent){
-            RawKeyEventDataAndroid rawKeyEventData = keyEvent.data;
+            RawKeyEventDataAndroid rawKeyEventData = keyEvent.data as RawKeyEventDataAndroid;
             FocusScopeNode focusScope = FocusScope.of(context);
             switch(rawKeyEventData.keyCode){
               case KEY_DOWN:
                 focusScope.requestFocus(this.germanFocusNodes.first);
-                RenderBox box = this.germanFocusNodes.first.context.findRenderObject();
+                RenderBox box = this.germanFocusNodes.first.context!.findRenderObject() as RenderBox;
                 this._scrollController.jumpTo(
                     this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
                 );
@@ -91,13 +91,13 @@ class AnimeWidgetState extends State<AnimeWidget>{
     this.backFocusNode = FocusNode(
         onKey: (FocusNode focusNode,RawKeyEvent keyEvent){
           if(Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent){
-            RawKeyEventDataAndroid rawKeyEventData = keyEvent.data;
+            RawKeyEventDataAndroid rawKeyEventData = keyEvent.data as RawKeyEventDataAndroid;
             FocusScopeNode focusScope = FocusScope.of(context);
             switch(rawKeyEventData.keyCode){
               case KEY_DOWN:
                 focusScope.requestFocus(this.readMoreFocusNode);
                 setState(() {});
-                RenderBox box = this.readMoreFocusNode.context.findRenderObject();
+                RenderBox box = this.readMoreFocusNode.context!.findRenderObject() as RenderBox;
                 this._scrollController.jumpTo(
                     this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
                 );
@@ -128,7 +128,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
         print('try to jump to readmore');
         FocusScope.of(context).requestFocus(this.readMoreFocusNode);
         setState(() {});
-        RenderBox box = this.readMoreFocusNode.context.findRenderObject();
+        RenderBox box = this.readMoreFocusNode.context!.findRenderObject() as RenderBox;
         this._scrollController.jumpTo(
             this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
         );
@@ -144,7 +144,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
           FocusNode(
               onKey: (FocusNode focusNode,RawKeyEvent keyEvent){
                 if( Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent ){
-                  RawKeyEventDataAndroid rawKeyEventData = keyEvent.data;
+                  RawKeyEventDataAndroid rawKeyEventData = keyEvent.data as RawKeyEventDataAndroid;
                   if(rawKeyEventData.keyCode == KEY_BACK) {
                     Navigator.pop(context);
                     return true;
@@ -183,7 +183,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                   }
                   setState(() {});
                   FocusScope.of(context).requestFocus(this.germanFocusNodes[this.episodeIndex]);
-                  RenderBox box = this.germanFocusNodes[this.episodeIndex].context.findRenderObject();
+                  RenderBox box = this.germanFocusNodes[this.episodeIndex].context!.findRenderObject() as RenderBox;
                   this._scrollController.jumpTo(
                       this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
                   );
@@ -196,7 +196,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
           FocusNode(
               onKey: (FocusNode focusNode,RawKeyEvent keyEvent){
                 if( Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent ) {
-                  RawKeyEventDataAndroid rawKeyEventData = keyEvent.data;
+                  RawKeyEventDataAndroid rawKeyEventData = keyEvent.data as RawKeyEventDataAndroid;
                   if(rawKeyEventData.keyCode == KEY_BACK) {
                     Navigator.pop(context);
                     return true;
@@ -234,7 +234,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                   }
                   setState(() {});
                   FocusScope.of(context).requestFocus(this.omuFocusNodes[this.episodeIndex]);
-                  RenderBox box = this.omuFocusNodes[this.episodeIndex].context.findRenderObject();
+                  RenderBox box = this.omuFocusNodes[this.episodeIndex].context!.findRenderObject() as RenderBox;
                   this._scrollController.jumpTo(
                       this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
                   );
@@ -250,14 +250,14 @@ class AnimeWidgetState extends State<AnimeWidget>{
     print('get anime init');
     http.Response res;
     try {
-      res = await http.get(Uri.tryParse('https://anime-on-demand.de/anime/' + this._anime.id.toString()),headers: headerHandler.getHeaders());
+      res = await http.get(Uri.tryParse('https://anime-on-demand.de/anime/' + this._anime.id.toString())!,headers: headerHandler.getHeaders());
     }catch(exception){
       connectionError = true;
       return false;
     }
     dom.Document doc = parse(res.body);
     headerHandler.decodeCookiesString(res.headers['set-cookie']);
-    this._csrf = doc.querySelector('meta[name=csrf-token]').attributes['content'];
+    this._csrf = doc.querySelector('meta[name=csrf-token]')!.attributes['content']!;
     List<dom.Element> episodesRaw = doc.querySelectorAll('div.three-box.episodebox.flip-container');
     if(episodesRaw.isEmpty){
       movie = true;
@@ -265,14 +265,15 @@ class AnimeWidgetState extends State<AnimeWidget>{
     }
     if(this._anime.image == null) {
       String imageUrl = doc
-          .querySelector('img.fullwidth-image.anime-top-image')
-          .attributes['src'];
+          .querySelector('img.fullwidth-image.anime-top-image')!
+          .attributes['src']!;
       http.Response imgRes = await http.get(Uri.parse(imageUrl));
       this._anime.image = imgRes.bodyBytes;
     }
     if (this._anime.description == null) {
-      this._anime.description = parse(doc.querySelector('div[itemprop=description] > p').innerHtml).documentElement.text.replaceAll('\n', '');
-      animesLocalCache.saveAnime(this._anime);
+      String descriptionHtml = doc.querySelector('div[itemprop=description] > p')!.innerHtml;
+      this._anime.description = parse(descriptionHtml).documentElement!.text.replaceAll('\n', '');
+      animesLocalCache!.saveAnime(this._anime);
     }
     print('init anime episodes iterating');
     List<Episode> episodes = [];
@@ -285,30 +286,31 @@ class AnimeWidgetState extends State<AnimeWidget>{
       Episode tmpEpisode = Episode();
       print('start anime episodes play button parsing');
       if(playButtons.length > 0){
-        tmpEpisode.mediaId = int.tryParse(playButtons[0].attributes['data-playlist'].split('/')[2]);
+        tmpEpisode.mediaId = int.tryParse(playButtons[0].attributes['data-playlist']!.split('/')[2])!;
       }
       playButtons.forEach((dom.Element playButton) {
-        tmpEpisode.languages.add(playButton.attributes['value']);
-        tmpEpisode.playlistUrl.add('https://anime-on-demand.de' +
-            playButton.attributes['data-playlist']);
+        tmpEpisode.languages.add(playButton.attributes['value']!);
+        String playlistPath = playButton.attributes['data-playlist']!;
+        String url = 'https://anime-on-demand.de' + playlistPath;
+        tmpEpisode.playlistUrl.add(url);
       });
 
       String tmpNameString;
       if(movie){
-        tmpEpisode.name = doc.querySelector('h1[itemprop=name]').text;
-        tmpEpisode.imageUrl = Uri.parse(doc.querySelector('img.anime-top-image').attributes['src']);
+        tmpEpisode.name = doc.querySelector('h1[itemprop=name]')!.text;
+        tmpEpisode.imageUrl = Uri.parse(doc.querySelector('img.anime-top-image')!.attributes['src']!);
       } else {
-        dom.Element content = element.querySelector('.three-box-content');
+        dom.Element content = element.querySelector('.three-box-content')!;
         if (content.children.last.className.isEmpty) {
           tmpEpisode.noteText = content.children.last.text;
         }
-        tmpEpisode.imageUrl = Uri.parse(element.querySelector('.episodebox-image').children[0].attributes['src']);
+        tmpEpisode.imageUrl = Uri.parse(element.querySelector('.episodebox-image')!.children[0].attributes['src']!);
 
         http.Response imageRes = await http.get(tmpEpisode.imageUrl);
         tmpEpisode.image = imageRes.bodyBytes;
 
         tmpNameString = element
-            .querySelector('h3.episodebox-title')
+            .querySelector('h3.episodebox-title')!
             .innerHtml
             .replaceAll('<br>', ' - ');
         List<String> tmpNameList = tmpNameString.split(' - ');
@@ -445,7 +447,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                             fit: BoxFit.fitWidth,
                             repeat: ImageRepeat.noRepeat,
                             image: MemoryImage(
-                                this._anime.image
+                                this._anime.image!
                             ),
                           ),
                         ),
@@ -458,7 +460,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                             ),
                             color: Colors.black.withOpacity(0.1),
                             child: Image.memory(
-                                this._anime.image
+                                this._anime.image!
                             ),
                           ),
                         ),
@@ -576,15 +578,15 @@ class AnimeWidgetState extends State<AnimeWidget>{
                             right: 15,left: 15,top: 10
                         ),
                         child: Text(
-                          showFullDescription || this._anime.description.length <= 150
-                              ? this._anime.description
-                              : this._anime.description.substring(0,this._anime.description.indexOf(' ',150)) + ' ...',
+                          showFullDescription || this._anime.description!.length <= 150
+                              ? this._anime.description!
+                              : this._anime.description!.substring(0,this._anime.description!.indexOf(' ',150)) + ' ...',
                           style: TextStyle(
                             color: Colors.white,
                           ),
                         ),
                       ),
-                      this._anime.description.length > 150
+                      this._anime.description!.length > 150
                           ? Container(
                           margin: EdgeInsets.only(
                               right: 15,

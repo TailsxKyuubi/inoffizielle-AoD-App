@@ -12,6 +12,7 @@ import 'package:unoffical_aod_app/caches/animes.dart';
 import 'package:unoffical_aod_app/caches/focusnode.dart';
 import 'package:unoffical_aod_app/caches/home.dart';
 import 'package:unoffical_aod_app/caches/keycodes.dart';
+import 'package:unoffical_aod_app/widgets/app_exit.dart';
 import 'package:unoffical_aod_app/widgets/navigation_bar_custom.dart';
 
 class HomePage extends StatefulWidget {
@@ -33,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   List<FocusNode> _newCatalogTitlesFocusNodes = [];
   List<FocusNode> _topTenFocusNodes = [];
 
-  FocusNode mainFocusNode;
+  FocusNode mainFocusNode = FocusNode();
 
   int rowIndex = 0;
   int itemIndex = 0;
@@ -103,7 +104,7 @@ class _HomePageState extends State<HomePage> {
 
   bool handleKeyEvent(FocusNode focusNode, RawKeyEvent keyEvent){
     if( Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent ){
-      RawKeyEventDataAndroid keyEventData = keyEvent.data;
+      RawKeyEventDataAndroid keyEventData = keyEvent.data as RawKeyEventDataAndroid;
       bool positionChanged = false;
       switch(keyEventData.keyCode){
         case KEY_DOWN:
@@ -166,8 +167,11 @@ class _HomePageState extends State<HomePage> {
           this.itemIndex = 0;
           return true;
         case KEY_BACK:
-          exit(0);
-          return true;
+          showDialog(
+              context: context,
+              builder: (_) => AppExitDialog()
+          );
+          //exit(0);
       }
       if(positionChanged){
         FocusScope.of(context).requestFocus(this.getRowList()[this.itemIndex]);
@@ -185,6 +189,8 @@ class _HomePageState extends State<HomePage> {
           case 3:
             controller = this._topTenScrollController;
             break;
+          default:
+            controller = this._newEpisodesScrollController;
         }
         this._scrollController.jumpTo(elementHeight*this.rowIndex);
         controller.jumpTo(elementWidth*this.itemIndex);
@@ -385,7 +391,7 @@ class _HomePageState extends State<HomePage> {
                               animeName = e['series_name'];
                             }
                             int id = int.parse(e['series_id']);
-                            Anime anime = animesLocalCache.getSingle(id);
+                            Anime anime = animesLocalCache!.getSingle(id)!;
                             return FlatButton(
                                 focusColor: Theme.of(context).accentColor,
                                 padding: EdgeInsets.all(3),
@@ -414,7 +420,7 @@ class _HomePageState extends State<HomePage> {
                                               width: elementWidth,
                                               height: elementHeight-40,
                                             ) : Image.memory(
-                                              anime.image,
+                                              anime.image!,
                                               width: elementWidth,
                                               height: elementHeight-40,
                                             ),
@@ -481,7 +487,7 @@ class _HomePageState extends State<HomePage> {
                               animeName = e['series_name'];
                             }
                             int id = int.parse(e['series_id']);
-                            Anime anime = animesLocalCache.getSingle(id);
+                            Anime anime = animesLocalCache!.getSingle(id)!;
                             return FlatButton(
                                 focusNode: _newCatalogTitlesFocusNodes[newCatalogTitlesCount++],
                                 focusColor: Theme.of(context).accentColor,
@@ -510,7 +516,7 @@ class _HomePageState extends State<HomePage> {
                                               width: elementWidth,
                                               height: elementHeight-40,
                                             ) : Image.memory(
-                                              anime.image,
+                                              anime.image!,
                                               width: elementWidth,
                                               height: elementHeight-40,
                                             ),
@@ -578,7 +584,7 @@ class _HomePageState extends State<HomePage> {
                               animeName = e['series_name'];
                             }
                             int id = int.parse(e['series_id']);
-                            Anime anime = animesLocalCache.getSingle(id);
+                            Anime anime = animesLocalCache!.getSingle(id)!;
                             return FlatButton(
                                 onPressed: (){
                                   Navigator.pushNamed(
@@ -606,7 +612,7 @@ class _HomePageState extends State<HomePage> {
                                               width: elementWidth,
                                               height: elementHeight-40,
                                             ) : Image.memory(
-                                              anime.image,
+                                              anime.image!,
                                               width: elementWidth,
                                               height: elementHeight-40,
                                             ),

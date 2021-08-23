@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:version/version.dart';
 import 'package:xml/xml.dart';
 
-final Version version = Version.parse('0.9.0-alpha.2');
+final Version version = Version.parse('0.9.0-alpha.3');
 
 Version latestVersion = version;
 
@@ -21,7 +21,7 @@ Future<bool> checkVersion() async{
   List<XmlElement> entries = releasesXml.findAllElements('entry').toList();
   for(int i=0; i<entries.length; i++){
     Version tmpVersion = Version.parse(
-        entries[i].getElement('id').innerText.split('/').last
+        entries[i].getElement('id')!.innerText.split('/').last
     );
     if(! tmpVersion.isPreRelease){
       int difference = tmpVersion.compareTo(version);

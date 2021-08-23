@@ -10,17 +10,17 @@ class NavigationElement extends StatelessWidget {
   final IconData icon;
   final String label;
   final FocusNode focusNode;
-  final Function onPressed;
+  final VoidCallback? onPressed;
   final bool first;
 
 
-  NavigationElement({this.routeName, this.icon, this.label, this.focusNode, this.onPressed,this.first});
+  NavigationElement({required this.routeName, required this.icon, required this.label, required this.focusNode, required this.onPressed,required this.first});
 
   String getRouteName(BuildContext context){
-    ModalRoute route = ModalRoute.of(context);
+    ModalRoute? route = ModalRoute.of(context);
     String routeName = '';
     if(route != null){
-      routeName = route.settings.name;
+      routeName = route.settings.name!;
     }
     return routeName;
   }

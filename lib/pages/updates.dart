@@ -20,7 +20,7 @@ class UpdatesPage extends StatelessWidget {
           focusNode: FocusNode(
               onKey: (FocusNode focusNode,RawKeyEvent event){
                 if(Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent){
-                  RawKeyEventDataAndroid eventData = event.data;
+                  RawKeyEventDataAndroid eventData = event.data as RawKeyEventDataAndroid;
                   if(eventData.keyCode == KEY_CENTER){
                     Navigator.pop(context);
                   }

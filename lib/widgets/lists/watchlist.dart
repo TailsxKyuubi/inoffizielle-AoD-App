@@ -22,10 +22,10 @@ class _WatchlistWidgetState extends State<WatchlistWidget> {
         height: mediaQuery.size.height,
         child: watchListCache.getAll().length > 0 ? ListView(
           children: watchListCache.getAll().map((Anime anime) {
-            String description = anime.description;
+            String? description = anime.description;
             elementCounter++;
 
-            if (description.length > 48) {
+            if (description!.length > 48) {
               int index = description.indexOf(' ', 48);
               description = description.substring(0, index) + ' ...';
             }
@@ -44,7 +44,7 @@ class _WatchlistWidgetState extends State<WatchlistWidget> {
                         Container(
                             width: imageWidth,
                             child: Image(
-                                image: MemoryImage(anime.image)
+                                image: MemoryImage(anime.image!)
                             )
                         ),
                         Container(

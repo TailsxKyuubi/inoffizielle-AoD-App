@@ -5,7 +5,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unoffical_aod_app/caches/settings/app_settings.dart';
 import 'package:unoffical_aod_app/caches/settings/player_settings.dart';
-Settings settings;
+late Settings settings;
 class Settings {
   Settings() {
     SharedPreferences.getInstance().then(( SharedPreferences value ){
@@ -14,6 +14,6 @@ class Settings {
       appSettings = AppSettings(value);
     });
   }
-  PlayerSettings playerSettings;
-  AppSettings appSettings;
+  late PlayerSettings playerSettings;
+  late AppSettings appSettings;
 }

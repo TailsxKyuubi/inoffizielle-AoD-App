@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unoffical_aod_app/caches/database.dart';
 import 'package:unoffical_aod_app/caches/episode_history.dart';
 
-EpisodeProgressCache episodeProgressCache;
+late EpisodeProgressCache episodeProgressCache;
 class EpisodeProgressCache {
 
   final SharedPreferences _sharedPreferences;
@@ -18,7 +18,7 @@ class EpisodeProgressCache {
 
   @Deprecated('Will be removed in 0.10')
   _bootUp(){
-    List<String> ids = _sharedPreferences.getStringList('tracking.mediaIds');
+    List<String>? ids = _sharedPreferences.getStringList('tracking.mediaIds');
     if(ids != null) {
       ids.forEach((String element) {
         List<String> idArray = element.split('-');
@@ -29,11 +29,14 @@ class EpisodeProgressCache {
         } else {
           lang = idArray[1];
         }
-        this._cache.addAll({
-          mediaId: {
-            lang: this._initEpisode(mediaId, lang)
-          }
-        });
+        Duration? duration = this._initEpisode(mediaId, lang);
+        if(duration != null) {
+          this._cache.addAll({
+            mediaId: {
+              lang: duration
+            }
+          });
+        }
       });
       this._convertHistory();
       this._sharedPreferences.remove('tracking.mediaIds');
@@ -65,21 +68,24 @@ class EpisodeProgressCache {
   }
 
   Duration getEpisodeDuration(int mediaId, String lang){
-    if(this._cache.containsKey(mediaId) && this._cache[mediaId].containsKey(lang)){
-      return this._cache[mediaId][lang];
+    if(this._cache.containsKey(mediaId) && this._cache[mediaId]!.containsKey(lang)){
+      return this._cache[mediaId]![lang]!;
     }
     return Duration(hours: 0,minutes: 0, seconds: 0);
   }
 
   @Deprecated('will be removed in 0.10')
-  Duration _initEpisode(int mediaId, String lang){
-    List<String> durationList = _sharedPreferences
-        .getString('tracking.'+mediaId.toString()+'-'+lang)
-        .split(':');
-    return Duration(
-        hours: int.parse(durationList[0]),
-        minutes: int.parse(durationList[1]),
-        seconds: int.parse(durationList[2])
-    );
+  Duration? _initEpisode(int mediaId, String lang){
+    String? durationString = _sharedPreferences
+        .getString('tracking.'+mediaId.toString()+'-'+lang);
+    if(durationString != null){
+      List<String> durationList = durationString.split(':');
+      return Duration(
+          hours: int.parse(durationList[0]),
+          minutes: int.parse(durationList[1]),
+          seconds: int.parse(durationList[2])
+      );
+    }
+    return null;
   }
 }

@@ -10,20 +10,20 @@ import 'package:unoffical_aod_app/caches/settings/settings.dart';
 class PlayerConnectionErrorDialog extends StatelessWidget {
   final PlayerTransfer args;
   PlayerConnectionErrorDialog(this.args){
-    if(settings.playerSettings.saveEpisodeProgress && playerCache.episodeTracker != null && playerCache.episodeTracker.isActive){
-      playerCache.episodeTracker.cancel();
+    if(settings.playerSettings.saveEpisodeProgress && playerCache.episodeTracker != null && playerCache.episodeTracker!.isActive){
+      playerCache.episodeTracker!.cancel();
       playerCache.episodeTracker = null;
     }
-    if( playerCache.updateThread != null && playerCache.updateThread.isActive ){
-      playerCache.updateThread.cancel();
+    if( playerCache.updateThread != null && playerCache.updateThread!.isActive ){
+      playerCache.updateThread!.cancel();
       playerCache.updateThread = null;
     }
     if(playerCache.timeTrackThread != null){
-      playerCache.timeTrackThread.cancel();
+      playerCache.timeTrackThread!.cancel();
       playerCache.timeTrackThread = null;
     }
-    if(playerCache.controller != null && playerCache.controller.value != null){
-      this.args.startTime = playerCache.controller.value.position;
+    if(playerCache.controller != null && playerCache.controller!.value != null){
+      this.args.startTime = playerCache.controller!.value.position;
     }else{
       this.args.startTime = Duration.zero;
     }
@@ -89,7 +89,7 @@ class PlayerConnectionErrorDialog extends StatelessWidget {
                           FlatButton(
                             onPressed: () {
                               for(int i = 0;this.args.episode.playlistUrl.length > i;i++){
-                                Uri oldStreamUrl = Uri.tryParse(this.args.episode.playlistUrl[this.args.languageIndex]);
+                                Uri oldStreamUrl = Uri.tryParse(this.args.episode.playlistUrl[this.args.languageIndex])!;
                                 List<String> oldPathList = oldStreamUrl.path.split('/');
                                 oldPathList[2] = playerCache.playlist[playerCache.playlistIndex]['mediaid'].toString();
                                 this.args.episode.playlistUrl[i] = 'https://'+ oldStreamUrl.host + oldPathList.join('/');

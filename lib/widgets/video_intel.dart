@@ -30,20 +30,24 @@ class VideoIntel extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () async{
-                  await playerCache.controller.pause();
+                  try {
+                    await playerCache.controller!.pause();
+                  }catch(exception){
+
+                  }
                   if(settings.playerSettings.saveEpisodeProgress){
                     if(playerCache.episodeTracker != null){
-                      playerCache.episodeTracker.cancel();
+                      playerCache.episodeTracker!.cancel();
                     }
                     episodeProgressCache.addEpisode(
                         playerCache.playlist[playerCache.playlistIndex]['mediaid'],
-                        playerCache.controller.value.position,
+                        playerCache.controller!.value.position,
                         this._playerState.args.episode.languages[this._playerState.args.languageIndex]
                     );
                   }
                   print('video halted');
-                  playerCache.updateThread.cancel();
-                  playerCache.timeTrackThread.cancel();
+                  playerCache.updateThread!.cancel();
+                  playerCache.timeTrackThread!.cancel();
                   await SystemChrome.setPreferredOrientations(
                       [
                         DeviceOrientation.portraitUp,
@@ -58,7 +62,7 @@ class VideoIntel extends StatelessWidget {
                   ]);
                   print('switched orientation');
                   Navigator.pop(context);
-                  VideoPlayerController oldVideoController = playerCache.controller;
+                  VideoPlayerController oldVideoController = playerCache.controller!;
                   playerCache.controller = null;
                   playerCache.updateThread = null;
                   Timer(Duration(seconds: 1),() => oldVideoController.dispose());
@@ -72,6 +76,7 @@ class VideoIntel extends StatelessWidget {
                   ),
                 ),
               ),
+
               Text(
                 playerCache.playlist[playerCache.playlistIndex]['title'] + ' ' + playerCache.playlist[playerCache.playlistIndex]['description'],
                 style: TextStyle(

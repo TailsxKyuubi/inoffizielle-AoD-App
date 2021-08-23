@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:unoffical_aod_app/caches/anime.dart';
 import 'package:unoffical_aod_app/caches/favorites.dart';
-import 'package:unoffical_aod_app/caches/watchlist.dart';
 
 class FavoritesWidget extends StatefulWidget {
   @override
@@ -23,10 +22,10 @@ class _FavoritesWidgetState extends State<FavoritesWidget> {
         height: mediaQuery.size.height,
         child: favoritesCache.getAll().length > 0 ? ListView(
           children: favoritesCache.getAll().map((Anime anime) {
-            String description = anime.description;
+            String? description = anime.description;
             elementCounter++;
 
-            if (description.length > 48) {
+            if (description!.length > 48) {
               int index = description.indexOf(' ', 48);
               description = description.substring(0, index) + ' ...';
             }
@@ -45,7 +44,7 @@ class _FavoritesWidgetState extends State<FavoritesWidget> {
                         Container(
                             width: imageWidth,
                             child: Image(
-                                image: MemoryImage(anime.image)
+                                image: MemoryImage(anime.image!)
                             )
                         ),
                         Container(

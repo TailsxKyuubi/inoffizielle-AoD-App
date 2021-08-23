@@ -21,15 +21,12 @@ import 'package:unoffical_aod_app/caches/version.dart';
 import 'package:unoffical_aod_app/pages/about.dart';
 import 'package:unoffical_aod_app/pages/anime.dart';
 import 'package:unoffical_aod_app/pages/animes.dart';
-import 'package:unoffical_aod_app/widgets/lists/favorites.dart';
-import 'package:unoffical_aod_app/widgets/lists/history.dart';
 import 'package:unoffical_aod_app/pages/home.dart';
 import 'package:unoffical_aod_app/pages/list.dart';
 import 'package:unoffical_aod_app/pages/loading.dart';
 import 'package:unoffical_aod_app/pages/login.dart';
 import 'package:unoffical_aod_app/pages/settings.dart';
 import 'package:unoffical_aod_app/pages/updates.dart';
-import 'package:unoffical_aod_app/widgets/lists/watchlist.dart';
 import 'package:unoffical_aod_app/widgets/app_update_notification.dart';
 import 'package:unoffical_aod_app/widgets/fire_os_version_error.dart';
 import 'package:unoffical_aod_app/widgets/loading_connection_error.dart';
@@ -226,7 +223,7 @@ class LoadingState extends State<BaseWidget> {
     print('loading widget build');
     if (loginSuccess) {
       if(animesCache.animesLocalCache != null) {
-        List<Anime> animes = animesCache.animesLocalCache.getAll();
+        List<Anime> animes = animesCache.animesLocalCache!.getAll();
         if (loginSuccess && animes.isEmpty) {
           return startScreensScaffold(LoadingPage());
         } else if (loginSuccess && animes.isNotEmpty) {
@@ -245,7 +242,7 @@ appChecks(SendPort sendPort) async {
   print('starting app checks');
   DeviceInfoPlugin info = DeviceInfoPlugin();
   AndroidDeviceInfo androidInfo = await info.androidInfo;
-  if( (androidInfo.brand == 'Amazon' || androidInfo.manufacturer == 'Amazon') && androidInfo.version.sdkInt < 28 ) {
+  if( (androidInfo.brand == 'Amazon' || androidInfo.manufacturer == 'Amazon') && androidInfo.version.sdkInt < 26 ) {
     sendPort.send('fire os outdated');
   }
   bool newVersionAvailable = await checkVersion();
@@ -296,7 +293,7 @@ appBootUp(SendPort sendPort) async {
 }
 
 void updateAnimeEntries(SendPort sendPort) async {
-  await animesCache.animesLocalCache.updateAnimes();
+  await animesCache.animesLocalCache!.updateAnimes();
   if(connectionError){
     sendPort.send('connection error');
   }else{

@@ -7,7 +7,7 @@ import 'package:unoffical_aod_app/caches/anime.dart';
 import 'package:unoffical_aod_app/caches/animes.dart';
 import 'package:unoffical_aod_app/caches/database.dart';
 
-FavoritesCache favoritesCache;
+late FavoritesCache favoritesCache;
 
 class FavoritesCache {
   List<Anime> _elements = [];
@@ -16,7 +16,7 @@ class FavoritesCache {
     FavoritesCache favoritesCache = FavoritesCache();
     List<Map> favoritesIds = await databaseHelper.query('SELECT * FROM favorites');
     favoritesIds.forEach((Map element) {
-      favoritesCache._elements.add(animesLocalCache.getSingle(element['anime_id']));
+      favoritesCache._elements.add(animesLocalCache!.getSingle(element['anime_id'])!);
     });
     return favoritesCache;
   }
@@ -32,7 +32,7 @@ class FavoritesCache {
     return false;
   }
 
-  Anime searchByAnimeId(int id){
+  Anime? searchByAnimeId(int id){
     try {
       return this._elements.firstWhere((element) => element.id == id);
     }catch(exception){

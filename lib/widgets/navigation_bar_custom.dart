@@ -46,7 +46,7 @@ class _NavigationBarCustomState extends State<NavigationBarCustom> {
 
   bool handleKeys(FocusNode focusNode, RawKeyEvent keyEvent){
     if(Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent){
-      RawKeyEventDataAndroid keyEventData = keyEvent.data;
+      RawKeyEventDataAndroid keyEventData = keyEvent.data as RawKeyEventDataAndroid;
       bool positionChanged = false;
       switch(keyEventData.keyCode){
         case KEY_RIGHT:

@@ -2,11 +2,8 @@
  * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
-import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:unoffical_aod_app/caches/app.dart';
-import 'package:unoffical_aod_app/main.dart';
 
 class FireOsVersionErrorDialog extends StatelessWidget {
 

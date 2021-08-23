@@ -6,13 +6,12 @@ import 'dart:typed_data';
 
 class Anime {
   final String name;
-  Uint8List image;
-  Uri imageLink;
-  String description;
+  Uint8List? image;
+  Uri? imageLink;
+  String? description;
   final int id;
-  Anime({this.name,this.image,this.description,this.id});
+  Anime({required this.name,this.image,this.description,required this.id});
   static Anime fromMap(Map<String,dynamic> animeMap){
-
     return Anime(
         id: animeMap['anime_id'],
         name: animeMap['name'],

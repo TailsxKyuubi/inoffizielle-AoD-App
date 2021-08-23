@@ -14,16 +14,16 @@ import 'package:unoffical_aod_app/caches/login.dart';
 
 import 'anime.dart';
 
-AnimesLocalCache animesLocalCache;
+AnimesLocalCache? animesLocalCache;
 
 class AnimesLocalCache {
   List<Anime> _elements = [];
 
   static Future<AnimesLocalCache> init() async{
     AnimesLocalCache localCache = AnimesLocalCache();
-    List<Map<String,dynamic>> animeMap = await databaseHelper.query('SELECT * FROM animes');
+    List<Map<String, dynamic>> animeMap = await databaseHelper.query('SELECT * FROM animes');
     if (animeMap.length > 0) {
-      animeMap.forEach((Map element) {
+      animeMap.forEach((Map<String,dynamic> element) {
         Anime tmpAnime = Anime.fromMap(element);
         localCache._elements.add(tmpAnime);
       });
@@ -45,7 +45,7 @@ class AnimesLocalCache {
     }, 'anime_id = ' + anime.id.toString());
   }
 
-  Future<dom.Document> _getAnimePage() async {
+  Future<dom.Document?> _getAnimePage() async {
     print('starting animes request');
     http.Response res;
     try {
@@ -63,7 +63,7 @@ class AnimesLocalCache {
   }
 
   Future<void> updateAnimes() async {
-    dom.Document animePageDoc = await this._getAnimePage();
+    dom.Document animePageDoc = (await this._getAnimePage())!;
 
     print('begin processing the data');
 
@@ -80,7 +80,7 @@ class AnimesLocalCache {
         );
       } catch(exception) {
         connectionError = true;
-        return false;
+        return;
       }
       dom.Document docAllAnimePage = parse(resAllAnimePage.body);
       animes = await parseAnimePage(docAllAnimePage);
@@ -113,12 +113,12 @@ class AnimesLocalCache {
     Timer.run(this.getMissingImages);
 
     print('finished anime parsing');
-    return true;
+    return;
   }
 
   Future<List<Anime>> parseAnimePage(dom.Document animePageDoc) async {
     HtmlUnescape unescape = HtmlUnescape();
-    dom.Element rootElement = animePageDoc.querySelector('.three-box-container');
+    dom.Element? rootElement = animePageDoc.querySelector('.three-box-container');
     print('filtered elements');
     if(rootElement != null){
       List<dom.Element> animeElements = rootElement.querySelectorAll('.animebox');
@@ -126,23 +126,24 @@ class AnimesLocalCache {
       for ( int a = 0; a < animeElements.length; a++)  {
         dom.Element element = animeElements[a];
         print('begin processing anime element');
-        int id = int.parse(element.querySelector('.animebox-link a').attributes['href'].split('/').last);
-        Anime tmpAnime = this.getSingle(id);
+        int id = int.parse(element.querySelector('.animebox-link a')!.attributes['href']!.split('/').last);
+        Anime? tmpAnime = this.getSingle(id);
 
         String imageUrl = element
-            .querySelector('.animebox-image img')
-            .attributes['src'];
+            .querySelector('.animebox-image img')!
+            .attributes['src']!;
 
         Uri imageUri = Uri.parse(imageUrl);
 
         if(tmpAnime == null) {
           String title = element
-              .querySelector('h3.animebox-title')
+              .querySelector('h3.animebox-title')!
               .innerHtml
               .trim();
           tmpAnime = Anime(
               id: id,
-              name: unescape.convert(title).replaceAll('(Sub)', '')
+              name: unescape.convert(title).replaceAll('(Sub)', ''),
+              description: ''
           );
         }
 
@@ -157,13 +158,13 @@ class AnimesLocalCache {
   }
 
   void getMissingImages() async {
-    List<Map<String,dynamic>> animes = await databaseHelper.query("SELECT anime_id FROM animes WHERE image IS NULL");
+    List<Map<String,dynamic>> animes = await databaseHelper.query("SELECT anime_id, image FROM animes WHERE image IS NULL");
     print('found ' + animes.length.toString() + ' anime images to download');
     for(int i = 0; i < animes.length; i++){
       print('search anime with id ' + animes[i]['anime_id'].toString());
       Anime anime = this._elements.firstWhere((Anime anime) => animes[i]['anime_id'] == anime.id);
       print('download image for anime with id ' + anime.id.toString());
-      http.Response imgRes = await http.get(anime.imageLink);
+      http.Response imgRes = await http.get(anime.imageLink!);
       anime.image = imgRes.bodyBytes;
       print('image downloaded for anime with id ' + anime.id.toString());
       print('saving anime image to db');
@@ -173,7 +174,7 @@ class AnimesLocalCache {
 
   List<Anime> getAll() => _elements;
 
-  Anime getSingle(int id) {
+  Anime? getSingle(int id) {
     int searchedAnimeIndex = this._elements.indexWhere((element) => element.id == id);
     if(searchedAnimeIndex >= 0){
       return this._elements[searchedAnimeIndex];
@@ -186,5 +187,5 @@ List<Anime> filterAnimes(String searchQuery){
   HtmlEscape escape = HtmlEscape();
   List<String> words = searchQuery.toLowerCase().split(' ').map((String e) => escape.convert(e)).toList();
   String query = '(?=.*'+ words.join(')(?=.*') + ')';
-  return animesLocalCache.getAll().where((element) => element.name.toLowerCase().contains(RegExp( query ))).toList();
+  return animesLocalCache!.getAll().where((element) => element.name.toLowerCase().contains(RegExp( query ))).toList();
 }

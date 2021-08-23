@@ -5,17 +5,18 @@
 import 'package:flutter/material.dart';
 import 'package:unoffical_aod_app/caches/app.dart';
 
-class LoadingConnectionErrorDialog extends StatelessWidget {
+class AppExitDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
     const double padding = 16.0;
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(3),
       ),
       elevation: 0.0,
       backgroundColor: Colors.transparent,
+
       child: Container(
           padding: EdgeInsets.only(
             top: padding*2,
@@ -33,34 +34,36 @@ class LoadingConnectionErrorDialog extends StatelessWidget {
                   offset: const Offset(0.0, 10.0),
                 )
               ]),
-          child:
-          Column(
+          child: Column(
               mainAxisSize: MainAxisSize.min, // To make the card compact
               children: <Widget>[
                 Text(
-                  'Verbindungsfehler',
+                  'App beenden?',
                   style: TextStyle(
                     fontSize: 24.0,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 SizedBox(height: 16.0),
-                Text('Es konnte keine Verbindung zu Anime on Demand aufgebaut werden. Bitte überprüfe deine Internetverbindung probiere es erneut.',
+                Text(
+                    'Willst du wirklich die App beenden?',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16.0,
-                    )),
+                    )
+                ),
                 SizedBox(height: 24.0),
-                Align(
-                    alignment: Alignment.bottomRight,
-                    child: FlatButton(
-                      onPressed: () {
-                        bootUpReceivePort.close();
-                        Navigator.pop(context);
-                        Navigator.pushReplacementNamed(context,'/base'); // To close the dialog
-                      },
-                      child: Text('Erneut versuchen'),
-                    ))
+                Row(
+                    children: [
+                      TextButton(
+                        onPressed: (){
+                          Navigator.pop(context);
+                          appCheckIsolate.resume();
+                        },
+                        child: Text('Hinweis schließen'),
+                      ),
+                    ]
+                ),
               ]
           )
       ),

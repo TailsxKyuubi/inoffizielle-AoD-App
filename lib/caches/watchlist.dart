@@ -7,7 +7,7 @@ import 'package:unoffical_aod_app/caches/anime.dart';
 import 'package:unoffical_aod_app/caches/animes.dart';
 import 'package:unoffical_aod_app/caches/database.dart';
 
-WatchListCache watchListCache;
+late WatchListCache watchListCache;
 
 class WatchListCache {
   List<Anime> _elements = [];
@@ -16,7 +16,7 @@ class WatchListCache {
     WatchListCache watchListCache = WatchListCache();
     List<Map> watchListIds = await databaseHelper.query('SELECT * FROM watchlist');
     watchListIds.forEach((Map element) {
-      watchListCache._elements.add(animesLocalCache.getSingle(element['anime_id']));
+      watchListCache._elements.add(animesLocalCache!.getSingle(element['anime_id'])!);
     });
     return watchListCache;
   }
@@ -32,7 +32,7 @@ class WatchListCache {
     return false;
   }
 
-  Anime searchByAnimeId(int id){
+  Anime? searchByAnimeId(int id){
     try {
       return this._elements.firstWhere((element) => element.id == id);
     }catch(exception){

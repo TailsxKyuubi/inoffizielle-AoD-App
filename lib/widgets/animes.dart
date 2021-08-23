@@ -20,12 +20,12 @@ class AnimesWidget extends StatefulWidget {
 
 class _AnimesWidgetState extends State<AnimesWidget> {
   TextEditingController _controller = TextEditingController();
-  List<Anime> searchResult = animes.animesLocalCache.getAll();
+  List<Anime> searchResult = animes.animesLocalCache!.getAll();
   ScrollController _scrollController = ScrollController();
   List<FocusNode> animeFocusNodes = [];
   List<int> _focusNodeAnimeMapping = [];
 
-  FocusNode mainFocusNode;
+  FocusNode mainFocusNode = FocusNode();
 
   GlobalKey _listViewKey = GlobalKey();
 
@@ -38,7 +38,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
   int _animeFocusIndex = 0;
   _AnimesWidgetState(){
     this._controller.addListener(onTextInput);
-    animes.animesLocalCache.getAll().forEach((_) => this.animeFocusNodes.add(
+    animes.animesLocalCache!.getAll().forEach((_) => this.animeFocusNodes.add(
         FocusNode(
             onKey: handleKey
         )
@@ -55,20 +55,19 @@ class _AnimesWidgetState extends State<AnimesWidget> {
     double reloadHeight = this._scrollController.position.maxScrollExtent - this._elementHeight;
     if (reloadHeight < this._scrollController.position.pixels && !this._scrollFinished) {
       setState(() {
-        this._countDisplayedElements += 30;
+        this._countDisplayedElements += 8;
       });
     }
   }
 
   bool handleKey(FocusNode focusNode, RawKeyEvent event) {
     if( Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent ){
-      RawKeyEventDataAndroid eventDataAndroid = event.data;
+      RawKeyEventDataAndroid eventDataAndroid = event.data as RawKeyEventDataAndroid;
       FocusScopeNode scope = FocusScope.of(context);
       switch(eventDataAndroid.keyCode){
         case KEY_DOWN:
           this._animeFocusIndex += 4;
           if(this._animeFocusIndex >= searchResult.length){
-            //this._animeFocusIndex = this.animeFocusNodes.length - this._animeFocusIndex;
             FocusScope.of(context).requestFocus(menuBarFocusNodes.first);
             return true;
           }
@@ -118,13 +117,12 @@ class _AnimesWidgetState extends State<AnimesWidget> {
           return true;
         case KEY_BACK:
           exit(0);
-          return true;
         case KEY_CENTER:
           Navigator.pushNamed(
               context,
               '/anime',
               arguments: animes
-                  .animesLocalCache
+                  .animesLocalCache!
                   .getAll()
                   .singleWhere(
                       (element) => element.id == this._focusNodeAnimeMapping[this._animeFocusIndex]
@@ -132,7 +130,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
           );
       }
       this._scrollController.jumpTo(
-        (this.animeFocusNodes.indexOf(scope.focusedChild) / 4).floor() * scope.focusedChild.size.height,
+        (this.animeFocusNodes.indexOf(scope.focusedChild!) / 4).floor() * scope.focusedChild!.size.height,
       );
     }
     return true;
@@ -150,7 +148,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
         this.searchResult = animes.filterAnimes(this._controller.text);
       }else if(this._controller.text.isEmpty){
         this._resetScrolling();
-        this.searchResult = animes.animesLocalCache.getAll();
+        this.searchResult = animes.animesLocalCache!.getAll();
       }
     });
   }
