@@ -31,16 +31,16 @@ class _VideoControlsState extends State<VideoControls> {
   void jumpTo(details){
     print('seek triggered');
     widget.playerState.initDelayedControlsHide();
-    int seconds = ((details.localPosition.dx+8)*1.1) ~/ ((MediaQuery.of(context).size.width-100)/100)*(playerCache.controller.value.duration.inSeconds/100).floor();
-    playerCache.controller.seekTo(Duration(seconds: seconds));
+    int seconds = ((details.localPosition.dx+8)*1.1) ~/ ((MediaQuery.of(context).size.width-100)/100)*(playerCache.controller!.value.duration.inSeconds/100).floor();
+    playerCache.controller!.seekTo(Duration(seconds: seconds));
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    videoPosition = playerCache.controller.value.position;
-    int positionSeconds = videoPosition == null ? 0 : videoPosition.inSeconds;
-    int durationSeconds = playerCache.controller.value.duration == null ? 0 : playerCache.controller.value.duration.inSeconds;
+    videoPosition = playerCache.controller!.value.position;
+    int positionSeconds = videoPosition.inSeconds;
+    int durationSeconds = playerCache.controller!.value.duration.inSeconds;
     TextStyle timeStyle = TextStyle(
       color: Colors.white,
     );
@@ -49,9 +49,7 @@ class _VideoControlsState extends State<VideoControls> {
     }
     double baseWidth = (MediaQuery.of(context).size.width-142)/100;
     double positionWidth = (positionSeconds / (durationSeconds/100))*baseWidth;
-    double bufferedWidth = playerCache.controller.value.buffered.isNotEmpty && playerCache.controller.value.buffered.last.end.inSeconds > positionSeconds
-        ? ((playerCache.controller.value.buffered.last.end.inSeconds-positionSeconds) / (durationSeconds/100))*baseWidth
-        : 0;
+    double bufferedWidth = playerCache.controller!.value.bufferPercent*baseWidth;
     double placeholderWidth = baseWidth*100-positionWidth-bufferedWidth;
     //placeholderWidth -= ((MediaQuery.of(context).size.width-142)-placeholderWidth-positionWidth-bufferedWidth);
     Color accentColor = Theme.of(context).accentColor;
@@ -141,10 +139,10 @@ class _VideoControlsState extends State<VideoControls> {
                         },
                         onTap: (){
                           setState(() {
-                            playerCache.updateThread.cancel();
+                            playerCache.updateThread!.cancel();
                             playerCache.updateThread = null;
-                            videoPosition = Duration(seconds: playerCache.controller.value.position.inSeconds-30);
-                            playerCache.controller.seekTo(videoPosition).then((_){
+                            videoPosition = Duration(seconds: playerCache.controller!.value.position.inSeconds-30);
+                            playerCache.controller!.seekTo(videoPosition).then((_){
                               widget.playerState.initUpdateThread();
                             });
                           });
@@ -176,10 +174,10 @@ class _VideoControlsState extends State<VideoControls> {
                         },
                         onTap: (){
                           setState(() {
-                            playerCache.updateThread.cancel();
+                            playerCache.updateThread!.cancel();
                             playerCache.updateThread = null;
-                            videoPosition = Duration(seconds: playerCache.controller.value.position.inSeconds-10);
-                            playerCache.controller.seekTo(videoPosition).then((_){
+                            videoPosition = Duration(seconds: playerCache.controller!.value.position.inSeconds-10);
+                            playerCache.controller!.seekTo(videoPosition).then((_){
                               widget.playerState.initUpdateThread();
                             });
                           });
@@ -210,14 +208,14 @@ class _VideoControlsState extends State<VideoControls> {
                           });
                         },
                         onTap: (){
-                          playerCache.controller.value.isPlaying && playerCache.timeTrackThread.isActive
-                              ? playerCache.timeTrackThread.cancel()
-                              : Timer(Duration(seconds: ((playerCache.controller.value.position.inSeconds % 30)-30)*-1),(){
+                          playerCache.controller!.value.isPlaying && playerCache.timeTrackThread!.isActive
+                              ? playerCache.timeTrackThread!.cancel()
+                              : Timer(Duration(seconds: ((playerCache.controller!.value.position.inSeconds % 30)-30)*-1),(){
                                 playerCache.timeTrackThread = Timer.periodic(
                                     Duration(seconds: 30), widget.playerState.sendAodTrackingRequest
                                 );
                               });
-                          playerCache.controller.value.isPlaying?playerCache.controller.pause():playerCache.controller.play();
+                          playerCache.controller!.value.isPlaying?playerCache.controller!.pause():playerCache.controller!.play();
                           setState(() {
                             this.playTap = false;
                             widget.playerState.initDelayedControlsHide();
@@ -233,7 +231,7 @@ class _VideoControlsState extends State<VideoControls> {
                                 : Color.fromRGBO(53, 54, 56, 0),
                           ),
                           child: Icon(
-                              playerCache.controller.value.isPlaying?Icons.pause:Icons.play_arrow,
+                              playerCache.controller!.value.isPlaying?Icons.pause:Icons.play_arrow,
                               color: Colors.white
                           ),
                         ),
@@ -246,14 +244,14 @@ class _VideoControlsState extends State<VideoControls> {
                           });
                         },
                         onTap: (){
-                          if(playerCache.controller.value.duration.inSeconds <= playerCache.controller.value.position.inSeconds+10){
+                          if(playerCache.controller!.value.duration.inSeconds <= playerCache.controller!.value.position.inSeconds+10){
                             this.widget.playerState.jumpToNextEpisode();
                           }else {
                             setState(() {
-                              playerCache.updateThread.cancel();
+                              playerCache.updateThread!.cancel();
                               playerCache.updateThread = null;
-                              videoPosition = Duration(seconds: playerCache.controller.value.position.inSeconds+10);
-                              playerCache.controller.seekTo(videoPosition).then((_){
+                              videoPosition = Duration(seconds: playerCache.controller!.value.position.inSeconds+10);
+                              playerCache.controller!.seekTo(videoPosition).then((_){
                                 widget.playerState.initUpdateThread();
                               });
                             });
@@ -285,14 +283,14 @@ class _VideoControlsState extends State<VideoControls> {
                           });
                         },
                         onTap: (){
-                          if(playerCache.controller.value.duration.inSeconds <= playerCache.controller.value.position.inSeconds+30){
+                          if(playerCache.controller!.value.duration.inSeconds <= playerCache.controller!.value.position.inSeconds+30){
                             this.widget.playerState.jumpToNextEpisode();
                           }else{
                             setState(() {
-                              playerCache.updateThread.cancel();
+                              playerCache.updateThread!.cancel();
                               playerCache.updateThread = null;
-                              videoPosition = Duration(seconds: playerCache.controller.value.position.inSeconds+30);
-                              playerCache.controller.seekTo(videoPosition).then((_){
+                              videoPosition = Duration(seconds: playerCache.controller!.value.position.inSeconds+30);
+                              playerCache.controller!.seekTo(videoPosition).then((_){
                                 widget.playerState.initUpdateThread();
                               });
                             });

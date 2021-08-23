@@ -6,7 +6,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:html/dom.dart';
 import 'package:http/http.dart' as http;
-import 'package:unoffical_aod_app/caches/app.dart';
 import 'HeaderHandler.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:unoffical_aod_app/caches/home.dart';
@@ -22,8 +21,8 @@ bool connectionError = false;
 
 Future<bool> checkLogin() async{
   print('start check login');
-  String username = await _storage.read(key: 'username');
-  String password = await _storage.read(key: 'password');
+  String? username = await _storage.read(key: 'username');
+  String? password = await _storage.read(key: 'password');
   print('read login data');
   loginStorageChecked = true;
   if(username == null || password == null){
@@ -51,8 +50,8 @@ Future<bool> validateCredentialsAndSave( String username, String password ) asyn
   Document mainDoc = parse(mainRes.body);
   parseHomePage(mainDoc);
   print('parsed home page');
-  Element form = mainDoc.querySelector('form.form');
-  String authenticityToken = form.querySelector('input[name=authenticity_token]').attributes['value'];
+  Element form = mainDoc.querySelector('form.form')!;
+  String authenticityToken = form.querySelector('input[name=authenticity_token]')!.attributes['value']!;
   headerHandler.decodeCookiesString(mainRes.headers['set-cookie']);
   print('generated headers for login');
   print('preparing data for login');
@@ -97,8 +96,8 @@ Future<bool> validateCredentialsAndSave( String username, String password ) asyn
   }
 }
 
-void validateAbo(Document myAnimesPage){
-  Element aboText = myAnimesPage.querySelector('.poolnote');
+void validateAbo(Document myAnimesPage) {
+  Element? aboText = myAnimesPage.querySelector('.poolnote');
   if(aboText != null){
     int daysLeft = int.parse(aboText.querySelectorAll('.green')[1].text);
     if(daysLeft > 0){
@@ -120,6 +119,4 @@ Future<void> logout() async{
   loginSuccess = false;
   loginDataChecked = false;
   headerHandler = HeaderHandler();
-  bootUpReceivePort = null;
-  bootUpIsolate = null;
 }

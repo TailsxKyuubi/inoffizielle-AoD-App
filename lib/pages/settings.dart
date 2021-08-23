@@ -25,7 +25,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderStateMixin {
 
-  TabController _controller;
+  late TabController _controller;
   bool _qualityDropdownOpen = false;
 
   @override
@@ -58,7 +58,7 @@ class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderSt
 
   bool handleKeyPlayerSettings(FocusNode focusNode, RawKeyEvent event){
     if(Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent){
-      RawKeyEventDataAndroid eventData = event.data;
+      RawKeyEventDataAndroid eventData = event.data as RawKeyEventDataAndroid;
       print(playerSettingsFocusIndex);
       switch(eventData.keyCode){
         case KEY_UP:
@@ -89,7 +89,7 @@ class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderSt
               });
               break;
             case 1:
-              CustomDropdownButtonState state = qualityDropdownKey.currentState;
+              CustomDropdownButtonState? state = qualityDropdownKey.currentState as CustomDropdownButtonState;
               if(! this._qualityDropdownOpen){
                 state.callTap();
                 this._qualityDropdownOpen = true;
@@ -111,7 +111,6 @@ class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderSt
           break;
         case KEY_BACK:
           exit(0);
-          break;
         case KEY_MENU:
           setState(() {
             FocusScope.of(context).requestFocus(menuBarFocusNodes.first);
@@ -129,7 +128,7 @@ class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderSt
 
   bool handleKeyAppSettings(FocusNode focusNode, RawKeyEvent event){
     if(Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent){
-      RawKeyEventDataAndroid eventData = event.data;
+      RawKeyEventDataAndroid eventData = event.data as RawKeyEventDataAndroid;
       switch(eventData.keyCode){
         case KEY_UP:
           appSettingsFocusIndex--;
@@ -173,7 +172,6 @@ class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderSt
           break;
         case KEY_BACK:
           exit(0);
-          break;
         case KEY_MENU:
           setState(() {
             FocusScope.of(context).requestFocus(menuBarFocusNodes.first);
@@ -198,6 +196,7 @@ class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderSt
       ),
       appBar: AppBar(
         title: Text('Einstellungen'),
+        brightness: Brightness.dark,
         bottom: TabBar(
           controller: this._controller,
           unselectedLabelColor: Colors.white,

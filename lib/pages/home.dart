@@ -8,9 +8,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:unoffical_aod_app/caches/anime.dart';
+import 'package:unoffical_aod_app/caches/animes.dart';
 import 'package:unoffical_aod_app/caches/focusnode.dart';
 import 'package:unoffical_aod_app/caches/home.dart';
 import 'package:unoffical_aod_app/caches/keycodes.dart';
+import 'package:unoffical_aod_app/widgets/app_exit.dart';
 import 'package:unoffical_aod_app/widgets/navigation_bar_custom.dart';
 
 class HomePage extends StatefulWidget {
@@ -32,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   List<FocusNode> _newCatalogTitlesFocusNodes = [];
   List<FocusNode> _topTenFocusNodes = [];
 
-  FocusNode mainFocusNode;
+  FocusNode mainFocusNode = FocusNode();
 
   int rowIndex = 0;
   int itemIndex = 0;
@@ -102,7 +104,7 @@ class _HomePageState extends State<HomePage> {
 
   bool handleKeyEvent(FocusNode focusNode, RawKeyEvent keyEvent){
     if( Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent ){
-      RawKeyEventDataAndroid keyEventData = keyEvent.data;
+      RawKeyEventDataAndroid keyEventData = keyEvent.data as RawKeyEventDataAndroid;
       bool positionChanged = false;
       switch(keyEventData.keyCode){
         case KEY_DOWN:
@@ -165,8 +167,11 @@ class _HomePageState extends State<HomePage> {
           this.itemIndex = 0;
           return true;
         case KEY_BACK:
-          exit(0);
-          return true;
+          showDialog(
+              context: context,
+              builder: (_) => AppExitDialog()
+          );
+          //exit(0);
       }
       if(positionChanged){
         FocusScope.of(context).requestFocus(this.getRowList()[this.itemIndex]);
@@ -184,6 +189,8 @@ class _HomePageState extends State<HomePage> {
           case 3:
             controller = this._topTenScrollController;
             break;
+          default:
+            controller = this._newEpisodesScrollController;
         }
         this._scrollController.jumpTo(elementHeight*this.rowIndex);
         controller.jumpTo(elementWidth*this.itemIndex);
@@ -201,7 +208,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     if(MediaQuery.of(context).orientation == Orientation.portrait) {
       this.elementWidth = MediaQuery.of(context).size.width / 7 * 3;
     }else if( MediaQuery.of(context).size.height < 480 ){
@@ -227,9 +233,6 @@ class _HomePageState extends State<HomePage> {
           }
         },
         child: Scaffold(
-            appBar: AppBar(
-              title: Text('Startseite'),
-            ),
             bottomNavigationBar: NavigationBarCustom(this._newEpisodesFocusNodes.first),
             //drawer: DrawerWidget(),
             body: Container(
@@ -254,7 +257,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Container(
-                        height: elementHeight+10,
+                        height: elementHeight+14,
                         child: ListView(
                           controller: _newEpisodesScrollController,
                           scrollDirection: Axis.horizontal,
@@ -334,8 +337,7 @@ class _HomePageState extends State<HomePage> {
                                                 decoration: BoxDecoration(
                                                   color: Color.fromRGBO(66,69,68,1),
                                                 ),
-                                                child: Text
-                                                  (
+                                                child: Text(
                                                   'Folge ' + e['episode_number']
                                                       .replaceAll('GRATIS','')
                                                       .replaceAll('(Dub-Upgrade)',''),
@@ -365,7 +367,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Container(
-                        height: elementHeight-12,
+                        height: elementHeight-8,
                         child: ListView(
                           controller: _newSimulcastsScrollController,
                           scrollDirection: Axis.horizontal,
@@ -388,6 +390,8 @@ class _HomePageState extends State<HomePage> {
                             }else{
                               animeName = e['series_name'];
                             }
+                            int id = int.parse(e['series_id']);
+                            Anime anime = animesLocalCache!.getSingle(id)!;
                             return FlatButton(
                                 focusColor: Theme.of(context).accentColor,
                                 padding: EdgeInsets.all(3),
@@ -397,7 +401,7 @@ class _HomePageState extends State<HomePage> {
                                     '/anime',
                                     arguments: Anime(
                                       name: e['series_name'],
-                                      id: int.parse(e['series_id']),
+                                      id: id,
                                     ),
                                   );
                                 },
@@ -411,8 +415,12 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                         child: Column(
                                           children: [
-                                            CachedNetworkImage(
+                                            anime.image == null ? CachedNetworkImage(
                                               imageUrl: 'https://'+url.host+url.path,
+                                              width: elementWidth,
+                                              height: elementHeight-40,
+                                            ) : Image.memory(
+                                              anime.image!,
                                               width: elementWidth,
                                               height: elementHeight-40,
                                             ),
@@ -455,7 +463,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Container(
-                        height: elementHeight-12,
+                        height: elementHeight-10,
                         child: ListView(
                           controller: _newCatalogTitlesScrollController,
                           scrollDirection: Axis.horizontal,
@@ -478,6 +486,8 @@ class _HomePageState extends State<HomePage> {
                             }else{
                               animeName = e['series_name'];
                             }
+                            int id = int.parse(e['series_id']);
+                            Anime anime = animesLocalCache!.getSingle(id)!;
                             return FlatButton(
                                 focusNode: _newCatalogTitlesFocusNodes[newCatalogTitlesCount++],
                                 focusColor: Theme.of(context).accentColor,
@@ -488,7 +498,7 @@ class _HomePageState extends State<HomePage> {
                                     '/anime',
                                     arguments: Anime(
                                       name: e['series_name'],
-                                      id: int.parse(e['series_id']),
+                                      id: id,
                                     ),
                                   );
                                 },
@@ -501,8 +511,12 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                         child: Column(
                                           children: [
-                                            CachedNetworkImage(
+                                            anime.image == null ? CachedNetworkImage(
                                               imageUrl: 'https://'+url.host+url.path,
+                                              width: elementWidth,
+                                              height: elementHeight-40,
+                                            ) : Image.memory(
+                                              anime.image!,
                                               width: elementWidth,
                                               height: elementHeight-40,
                                             ),
@@ -545,7 +559,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Container(
-                        height: elementHeight-12,
+                        height: elementHeight-10,
                         margin: EdgeInsets.only(bottom: 10),
                         child: ListView(
                           controller: _topTenScrollController,
@@ -569,6 +583,8 @@ class _HomePageState extends State<HomePage> {
                             }else{
                               animeName = e['series_name'];
                             }
+                            int id = int.parse(e['series_id']);
+                            Anime anime = animesLocalCache!.getSingle(id)!;
                             return FlatButton(
                                 onPressed: (){
                                   Navigator.pushNamed(
@@ -591,8 +607,12 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                         child: Column(
                                           children: [
-                                            CachedNetworkImage(
+                                            anime.image == null ? CachedNetworkImage(
                                               imageUrl: 'https://'+url.host+url.path,
+                                              width: elementWidth,
+                                              height: elementHeight-40,
+                                            ) : Image.memory(
+                                              anime.image!,
                                               width: elementWidth,
                                               height: elementHeight-40,
                                             ),

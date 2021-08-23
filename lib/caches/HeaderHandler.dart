@@ -31,9 +31,11 @@ class HeaderHandler {
 
   writeCookiesInHeader(){
     this._headers['Cookie'] = '';
+    String cookie = this._headers['Cookie']!;
     this.cookies.forEach((String key,String value){
-      this._headers['Cookie'] += key+'='+value+'; ';
+      cookie += key+'='+value+'; ';
     });
+    this._headers['Cookie'] = cookie;
   }
 
   setCookie(String key,String value){

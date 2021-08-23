@@ -95,7 +95,6 @@ class AppSettingsState extends State<AppSettingsWidget> {
               ),
             ),
             onPressed: (){
-              print('go to updates');
               Navigator.pushNamed(context, '/updates');
             },
           ),

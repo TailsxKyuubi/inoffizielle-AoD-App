@@ -35,7 +35,7 @@ class _NavigationBarCustomState extends State<NavigationBarCustom> {
 
   void generateFocusNodes(){
     menuBarFocusNodes.clear();
-    for(int i = 0; i < 3; i++){
+    for(int i = 0; i < 4; i++){
       menuBarFocusNodes.add(
           FocusNode(
               onKey: handleKeys
@@ -46,12 +46,12 @@ class _NavigationBarCustomState extends State<NavigationBarCustom> {
 
   bool handleKeys(FocusNode focusNode, RawKeyEvent keyEvent){
     if(Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent){
-      RawKeyEventDataAndroid keyEventData = keyEvent.data;
+      RawKeyEventDataAndroid keyEventData = keyEvent.data as RawKeyEventDataAndroid;
       bool positionChanged = false;
       switch(keyEventData.keyCode){
         case KEY_RIGHT:
           this._itemIndex++;
-          if(this._itemIndex > 2){
+          if(this._itemIndex > 3){
             this._itemIndex = 0;
           }
           positionChanged = true;
@@ -59,7 +59,7 @@ class _NavigationBarCustomState extends State<NavigationBarCustom> {
         case KEY_LEFT:
           this._itemIndex--;
           if(this._itemIndex < 0){
-            this._itemIndex = 2;
+            this._itemIndex = 3;
           }
           positionChanged = true;
           break;
@@ -72,6 +72,9 @@ class _NavigationBarCustomState extends State<NavigationBarCustom> {
               Navigator.pushReplacementNamed(context, '/animes');
               break;
             case 2:
+              Navigator.pushReplacementNamed(context, '/lists');
+              break;
+            case 3:
               Navigator.pushReplacementNamed(context, '/settings');
               break;
           }
@@ -93,16 +96,20 @@ class _NavigationBarCustomState extends State<NavigationBarCustom> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 50,
+        height: 60,
+        padding: EdgeInsets.only(top:5,bottom: 5),
+        decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor
+        ),
         child: Row(
           children: [
             NavigationElement(
-              icon: Icons.home,
-              label: 'Startseite',
-              routeName: '/home',
-              focusNode: menuBarFocusNodes[0],
-              onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
-              first: true
+                icon: Icons.home,
+                label: 'Startseite',
+                routeName: '/home',
+                focusNode: menuBarFocusNodes[0],
+                onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
+                first: true
             ),
             NavigationElement(
               icon: Icons.video_library,
@@ -113,10 +120,18 @@ class _NavigationBarCustomState extends State<NavigationBarCustom> {
               first: false,
             ),
             NavigationElement(
+              icon: Icons.list,
+              label: 'Listen',
+              focusNode: menuBarFocusNodes[2],
+              routeName: '/lists',
+              onPressed: () => Navigator.pushReplacementNamed(context, '/lists'),
+              first: false,
+            ),
+            NavigationElement(
               icon: Icons.settings,
               label: 'Einstellungen',
               routeName: '/settings',
-              focusNode: menuBarFocusNodes[2],
+              focusNode: menuBarFocusNodes[3],
               onPressed: () => Navigator.pushReplacementNamed(context, '/settings'),
               first: false,
             ),

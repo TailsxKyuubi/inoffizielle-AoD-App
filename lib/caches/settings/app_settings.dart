@@ -7,9 +7,9 @@ import 'package:unoffical_aod_app/caches/settings/abstract_settings.dart';
 
 class AppSettings extends AbstractSettings {
   AppSettings(SharedPreferences preferences) : super(preferences){
-    this.keepSession = this.preferences.getBool('app.keepSession');
-    if(keepSession == null){
-      this.keepSession = false;
+    bool? keepSession = this.preferences.getBool('app.keepSession');
+    if(keepSession != null){
+      this.keepSession = keepSession;
     }
   }
 
@@ -18,7 +18,7 @@ class AppSettings extends AbstractSettings {
     this.save();
   }
 
-  bool keepSession;
+  bool keepSession = true;
 
   @override
   save() {

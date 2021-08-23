@@ -1,10 +1,14 @@
+/*
+ * Copyright 2020-2021 TailsxKyuubi
+ * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
+ */
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:version/version.dart';
 import 'package:xml/xml.dart';
 
-final Version version = Version.parse('0.8.2');
+final Version version = Version.parse('0.9.0-alpha.3');
 
 Version latestVersion = version;
 
@@ -15,9 +19,9 @@ Future<bool> checkVersion() async{
   String releasesXmlString = await res.transform(utf8.decoder).join();
   XmlDocument releasesXml = XmlDocument.parse(releasesXmlString);
   List<XmlElement> entries = releasesXml.findAllElements('entry').toList();
-  for(int i=0; i<entries.length;i++){
+  for(int i=0; i<entries.length; i++){
     Version tmpVersion = Version.parse(
-        entries[i].getElement('id').innerText.split('/').last
+        entries[i].getElement('id')!.innerText.split('/').last
     );
     if(! tmpVersion.isPreRelease){
       int difference = tmpVersion.compareTo(version);

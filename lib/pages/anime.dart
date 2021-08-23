@@ -11,7 +11,7 @@ class AnimePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Anime anime = ModalRoute.of(context).settings.arguments;
+    Anime anime = ModalRoute.of(context)!.settings.arguments as Anime;
     return AnimeWidget(anime);
   }
 }

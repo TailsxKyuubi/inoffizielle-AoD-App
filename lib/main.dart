@@ -10,8 +10,10 @@ import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:unoffical_aod_app/caches/app.dart';
-import 'package:unoffical_aod_app/caches/episode_progress.dart';
+import 'package:unoffical_aod_app/caches/database.dart';
 import 'package:unoffical_aod_app/caches/home.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
@@ -20,6 +22,7 @@ import 'package:unoffical_aod_app/pages/about.dart';
 import 'package:unoffical_aod_app/pages/anime.dart';
 import 'package:unoffical_aod_app/pages/animes.dart';
 import 'package:unoffical_aod_app/pages/home.dart';
+import 'package:unoffical_aod_app/pages/list.dart';
 import 'package:unoffical_aod_app/pages/loading.dart';
 import 'package:unoffical_aod_app/pages/login.dart';
 import 'package:unoffical_aod_app/pages/settings.dart';
@@ -32,17 +35,17 @@ import 'package:version/version.dart';
 import 'caches/anime.dart';
 import 'caches/animes.dart' as animesCache;
 
-
-void main() async {
+void main(){
   WidgetsFlutterBinding.ensureInitialized();
   runApp(AodApp());
 }
 
 class AodApp extends StatelessWidget {
-  final ReceivePort receivePort = ReceivePort();
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(statusBarIconBrightness: Brightness.light)
+    );
     return Shortcuts(
         shortcuts: {
           LogicalKeySet(LogicalKeyboardKey.select): ActivateIntent(),
@@ -57,7 +60,8 @@ class AodApp extends StatelessWidget {
             '/animes': (BuildContext context) => AnimesPage(),
             '/settings': (BuildContext context) => SettingsPage(),
             '/about': (BuildContext context) => AboutPage(),
-            '/updates': (BuildContext context) => UpdatesPage()
+            '/updates': (BuildContext context) => UpdatesPage(),
+            '/lists': (BuildContext context) => ListPage(),
           },
           theme: ThemeData(
             primaryColor: Color.fromRGBO(53, 54, 56, 1),
@@ -76,27 +80,29 @@ class BaseWidget extends StatefulWidget {
   State<StatefulWidget> createState() => LoadingState();
 }
 
-class LoadingState extends State<BaseWidget>{
+class LoadingState extends State<BaseWidget> {
 
   List<String> dialogList = [];
 
-  Widget startScreensScaffold(Widget content){
+  bool _appCheckStarted = false;
+
+  Widget startScreensScaffold(Widget content) {
     return Scaffold(
-        body: WillPopScope(
-          onWillPop: () async => false,
-          child: content,
-        )
+      body: WillPopScope(
+        onWillPop: () async => false,
+        child: content,
+      ),
     );
   }
 
-  parseMessage(message, BuildContext context){
+  parseMessage(message, BuildContext context) async {
     if (message is String) {
-      switch(message){
+      switch (message) {
         case 'connection error':
           connectionError = true;
           showDialog(
               context: context,
-              builder: (BuildContext context){
+              builder: (BuildContext context) {
                 return LoadingConnectionErrorDialog();
               },
               barrierDismissible: false
@@ -112,6 +118,7 @@ class LoadingState extends State<BaseWidget>{
           break;
         case 'login success':
           loginSuccess = true;
+          await initDb();
           break;
         case 'active abo':
           aboActive = true;
@@ -120,10 +127,10 @@ class LoadingState extends State<BaseWidget>{
           aboActive = false;
           break;
         default:
-          if(message.startsWith('remaining abo days:')){
+          if (message.startsWith('remaining abo days:')) {
             aboDaysLeft = int.parse(message.split(':')[1]);
           } else {
-            Map<String, dynamic> data;
+            Map<String, dynamic> data = {};
             try {
               data = jsonDecode(message);
             } catch (e) {
@@ -136,18 +143,6 @@ class LoadingState extends State<BaseWidget>{
                   data['cookies'].map<String, String>((String key, value) =>
                       MapEntry(key, value.toString()));
               headerHandler.writeCookiesInHeader();
-            } else if (data.containsKey('animes')) {
-              data['animes'].forEach(
-                      (String title,anime) =>
-                      animesCache.animes.addAll(
-                          {
-                            title: Anime.fromMap(
-                                anime.map<String, String>((key, value) =>
-                                    MapEntry(key.toString(), value.toString())))
-                          }
-                      )
-              );
-              episodeProgressCache = EpisodeProgressCache();
             } else if (data.containsKey('newEpisodes')) {
               newEpisodes.addAll(
                   List.from(data['newEpisodes'])
@@ -163,74 +158,91 @@ class LoadingState extends State<BaseWidget>{
             }
           }
       }
-    } else if (message is Map<String,Anime>) {
-      connectionError = false;
-      animesCache.animes = message;
     }
     setState(() {});
   }
 
-  void executeCheckActions(String message){
-    if(message.indexOf('new version available: ') != -1){
+  void executeCheckActions(String message) {
+    if (message.indexOf('new version available: ') != -1) {
       latestVersion = Version.parse(
-          message.replaceAll('new version available: ','')
+          message.replaceAll('new version available: ', '')
       );
       this.dialogList.add('app version outdated');
-    } else if (message == 'fire os outdated'){
+    } else if (message == 'fire os outdated') {
       this.dialogList.add('fire os outdated');
-    }else if(message == 'checks completed'){
+    } else if (message == 'checks completed') {
       appCheckReceivePort.close();
       showProblemDialogs();
+      setState(() {});
     }
   }
 
-  void showProblemDialogs() async{
-    if(this.dialogList.contains('fire os outdated')){
+  void showProblemDialogs() async {
+    if (this.dialogList.contains('fire os outdated')) {
       await showDialog(
           barrierDismissible: false,
           context: context,
           builder: (BuildContext context) => FireOsVersionErrorDialog()
       );
     }
-    if(this.dialogList.contains('app version outdated')){
+    if (this.dialogList.contains('app version outdated')) {
       await showDialog(
           barrierDismissible: false,
           context: context,
           builder: (BuildContext context) => AppUpdateNotificationDialog()
       );
     }
-    FlutterIsolate.spawn(appBootUp, bootUpReceivePort.sendPort);
+    FlutterIsolate.spawn(
+        appBootUpPreparations, bootUpPreparationsReceivePort.sendPort);
+  }
+
+  void processBootUpPreparations(object) async {
+    switch (object) {
+      case 'sharedPreferences':
+        sharedPreferences = await SharedPreferences.getInstance();
+        break;
+      case 'continue':
+        FlutterIsolate.spawn(appBootUp, bootUpReceivePort.sendPort);
+        break;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    //SystemChrome.setEnabledSystemUIOverlays([]);
-    if(bootUpReceivePort == null){
+    if (!this._appCheckStarted) {
       bootUpReceivePort = ReceivePort();
-      bootUpReceivePort.listen((message) => parseMessage(message, context));
       appCheckReceivePort = ReceivePort();
+      bootUpReceivePort.listen((message) => parseMessage(message, context));
+      bootUpPreparationsReceivePort = ReceivePort();
+      bootUpPreparationsReceivePort.listen(this.processBootUpPreparations);
       appCheckReceivePort.listen((message) => executeCheckActions(message));
       FlutterIsolate
-          .spawn(appChecks, appCheckReceivePort.sendPort)
-          .then((value) => appCheckIsolate = value);
+          .spawn(appChecks, appCheckReceivePort.sendPort);
+      this._appCheckStarted = true;
     }
     print('loading widget build');
-    if(loginStorageChecked && ! loginSuccess ) {
-      return startScreensScaffold(LoginPage());
-    }else if(loginSuccess && animesCache.animes == null){
-      return startScreensScaffold(LoadingPage());
-    }else if(loginSuccess && animesCache.animes != null && animesCache.animes.isNotEmpty){
-      return HomePage();
-    }else{
-      return startScreensScaffold(LoadingPage());
+    if (loginSuccess) {
+      if(animesCache.animesLocalCache != null) {
+        List<Anime> animes = animesCache.animesLocalCache!.getAll();
+        if (loginSuccess && animes.isEmpty) {
+          return startScreensScaffold(LoadingPage());
+        } else if (loginSuccess && animes.isNotEmpty) {
+          return HomePage();
+        }
+      }
     }
+    if (loginStorageChecked && !loginSuccess) {
+      return startScreensScaffold(LoginPage());
+    }
+    return startScreensScaffold(LoadingPage());
   }
 }
 
-appChecks(SendPort sendPort) async{
+appChecks(SendPort sendPort) async {
+  print('starting app checks');
   DeviceInfoPlugin info = DeviceInfoPlugin();
   AndroidDeviceInfo androidInfo = await info.androidInfo;
-  if( (androidInfo.brand == 'Amazon' || androidInfo.manufacturer == 'Amazon') && androidInfo.version.sdkInt < 28 ) {
+  if( (androidInfo.brand == 'Amazon' || androidInfo.manufacturer == 'Amazon') && androidInfo.version.sdkInt < 26 ) {
     sendPort.send('fire os outdated');
   }
   bool newVersionAvailable = await checkVersion();
@@ -238,6 +250,25 @@ appChecks(SendPort sendPort) async{
     sendPort.send('new version available: ' + latestVersion.toString());
   }
   sendPort.send('checks completed');
+  print('checks completed');
+}
+Future<void> initDb() async {
+  // Nur für Test Zwecke
+  //await deleteDatabase('iaoda.db');
+
+  await openDatabase(
+      'iaoda.db',
+      version: 1,
+      onCreate: DatabaseHelper.create,
+      onOpen: DatabaseHelper.init
+  );
+}
+
+appBootUpPreparations(SendPort sendPort) async{
+  print('preparations started');
+  sendPort.send('sharedPreferences');
+  sendPort.send('continue');
+  print('preparations finished');
 }
 
 appBootUp(SendPort sendPort) async {
@@ -258,27 +289,15 @@ appBootUp(SendPort sendPort) async {
     sendPort.send(jsonEncode({'newCatalogTitles':newCatalogTitles}));
     sendPort.send(jsonEncode({'newSimulcastTitles':newSimulcastTitles}));
     sendPort.send(jsonEncode({'topTen':topTen}));
-    await animesCache.getAllAnimesV2();
-    if(connectionError){
-      sendPort.send('connection error');
-    }else{
-      Map<String,dynamic> animes = Map<String,dynamic>();
-      animes.addEntries(
-          [
-            MapEntry(
-                'animes',
-                animesCache.animes.map((title, Anime anime) => MapEntry(title, anime.toMap()) )
-            )
-          ]
-      );
-      sendPort.send(jsonEncode(animes));
-    }
-    if(aboActive){
-      sendPort.send('active abo');
-      sendPort.send('remaining abo days:'+aboDaysLeft.toString());
-    }else{
-      sendPort.send('inactive abo');
-    }
+  }
+}
+
+void updateAnimeEntries(SendPort sendPort) async {
+  await animesCache.animesLocalCache!.updateAnimes();
+  if(connectionError){
+    sendPort.send('connection error');
+  }else{
+    sendPort.send('animes updated');
   }
 }
 

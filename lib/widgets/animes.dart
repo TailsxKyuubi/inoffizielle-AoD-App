@@ -4,7 +4,6 @@
  */
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:unoffical_aod_app/caches/anime.dart';
@@ -21,32 +20,54 @@ class AnimesWidget extends StatefulWidget {
 
 class _AnimesWidgetState extends State<AnimesWidget> {
   TextEditingController _controller = TextEditingController();
-  Map<String,Anime> searchResult = animes.animes;
+  List<Anime> searchResult = animes.animesLocalCache!.getAll();
   ScrollController _scrollController = ScrollController();
   List<FocusNode> animeFocusNodes = [];
-  List<String> _focusNodeAnimeMapping = [];
+  List<int> _focusNodeAnimeMapping = [];
 
-  FocusNode mainFocusNode;
+  FocusNode mainFocusNode = FocusNode();
+
+  GlobalKey _listViewKey = GlobalKey();
+
+  int _countDisplayedElements = 30;
+
+  bool _scrollFinished = false;
+
+  double _elementHeight = 0;
 
   int _animeFocusIndex = 0;
   _AnimesWidgetState(){
     this._controller.addListener(onTextInput);
-    animes.animes.forEach((_,__) => this.animeFocusNodes.add(
+    animes.animesLocalCache!.getAll().forEach((_) => this.animeFocusNodes.add(
         FocusNode(
             onKey: handleKey
         )
     ));
   }
 
-  bool handleKey(FocusNode focusNode, RawKeyEvent event){
+  @override
+  void initState() {
+    super.initState();
+    this._scrollController.addListener(_onScroll);
+  }
+
+  _onScroll() {
+    double reloadHeight = this._scrollController.position.maxScrollExtent - this._elementHeight;
+    if (reloadHeight < this._scrollController.position.pixels && !this._scrollFinished) {
+      setState(() {
+        this._countDisplayedElements += 8;
+      });
+    }
+  }
+
+  bool handleKey(FocusNode focusNode, RawKeyEvent event) {
     if( Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent ){
-      RawKeyEventDataAndroid eventDataAndroid = event.data;
+      RawKeyEventDataAndroid eventDataAndroid = event.data as RawKeyEventDataAndroid;
       FocusScopeNode scope = FocusScope.of(context);
       switch(eventDataAndroid.keyCode){
         case KEY_DOWN:
           this._animeFocusIndex += 4;
           if(this._animeFocusIndex >= searchResult.length){
-            //this._animeFocusIndex = this.animeFocusNodes.length - this._animeFocusIndex;
             FocusScope.of(context).requestFocus(menuBarFocusNodes.first);
             return true;
           }
@@ -96,39 +117,46 @@ class _AnimesWidgetState extends State<AnimesWidget> {
           return true;
         case KEY_BACK:
           exit(0);
-          return true;
         case KEY_CENTER:
           Navigator.pushNamed(
               context,
               '/anime',
-              arguments: animes.animes[this._focusNodeAnimeMapping[this._animeFocusIndex]]
+              arguments: animes
+                  .animesLocalCache!
+                  .getAll()
+                  .singleWhere(
+                      (element) => element.id == this._focusNodeAnimeMapping[this._animeFocusIndex]
+              )
           );
       }
       this._scrollController.jumpTo(
-          (this.animeFocusNodes.indexOf(scope.focusedChild) / 4).floor() * scope.focusedChild.size.height,
+        (this.animeFocusNodes.indexOf(scope.focusedChild!) / 4).floor() * scope.focusedChild!.size.height,
       );
     }
     return true;
   }
 
+  void _resetScrolling() {
+    this._scrollFinished = false;
+    this._countDisplayedElements = 30;
+  }
+
   onTextInput(){
     setState(() {
       if(this._controller.text.length >= 1){
+        this._resetScrolling();
         this.searchResult = animes.filterAnimes(this._controller.text);
       }else if(this._controller.text.isEmpty){
-        this.searchResult = animes.animes;
+        this._resetScrolling();
+        this.searchResult = animes.animesLocalCache!.getAll();
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    /*SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown
-    ]);*/
     int i = 0;
-    double elementWidth;
+    double elementWidth = 0;
     MediaQueryData mediaQuery = MediaQuery.of(context);
     if(mediaQuery.orientation == Orientation.landscape){
       elementWidth = (mediaQuery.size.width-40)*0.25-7.5;
@@ -138,21 +166,28 @@ class _AnimesWidgetState extends State<AnimesWidget> {
 
     this._focusNodeAnimeMapping.clear();
 
-    double elementHeight = elementWidth / 16 * 9;
+    this._elementHeight = elementWidth / 16 * 9;
     Radius radius = Radius.circular(2);
     List<Widget> animeList = [];
-    this.searchResult.forEach(
-            (String title,Anime anime) {
-          this._focusNodeAnimeMapping.add(title);
-          animeList.add(
-              AnimeSmallWidget(
-                  anime,
-                  elementWidth,
-                  elementHeight,
-                  radius,
-                  this.animeFocusNodes[i++]
-              )
-          );
+    int index = 0;
+    this.searchResult.forEach((Anime anime) {
+          this._focusNodeAnimeMapping.add(anime.id);
+
+          if (index < this._countDisplayedElements) {
+            index++;
+            animeList.add(
+                AnimeSmallWidget(
+                    anime,
+                    elementWidth,
+                    this._elementHeight,
+                    radius,
+                    this.animeFocusNodes[i++]
+                )
+            );
+          }
+          if (index >= this.searchResult.length) {
+            this._scrollFinished = true;
+          }
         }
     );
 
@@ -166,10 +201,6 @@ class _AnimesWidgetState extends State<AnimesWidget> {
           }
         },
         child: Scaffold(
-            appBar: AppBar(
-              backgroundColor: Theme.of(context).primaryColor,
-              title: Text('Meine Anime'),
-            ),
             bottomNavigationBar: NavigationBarCustom(this.animeFocusNodes.first),
             body: Container(
                 decoration: BoxDecoration(
@@ -178,13 +209,14 @@ class _AnimesWidgetState extends State<AnimesWidget> {
                 height: MediaQuery.of(context).size.height,
                 padding: EdgeInsets.only(left: 20, right: 20),
                 child: ListView(
+                    key: _listViewKey,
                     controller: _scrollController,
                     children: [
                       Container(
                         margin: EdgeInsets.only(top: 10),
                         child: ClipRRect(
                           borderRadius: BorderRadius.all(
-                              Radius.circular(5)
+                              Radius.circular(3)
                           ),
 
                           child: Container(
@@ -215,7 +247,7 @@ class _AnimesWidgetState extends State<AnimesWidget> {
                                   FocusScope.of(context).requestFocus(animeFocusNodes.first);
                                 });
                               },
-                              onSubmitted: (_){
+                              onSubmitted: (_) {
                                 setState(() {
                                   print('search submitted');
                                   this._animeFocusIndex = 0;

@@ -18,8 +18,8 @@ parseHomePage(dom.Document doc){
     Map tmpObject = {};
     tmpObject['image'] = a[0].children[0].attributes['src'];
     tmpObject['series_name'] = a[1].text;
-    tmpObject['series_id'] = a[0].attributes['href'].split('/').last;
-    tmpObject['episode_number'] = element.querySelector('.neweps').text.replaceAll('Episode ', '');
+    tmpObject['series_id'] = a[0].attributes['href']!.split('/').last;
+    tmpObject['episode_number'] = element.querySelector('.neweps')!.text.replaceAll('Episode ', '');
     newEpisodes.add(tmpObject);
   });
   List<dom.Element> newTitles = carousels[1].querySelectorAll('li');
@@ -28,7 +28,7 @@ parseHomePage(dom.Document doc){
     Map tmpObject = {};
     tmpObject['image'] = a[0].children[0].attributes['src'];
     tmpObject['series_name'] = a[1].text;
-    tmpObject['series_id'] = a[0].attributes['href'].split('/').last;
+    tmpObject['series_id'] = a[0].attributes['href']!.split('/').last;
     newCatalogTitles.add(tmpObject);
   });
 
@@ -38,7 +38,7 @@ parseHomePage(dom.Document doc){
     Map tmpObject = {};
     tmpObject['image'] = a[0].children[0].attributes['src'];
     tmpObject['series_name'] = a[1].text;
-    tmpObject['series_id'] = a[0].attributes['href'].split('/').last;
+    tmpObject['series_id'] = a[0].attributes['href']!.split('/').last;
     newSimulcastTitles.add(tmpObject);
   });
 
@@ -48,7 +48,7 @@ parseHomePage(dom.Document doc){
     Map tmpObject = {};
     tmpObject['image'] = a[0].children[0].attributes['src'];
     tmpObject['series_name'] = a[1].text;
-    tmpObject['series_id'] = a[0].attributes['href'].split('/').last;
+    tmpObject['series_id'] = a[0].attributes['href']!.split('/').last;
     topTen.add(tmpObject);
   });
 }

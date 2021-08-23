@@ -19,7 +19,10 @@ class LoadingPage extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(top: MediaQuery.of(context).size.height*0.1),
             ),
-            Image.asset('images/logo.png',scale: orientation == Orientation.landscape?4:3,),
+            Image.asset(
+              'images/logo.png',
+              scale: orientation == Orientation.landscape ? 4 : 3
+            ),
             orientation == Orientation.portrait
                 ? Flexible(child: Container())
                 : Container(),

@@ -4,9 +4,6 @@
  */
 import 'package:flutter/material.dart';
 import 'package:unoffical_aod_app/caches/app.dart';
-import 'package:unoffical_aod_app/transfermodels/player.dart';
-import 'package:unoffical_aod_app/caches/playercache.dart' as playerCache;
-import 'package:unoffical_aod_app/caches/settings/settings.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AppUpdateNotificationDialog extends StatelessWidget {

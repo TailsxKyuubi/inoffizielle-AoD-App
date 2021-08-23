@@ -2,10 +2,10 @@
  * Copyright 2020-2021 TailsxKyuubi
  * This code is part of inoffizielle-AoD-App and licensed under the AGPL License
  */
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:unoffical_aod_app/caches/anime.dart';
-import 'package:unoffical_aod_app/caches/focusnode.dart';
 
 class AnimeSmallWidget extends StatelessWidget{
   final Anime _anime;
@@ -71,9 +71,12 @@ class AnimeSmallWidget extends StatelessWidget{
                   child: Container(
                     width: double.maxFinite,
                     height: elementHeight,
-                    child: CachedNetworkImage(
-                      imageUrl: this._anime.imageUrl,
+                    child: this._anime.image != null ? Image.memory(
+                      this._anime.image!,
                       fit: BoxFit.fill,
+                    ) : CachedNetworkImage(
+                      fit: BoxFit.fill,
+                      imageUrl: this._anime.imageLink.toString(),
                     ),
                   ),
                 ),

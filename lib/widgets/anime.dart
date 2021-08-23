@@ -11,14 +11,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:unoffical_aod_app/caches/anime.dart';
+import 'package:unoffical_aod_app/caches/animes.dart';
 import 'package:unoffical_aod_app/caches/episode.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
 import 'package:html/dom.dart' as dom;
 import 'package:unoffical_aod_app/caches/episode_progress.dart';
+import 'package:unoffical_aod_app/caches/favorites.dart';
 import 'package:unoffical_aod_app/caches/keycodes.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
 import 'package:unoffical_aod_app/caches/settings/settings.dart';
+import 'package:unoffical_aod_app/caches/watchlist.dart';
 import 'package:unoffical_aod_app/transfermodels/player.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:html_unescape/html_unescape.dart';
@@ -32,18 +35,18 @@ class AnimeWidget extends StatefulWidget {
 
 
 class AnimeWidgetState extends State<AnimeWidget>{
-  Anime _anime;
+  late Anime _anime;
   List<Episode> episodes = [];
-  String _csrf;
+  String _csrf = '';
   bool movie = false;
   bool showFullDescription = false;
   bool bootUp = true;
   int episodeIndex = 0;
   List<FocusNode> germanFocusNodes = [];
   List<FocusNode> omuFocusNodes = [];
-  FocusNode readMoreFocusNode;
-  FocusNode backFocusNode;
-  FocusNode mainFocusNode;
+  FocusNode readMoreFocusNode = FocusNode();
+  FocusNode backFocusNode = FocusNode();
+  FocusNode mainFocusNode = FocusNode();
 
   final ScrollController _scrollController = ScrollController();
 
@@ -57,12 +60,12 @@ class AnimeWidgetState extends State<AnimeWidget>{
     this.readMoreFocusNode = FocusNode(
         onKey: (FocusNode focusNode,RawKeyEvent keyEvent){
           if(Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent){
-            RawKeyEventDataAndroid rawKeyEventData = keyEvent.data;
+            RawKeyEventDataAndroid rawKeyEventData = keyEvent.data as RawKeyEventDataAndroid;
             FocusScopeNode focusScope = FocusScope.of(context);
             switch(rawKeyEventData.keyCode){
               case KEY_DOWN:
                 focusScope.requestFocus(this.germanFocusNodes.first);
-                RenderBox box = this.germanFocusNodes.first.context.findRenderObject();
+                RenderBox box = this.germanFocusNodes.first.context!.findRenderObject() as RenderBox;
                 this._scrollController.jumpTo(
                     this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
                 );
@@ -88,13 +91,13 @@ class AnimeWidgetState extends State<AnimeWidget>{
     this.backFocusNode = FocusNode(
         onKey: (FocusNode focusNode,RawKeyEvent keyEvent){
           if(Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent){
-            RawKeyEventDataAndroid rawKeyEventData = keyEvent.data;
+            RawKeyEventDataAndroid rawKeyEventData = keyEvent.data as RawKeyEventDataAndroid;
             FocusScopeNode focusScope = FocusScope.of(context);
             switch(rawKeyEventData.keyCode){
               case KEY_DOWN:
                 focusScope.requestFocus(this.readMoreFocusNode);
                 setState(() {});
-                RenderBox box = this.readMoreFocusNode.context.findRenderObject();
+                RenderBox box = this.readMoreFocusNode.context!.findRenderObject() as RenderBox;
                 this._scrollController.jumpTo(
                     this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
                 );
@@ -125,7 +128,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
         print('try to jump to readmore');
         FocusScope.of(context).requestFocus(this.readMoreFocusNode);
         setState(() {});
-        RenderBox box = this.readMoreFocusNode.context.findRenderObject();
+        RenderBox box = this.readMoreFocusNode.context!.findRenderObject() as RenderBox;
         this._scrollController.jumpTo(
             this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
         );
@@ -141,7 +144,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
           FocusNode(
               onKey: (FocusNode focusNode,RawKeyEvent keyEvent){
                 if( Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent ){
-                  RawKeyEventDataAndroid rawKeyEventData = keyEvent.data;
+                  RawKeyEventDataAndroid rawKeyEventData = keyEvent.data as RawKeyEventDataAndroid;
                   if(rawKeyEventData.keyCode == KEY_BACK) {
                     Navigator.pop(context);
                     return true;
@@ -180,7 +183,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                   }
                   setState(() {});
                   FocusScope.of(context).requestFocus(this.germanFocusNodes[this.episodeIndex]);
-                  RenderBox box = this.germanFocusNodes[this.episodeIndex].context.findRenderObject();
+                  RenderBox box = this.germanFocusNodes[this.episodeIndex].context!.findRenderObject() as RenderBox;
                   this._scrollController.jumpTo(
                       this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
                   );
@@ -192,8 +195,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
       this.omuFocusNodes.add(
           FocusNode(
               onKey: (FocusNode focusNode,RawKeyEvent keyEvent){
-                if( Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent ){
-                  RawKeyEventDataAndroid rawKeyEventData = keyEvent.data;
+                if( Platform.isAndroid && keyEvent.data is RawKeyEventDataAndroid && keyEvent.runtimeType == RawKeyUpEvent ) {
+                  RawKeyEventDataAndroid rawKeyEventData = keyEvent.data as RawKeyEventDataAndroid;
                   if(rawKeyEventData.keyCode == KEY_BACK) {
                     Navigator.pop(context);
                     return true;
@@ -231,7 +234,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                   }
                   setState(() {});
                   FocusScope.of(context).requestFocus(this.omuFocusNodes[this.episodeIndex]);
-                  RenderBox box = this.omuFocusNodes[this.episodeIndex].context.findRenderObject();
+                  RenderBox box = this.omuFocusNodes[this.episodeIndex].context!.findRenderObject() as RenderBox;
                   this._scrollController.jumpTo(
                       this._scrollController.position.pixels+box.localToGlobal(Offset.zero).dy-(MediaQuery.of(context).size.height*0.5)
                   );
@@ -247,24 +250,35 @@ class AnimeWidgetState extends State<AnimeWidget>{
     print('get anime init');
     http.Response res;
     try {
-      res = await http.get(Uri.tryParse('https://anime-on-demand.de/anime/' + this._anime.id.toString()),headers: headerHandler.getHeaders());
+      res = await http.get(Uri.tryParse('https://anime-on-demand.de/anime/' + this._anime.id.toString())!,headers: headerHandler.getHeaders());
     }catch(exception){
       connectionError = true;
       return false;
     }
     dom.Document doc = parse(res.body);
     headerHandler.decodeCookiesString(res.headers['set-cookie']);
-    this._csrf = doc.querySelector('meta[name=csrf-token]').attributes['content'];
+    this._csrf = doc.querySelector('meta[name=csrf-token]')!.attributes['content']!;
     List<dom.Element> episodesRaw = doc.querySelectorAll('div.three-box.episodebox.flip-container');
     if(episodesRaw.isEmpty){
       movie = true;
       episodesRaw = doc.querySelectorAll('.two-column-container');
     }
-    this._anime.imageUrl = doc.querySelector('img.fullwidth-image.anime-top-image').attributes['src'];
-    this._anime.description = parse(doc.querySelector('div[itemprop=description] > p').innerHtml).documentElement.text.replaceAll('\n', '');
+    if(this._anime.image == null) {
+      String imageUrl = doc
+          .querySelector('img.fullwidth-image.anime-top-image')!
+          .attributes['src']!;
+      http.Response imgRes = await http.get(Uri.parse(imageUrl));
+      this._anime.image = imgRes.bodyBytes;
+    }
+    if (this._anime.description == null) {
+      String descriptionHtml = doc.querySelector('div[itemprop=description] > p')!.innerHtml;
+      this._anime.description = parse(descriptionHtml).documentElement!.text.replaceAll('\n', '');
+      animesLocalCache!.saveAnime(this._anime);
+    }
     print('init anime episodes iterating');
     List<Episode> episodes = [];
-    episodesRaw.forEach((element) {
+    for(int i = 0; episodesRaw.length > i; i++) {
+      dom.Element element = episodesRaw[i];
       List<dom.Element> playButtons = element.querySelectorAll('input.highlight.streamstarter_html5');
       print('start anime episodes play button count');
 
@@ -272,26 +286,31 @@ class AnimeWidgetState extends State<AnimeWidget>{
       Episode tmpEpisode = Episode();
       print('start anime episodes play button parsing');
       if(playButtons.length > 0){
-        tmpEpisode.mediaId = int.tryParse(playButtons[0].attributes['data-playlist'].split('/')[2]);
+        tmpEpisode.mediaId = int.tryParse(playButtons[0].attributes['data-playlist']!.split('/')[2])!;
       }
       playButtons.forEach((dom.Element playButton) {
-        tmpEpisode.languages.add(playButton.attributes['value']);
-        tmpEpisode.playlistUrl.add('https://anime-on-demand.de' +
-            playButton.attributes['data-playlist']);
+        tmpEpisode.languages.add(playButton.attributes['value']!);
+        String playlistPath = playButton.attributes['data-playlist']!;
+        String url = 'https://anime-on-demand.de' + playlistPath;
+        tmpEpisode.playlistUrl.add(url);
       });
 
       String tmpNameString;
       if(movie){
-        tmpEpisode.name = doc.querySelector('h1[itemprop=name]').text;
-        tmpEpisode.imageUrl = Uri.parse(doc.querySelector('img.anime-top-image').attributes['src']);
+        tmpEpisode.name = doc.querySelector('h1[itemprop=name]')!.text;
+        tmpEpisode.imageUrl = Uri.parse(doc.querySelector('img.anime-top-image')!.attributes['src']!);
       } else {
-        dom.Element content = element.querySelector('.three-box-content');
-        if(content.children.last.className.isEmpty){
+        dom.Element content = element.querySelector('.three-box-content')!;
+        if (content.children.last.className.isEmpty) {
           tmpEpisode.noteText = content.children.last.text;
         }
-        tmpEpisode.imageUrl = Uri.parse(element.querySelector('.episodebox-image').children[0].attributes['src']);
+        tmpEpisode.imageUrl = Uri.parse(element.querySelector('.episodebox-image')!.children[0].attributes['src']!);
+
+        http.Response imageRes = await http.get(tmpEpisode.imageUrl);
+        tmpEpisode.image = imageRes.bodyBytes;
+
         tmpNameString = element
-            .querySelector('h3.episodebox-title')
+            .querySelector('h3.episodebox-title')!
             .innerHtml
             .replaceAll('<br>', ' - ');
         List<String> tmpNameList = tmpNameString.split(' - ');
@@ -304,7 +323,8 @@ class AnimeWidgetState extends State<AnimeWidget>{
       }
       print('end anime episodes play button parsing');
       episodes.add(tmpEpisode);
-    });
+    }
+
     this.episodes = episodes;
     this.generateEpisodesFocusNodes();
 
@@ -357,6 +377,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
     Orientation deviceOrientation = mediaQuery.orientation;
     double width = mediaQuery.size.width;
     double padding = 0;
+    print(width);
     if(mediaQuery.orientation == Orientation.landscape){
       padding = width * 0.25;
     }
@@ -385,6 +406,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
           child: Scaffold(
             appBar: AppBar(
               title: Text(this._anime.name),
+              brightness: Brightness.dark,
               backgroundColor: Theme.of(context).primaryColor,
               leading: FlatButton(
                 onPressed: () {
@@ -409,8 +431,7 @@ class AnimeWidgetState extends State<AnimeWidget>{
                 ),
               ),
               onPressed: continueSeries,
-            )
-                : Container(),
+            ) : Container(),
             body: Container(
                 decoration: BoxDecoration(
                     color: Theme.of(context).primaryColor
@@ -421,13 +442,13 @@ class AnimeWidgetState extends State<AnimeWidget>{
                       Container(
                         height: deviceOrientation == Orientation.landscape ? mediaQuery.size.height * 0.4 : width / 16 * 9,
                         decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(3)),
                           image: DecorationImage(
-                              fit: BoxFit.fitWidth,
-                              repeat: ImageRepeat.noRepeat,
-                              image: CachedNetworkImageProvider(
-                                  this._anime.imageUrl,
-                                  scale: 0.1
-                              )
+                            fit: BoxFit.fitWidth,
+                            repeat: ImageRepeat.noRepeat,
+                            image: MemoryImage(
+                                this._anime.image!
+                            ),
                           ),
                         ),
                         child: BackdropFilter(
@@ -438,10 +459,118 @@ class AnimeWidgetState extends State<AnimeWidget>{
                                 bottom: 15
                             ),
                             color: Colors.black.withOpacity(0.1),
-                            child: CachedNetworkImage(
-                                imageUrl: this._anime.imageUrl
+                            child: Image.memory(
+                                this._anime.image!
                             ),
                           ),
+                        ),
+                      ),
+                      Container (
+                        margin: EdgeInsets.only(top: 25),
+                        width: width - 40,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Container(
+                              child: FlatButton(
+                                onPressed: () {
+                                  if (!aboActive) {
+                                    return;
+                                  }
+                                },
+                                child: Container(
+                                  margin: EdgeInsets.only(
+                                      top: 2.5,
+                                      bottom: 2.5
+                                  ),
+                                  padding: EdgeInsets.only(
+                                    top: 5,
+                                    bottom: 5,
+                                    left: 5,
+                                    right: 12.5
+                                  ),
+                                  decoration: BoxDecoration(
+                                      color: aboActive ? Theme.of(context).accentColor : Colors.grey
+                                  ),
+                                  child: Row(
+                                      children: [
+                                        Icon(
+                                            Icons.play_arrow
+                                        ),
+                                        Text(
+                                          'Weiterschauen',
+                                          textAlign: TextAlign.center,
+                                        )
+                                      ]
+                                  ),
+                                ),
+                              )
+                            ),
+                            Container(
+                                margin: EdgeInsets.only(left: (width - 270)),
+                                padding: EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor,
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: Colors.black87,
+                                          offset: Offset(0.3, 0.3),
+                                          blurRadius: 1
+                                      )
+                                    ]
+                                ),
+                                child: GestureDetector(
+                                    onTap: (){
+                                      setState(() {
+                                        if (favoritesCache.getAll().indexOf(this._anime) == -1) {
+                                          favoritesCache.add(this._anime);
+                                        } else {
+                                          favoritesCache.delete(this._anime);
+                                        }
+                                      });
+                                    },
+                                    child: Icon(
+                                      Icons.star,
+                                      color: favoritesCache.searchByAnimeId(this._anime.id) == null
+                                          ? Colors.white70
+                                          : Theme.of(context).accentColor,
+                                      size: 30,
+                                    )
+                                )
+                            ),
+                            Container(
+                                padding: EdgeInsets.all(5),
+                                margin: EdgeInsets.only(right: 3,left: 5),
+                                decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor,
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: Colors.black87,
+                                          offset: Offset(0.3, 0.3),
+                                          blurRadius: 1
+                                      )
+                                    ]
+                                ),
+                                child: GestureDetector(
+                                    onTap: (){
+                                      setState(() {
+                                        if (watchListCache.getAll().indexOf(this._anime) == -1) {
+                                          watchListCache.add(this._anime);
+                                        } else {
+                                          watchListCache.delete(this._anime);
+                                        }
+                                      });
+                                    },
+                                    child: Icon(
+                                      Icons.bookmark,
+                                      color: watchListCache.searchByAnimeId(this._anime.id) == null
+                                          ? Colors.white70
+                                          : Theme.of(context).accentColor,
+                                      size: 30,
+                                    )
+                                )
+                            )
+                          ],
                         ),
                       ),
                       Container(
@@ -449,15 +578,15 @@ class AnimeWidgetState extends State<AnimeWidget>{
                             right: 15,left: 15,top: 10
                         ),
                         child: Text(
-                          showFullDescription || this._anime.description.length <= 150
-                              ?this._anime.description
-                              :this._anime.description.substring(0,this._anime.description.indexOf(' ',150)) + ' ...',
+                          showFullDescription || this._anime.description!.length <= 150
+                              ? this._anime.description!
+                              : this._anime.description!.substring(0,this._anime.description!.indexOf(' ',150)) + ' ...',
                           style: TextStyle(
                             color: Colors.white,
                           ),
                         ),
                       ),
-                      this._anime.description.length > 150
+                      this._anime.description!.length > 150
                           ? Container(
                           margin: EdgeInsets.only(
                               right: 15,

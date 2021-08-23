@@ -15,11 +15,12 @@ class UpdatesPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        brightness: Brightness.dark,
         leading: FlatButton(
           focusNode: FocusNode(
               onKey: (FocusNode focusNode,RawKeyEvent event){
                 if(Platform.isAndroid && event.data is RawKeyEventDataAndroid && event.runtimeType == RawKeyUpEvent){
-                  RawKeyEventDataAndroid eventData = event.data;
+                  RawKeyEventDataAndroid eventData = event.data as RawKeyEventDataAndroid;
                   if(eventData.keyCode == KEY_CENTER){
                     Navigator.pop(context);
                   }
