@@ -5,11 +5,11 @@
 
 import 'dart:async';
 
-import 'package:video_player/video_player.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 
 List playlist = [];
 int playlistIndex = 0;
-VideoPlayerController? controller;
+VlcPlayerController? controller;
 Timer? updateThread;
 Timer? timeTrackThread;
 Timer? episodeTracker;

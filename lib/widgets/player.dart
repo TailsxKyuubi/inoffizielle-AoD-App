@@ -9,6 +9,7 @@ import 'dart:isolate';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:unoffical_aod_app/caches/episode_progress.dart';
 import 'package:unoffical_aod_app/caches/keycodes.dart';
 import 'package:unoffical_aod_app/caches/login.dart';
@@ -21,7 +22,6 @@ import 'package:unoffical_aod_app/widgets/video_intel.dart';
 import 'package:unoffical_aod_app/widgets/video_progress.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:video_player/video_player.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:unoffical_aod_app/caches/playercache.dart' as playerCache;
 
@@ -44,9 +44,14 @@ class PlayerState extends State<PlayerWidget> {
   DateTime showControlStart = DateTime(1970);
   DateTime showVolumeStart = DateTime(1970);
   late PlayerTransfer args;
-  bool bootUp = true;
+  bool _bootUp = true;
   double volumeStartPositionY = 0;
   bool connectionError = false;
+  Duration _lastPosition = Duration();
+  bool _isBuffering = false;
+  late Timer _bufferingDetectionTimer;
+  final bool nativeBufferingStateWorking = false;
+
 
   initUpdateThread() async {
     playerCache.updateThread = Timer.periodic(Duration(milliseconds: 500), (timer) {
@@ -54,17 +59,26 @@ class PlayerState extends State<PlayerWidget> {
     });
     if( playerCache.timeTrackThread == null || ! playerCache.timeTrackThread!.isActive ){
       playerCache.timeTrackThread = Timer.periodic(
-          Duration(seconds: 30), this.sendAodTrackingRequest
+          Duration(seconds: 30),
+          this.sendAodTrackingRequest
       );
+    }
+  }
+
+  void _bufferingDetector(Timer timer) {
+    if(playerCache.controller != null && playerCache.controller!.value.position.compareTo(this._lastPosition) == 0){
+      this._isBuffering = true;
+      return;
+    }
+    this._isBuffering = false;
+    if(playerCache.controller != null) {
+      this._lastPosition = playerCache.controller!.value.position;
     }
   }
 
   @override
   void initState(){
     super.initState();
-    Future.delayed(Duration.zero,(){
-
-    });
   }
 
   sendAodTrackingRequest([timer]) async{
@@ -124,32 +138,10 @@ class PlayerState extends State<PlayerWidget> {
   }
 
   jumpToNextEpisode() async{
-    VideoPlayerController oldPlayerController = playerCache.controller!;
+    VlcPlayerController oldPlayerController = playerCache.controller!;
     this.saveEpisodeProgress();
     if(playerCache.playlist.length <= (playerCache.playlistIndex+1)){
-      await playerCache.controller!.pause();
-      print('video halted');
-      playerCache.updateThread!.cancel();
-      playerCache.timeTrackThread!.cancel();
-      await SystemChrome.setPreferredOrientations(
-          [
-            DeviceOrientation.portraitUp,
-            DeviceOrientation.portraitDown,
-            DeviceOrientation.landscapeLeft,
-            DeviceOrientation.landscapeRight
-          ]
-      );
-      SystemChrome.setEnabledSystemUIOverlays([
-        SystemUiOverlay.top,
-        SystemUiOverlay.bottom
-      ]);
-      print('switched orientation');
-      Navigator.pop(context);
-      playerCache.controller = null;
-      print('cleared controller');
-      playerCache.updateThread = null;
-      print('killed thread');
-      Timer(Duration(seconds: 1),() => oldPlayerController.dispose());
+      _clearPlayer();
       return false;
     }
     await playerCache.controller!.pause();
@@ -162,12 +154,45 @@ class PlayerState extends State<PlayerWidget> {
     String m3u8 = playerCache.playlist[playerCache.playlistIndex]['sources'][0]['file'];
     m3u8 = await this.checkVideoQuality(m3u8);
     Timer(Duration(seconds: 1),() => oldPlayerController.dispose());
-    playerCache.controller = VideoPlayerController.network(m3u8);
+    playerCache.controller = VlcPlayerController.network(m3u8);
     await playerCache.controller!.initialize();
     setState(() {
       _playlistLoaded = true;
       playerCache.controller!.play();
     });
+  }
+
+  void _clearPlayer() async{
+    VlcPlayerController oldPlayerController = playerCache.controller!;
+    await playerCache.controller!.pause();
+    print('video halted');
+    playerCache.updateThread!.cancel();
+    playerCache.timeTrackThread!.cancel();
+    if(!this.nativeBufferingStateWorking){
+      this._bufferingDetectionTimer.cancel();
+    }
+    if(settings.playerSettings.saveEpisodeProgress){
+      this.saveEpisodeProgress();
+    }
+    await SystemChrome.setPreferredOrientations(
+        [
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight
+        ]
+    );
+    SystemChrome.setEnabledSystemUIOverlays([
+      SystemUiOverlay.top,
+      SystemUiOverlay.bottom
+    ]);
+    print('switched orientation');
+    Navigator.pop(context);
+    playerCache.controller = null;
+    print('cleared controller');
+    playerCache.updateThread = null;
+    print('killed thread');
+    Timer(Duration(seconds: 1),() => oldPlayerController.dispose());
   }
 
   Future<String> checkVideoQuality(String m3u8) async{
@@ -194,7 +219,7 @@ class PlayerState extends State<PlayerWidget> {
   }
 
   initPlayer() async{
-    this.bootUp = false;
+    this._bootUp = false;
     playerCache.playlistIndex = 0;
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
@@ -238,8 +263,8 @@ class PlayerState extends State<PlayerWidget> {
       String m3u8 = playerCache.playlist[0]['sources'][0]['file'];
       m3u8 = await this.checkVideoQuality(m3u8);
       this._playlistLoaded = true;
-      playerCache.controller = VideoPlayerController.network(m3u8)
-      ..initialize().then((_) {
+      playerCache.controller = VlcPlayerController.network(m3u8)
+        ..addOnInitListener(() {
           print('player initialized');
           setState(() {
 
@@ -266,8 +291,8 @@ class PlayerState extends State<PlayerWidget> {
             if(!this.connectionError) {
               this.connectionError = true;
               showDialog(
-                context: context,
-                barrierDismissible: false, builder: (BuildContext context) {
+                  context: context,
+                  barrierDismissible: false, builder: (BuildContext context) {
                 return PlayerConnectionErrorDialog(this.args);
               });
             }
@@ -284,14 +309,20 @@ class PlayerState extends State<PlayerWidget> {
   @override
   Widget build(BuildContext context) {
     Color primaryColor = Color(Theme.of(context).primaryColor.value);
-    if( playerCache.updateThread == null && this.bootUp ){
+    if( playerCache.updateThread == null && this._bootUp ){
       print('init update thread');
       this.args = ModalRoute.of(context)!.settings.arguments as PlayerTransfer;
+      if(!this.nativeBufferingStateWorking) {
+        this._bufferingDetectionTimer = Timer.periodic(
+            Duration(milliseconds: 1200), this._bufferingDetector);
+      }
       initPlayer();
       initUpdateThread();
     }
     if( playerCache.controller != null ){
-      if( playerCache.controller!.value.isBuffering && playerCache.timeTrackThread!.isActive ){
+      if((this.nativeBufferingStateWorking && playerCache.controller!.value.isBuffering
+          || !this.nativeBufferingStateWorking && this._isBuffering && playerCache.controller!.value.isPlaying)
+          && playerCache.timeTrackThread!.isActive ){
         playerCache.timeTrackThread!.cancel();
       }else if( ! playerCache.controller!.value.isBuffering && ! playerCache.timeTrackThread!.isActive ){
         playerCache.timeTrackThread = Timer(Duration(seconds: ((playerCache.controller!.value.position.inSeconds % 30)-30)*-1),() {
@@ -316,7 +347,6 @@ class PlayerState extends State<PlayerWidget> {
               descendantsAreFocusable: false,
               onKey: (focusNode, RawKeyEvent event){
                 print('Tastendruck');
-
                 return true;
               }
           ),
@@ -327,6 +357,9 @@ class PlayerState extends State<PlayerWidget> {
                 RawKeyEventDataAndroid eventDataAndroid = event.data as RawKeyEventDataAndroid;
                 print('Tastencode:'+ eventDataAndroid.keyCode.toString());
                 switch(eventDataAndroid.keyCode){
+                  case KEY_BACK:
+                    _clearPlayer();
+                    break;
                   case KEY_CENTER:
                   case KEY_MEDIA_PLAY_PAUSE:
                     playerCache.controller!.value.isPlaying
@@ -386,7 +419,7 @@ class PlayerState extends State<PlayerWidget> {
               print('set orientation');
 
               Navigator.pop(context);
-              VideoPlayerController oldVideoController = playerCache.controller!;
+              VlcPlayerController oldVideoController = playerCache.controller!;
               playerCache.controller = null;
               print('unlinked object');
               playerCache.updateThread = null;
@@ -403,7 +436,6 @@ class PlayerState extends State<PlayerWidget> {
                         showControlStart = DateTime.now();
                         if(showControls){
                           initDelayedControlsHide();
-                        }else{
                         }
                         setState(() {});
                       },
@@ -445,7 +477,11 @@ class PlayerState extends State<PlayerWidget> {
                               color: Colors.black
                           ),
                           child: _playlistLoaded && playerCache.controller != null
-                              ? VideoPlayer(playerCache.controller!) : Container()
+                              ? VlcPlayer(
+                            controller: playerCache.controller!,
+                            aspectRatio: 16 / 9,
+                            placeholder: this._getBufferingScreen(),
+                          ) : Container()
                       )
                   ),
                   settings.playerSettings.alwaysShowProgress && !showControls ? Positioned(
@@ -496,7 +532,8 @@ class PlayerState extends State<PlayerWidget> {
                   showControls && _playlistLoaded
                       ? VideoIntel(this)
                       : Container(),
-                  playerCache.controller!.value.isBuffering
+                  this.nativeBufferingStateWorking && playerCache.controller!.value.isBuffering
+                      || !this.nativeBufferingStateWorking && this._isBuffering && playerCache.controller!.value.isPlaying
                       ? Positioned.fill(
                       child: Align(
                         alignment: Alignment.center,
@@ -517,32 +554,36 @@ class PlayerState extends State<PlayerWidget> {
                   )
                       : Container()
                 ]
-            ):Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-              ),
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: Stack (
-                alignment: Alignment.center,
-                children: [
-                  SpinKitFadingCircle(
-                    size: 80,
-                    duration: Duration( seconds: 2 ),
-                    //color: Colors.white,
-                    itemBuilder: (BuildContext context, int index) {
-                      return DecoratedBox(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          color: Theme.of(context).accentColor,
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
+            ): this._getBufferingScreen(),
           )
+      ),
+    );
+  }
+
+  Widget _getBufferingScreen(){
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor,
+      ),
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      child: Stack (
+        alignment: Alignment.center,
+        children: [
+          SpinKitFadingCircle(
+            size: 80,
+            duration: Duration( seconds: 2 ),
+            //color: Colors.white,
+            itemBuilder: (BuildContext context, int index) {
+              return DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Theme.of(context).accentColor,
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -551,6 +592,9 @@ class PlayerState extends State<PlayerWidget> {
   void dispose() {
     //playerCache.updateThread.kill(priority: 0);
     widget.receivePort.close();
+    if(!this.nativeBufferingStateWorking) {
+      this._bufferingDetectionTimer.cancel();
+    }
     super.dispose();
   }
 }
