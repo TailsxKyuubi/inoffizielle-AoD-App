@@ -10,6 +10,10 @@ List newSimulcastTitles = [];
 List topTen = [];
 
 parseHomePage(dom.Document doc){
+  newEpisodes = [];
+  newCatalogTitles = [];
+  newSimulcastTitles = [];
+  topTen = [];
   List<dom.Element> carousels = doc.querySelectorAll('.jcarousel-container-new');
   carousels.addAll(doc.querySelectorAll('.jcarousel-container-top10'));
   List<dom.Element> episodes = carousels[0].querySelectorAll('li');

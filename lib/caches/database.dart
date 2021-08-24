@@ -1,8 +1,14 @@
+import 'dart:async';
+
+import 'package:html/parser.dart' show parse;
 import 'package:sqflite/sqflite.dart';
 import 'package:unoffical_aod_app/caches/animes.dart';
 import 'package:unoffical_aod_app/caches/episode_progress.dart';
 import 'package:unoffical_aod_app/caches/favorites.dart';
+import 'package:unoffical_aod_app/caches/home.dart';
+import 'package:unoffical_aod_app/caches/login.dart';
 import 'package:unoffical_aod_app/caches/watchlist.dart';
+import 'package:http/http.dart' as http;
 
 late DatabaseHelper databaseHelper;
 
@@ -20,7 +26,7 @@ class DatabaseHelper {
   Future<List<Map<String,dynamic>>> query(String sql) async => await this._db.rawQuery(sql);
 
   Future<int> update(String table, Map<String, dynamic> values,[String? where]) async
-    => await this._db.update(table, values, where: where);
+  => await this._db.update(table, values, where: where);
 
   static create(Database _db, int version) async {
     print('Datenbank tabellen werden erstellt');
@@ -45,5 +51,12 @@ class DatabaseHelper {
     animesLocalCache = await AnimesLocalCache.init();
     watchListCache = await WatchListCache.init();
     favoritesCache = await FavoritesCache.init();
+    Timer.periodic(Duration(hours: 1), (timer) async {
+      http.Response res = await http.get(
+          Uri.parse('Https://anime-on-demand.de'),
+          headers: headerHandler.getHeadersForGetRequest()
+      );
+      parseHomePage(parse(res.body));
+    });
   }
 }
