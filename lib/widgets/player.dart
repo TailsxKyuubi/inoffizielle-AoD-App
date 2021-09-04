@@ -51,7 +51,7 @@ class PlayerState extends State<PlayerWidget> {
   bool _isBuffering = false;
   late Timer _bufferingDetectionTimer;
   final bool nativeBufferingStateWorking = false;
-
+  int progressId = 0;
 
   initUpdateThread() async {
     playerCache.updateThread = Timer.periodic(Duration(milliseconds: 500), (timer) {
@@ -124,17 +124,19 @@ class PlayerState extends State<PlayerWidget> {
   }
 
   saveEpisodeProgress([timer]){
-    /*if(settings.playerSettings.saveEpisodeProgress){
-      Duration duration = (playerCache.controller!.value.position.inSeconds > (playerCache.controller!.value.duration.inSeconds - 120))
-          ? Duration()
-          : playerCache.controller!.value.position;
+    if(settings.playerSettings.saveEpisodeProgress){
+      Duration duration = playerCache.controller!.value.position;
 
-      episodeProgressCache.addEpisode(
-          playerCache.playlist[playerCache.playlistIndex]['mediaid'],
-          duration,
-          this.args.episode.languages[this.args.languageIndex]
-      );
-    }*/
+      if(this.progressId == 0){
+        episodeProgressCache.addEpisode(
+            playerCache.playlist[playerCache.playlistIndex]['mediaid'],
+            duration,
+            this.args.episode.languages[this.args.languageIndex]
+        );
+      }else{
+
+      }
+    }
   }
 
   jumpToNextEpisode() async{

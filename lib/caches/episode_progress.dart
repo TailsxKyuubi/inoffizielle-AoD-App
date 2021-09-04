@@ -63,8 +63,15 @@ class EpisodeProgressCache {
     });
   }
 
-  void addEpisode(int mediaId, Duration timeCode,String lang) async {
+  void addEpisode(int mediaId, Duration timeCode, String lang) async {
     await databaseHelper.query('INSERT INTO history (media_id, language, progress) VALUES (' + mediaId.toString() + ', \''+lang+'\', \'' + databaseHelper.formatTime(timeCode) + '\');');
+
+  }
+
+  void updateEpisode(int rowId, Duration timeCode) async {
+    await databaseHelper.update('history', {
+      'progress':  databaseHelper.formatTime(timeCode)
+    }, 'ROWID = ' + rowId.toString());
   }
 
   Duration getEpisodeDuration(int mediaId, String lang){
